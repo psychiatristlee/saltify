@@ -1,0 +1,206 @@
+.container {
+  background: white;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 0 12px 8px;
+  box-shadow: 0 2px 8px rgba(128, 128, 128, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.statIconButton {
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.statIconButton:hover {
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.statIconButton:active {
+  background: rgba(128, 128, 128, 0.2);
+}
+
+.statIcon {
+  font-size: 1.5rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statIconImg {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.statInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.statValue {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8B4513;
+}
+
+.statValuePoint {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #FF8C00;
+}
+
+.progressBarBg {
+  height: 8px;
+  background: rgba(128, 128, 128, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.levelProgressFill {
+  height: 100%;
+  background: linear-gradient(to right, #8B4513, #D2691E);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.pointProgressFill {
+  height: 100%;
+  background: linear-gradient(to right, #FF8C00, #FFD700);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.movesBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 44px;
+  padding: 4px 8px;
+  background: rgba(128, 128, 128, 0.08);
+  border-radius: 8px;
+}
+
+.movesLabel {
+  font-size: 0.625rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.moves {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.movesLow {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #E53E3E;
+}
+
+.couponBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  background: rgba(255, 140, 0, 0.15);
+  border-radius: 8px;
+  color: #FF8C00;
+  white-space: nowrap;
+}
+
+/* Tooltip styles */
+.tooltip {
+  background: linear-gradient(135deg, #FFF8F0 0%, #FFFFFF 100%);
+  border: 1px solid rgba(255, 140, 0, 0.2);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 4px;
+  box-shadow: 0 4px 16px rgba(255, 140, 0, 0.15);
+  animation: tooltipFadeIn 0.2s ease;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltipHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.tooltipClose {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #999;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.tooltipClose:hover {
+  color: #666;
+}
+
+.tooltipText {
+  font-size: 0.8125rem;
+  color: #555;
+  line-height: 1.5;
+  margin: 0 0 8px 0;
+}
+
+.tooltipText:last-of-type {
+  margin-bottom: 10px;
+}
+
+.tooltipHighlight {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #FF8C00;
+  background: rgba(255, 140, 0, 0.1);
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-align: center;
+}

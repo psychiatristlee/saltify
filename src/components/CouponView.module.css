@@ -1,0 +1,409 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  animation: fadeIn 0.2s ease;
+}
+
+.container {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #FFF9E6 0%, #FFF5D6 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  border-bottom: none;
+  box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.closeButton {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  font-size: 1.125rem;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.statsRow {
+  display: flex;
+  gap: 10px;
+}
+
+.statCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 10px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.12);
+  border: 1px solid rgba(255, 140, 0, 0.1);
+}
+
+.statIcon {
+  font-size: 1.75rem;
+}
+
+.statIconImg {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.useCouponButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.useCouponButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 140, 0, 0.4);
+}
+
+.useCouponButton:active {
+  transform: translateY(0);
+}
+
+.useCouponIcon {
+  font-size: 1.5rem;
+}
+
+.useCouponText {
+  font-size: 1rem;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #FF8C00;
+}
+
+.section {
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 140, 0, 0.08);
+}
+
+.sectionTitle {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sectionTitle::before {
+  content: '';
+  width: 4px;
+  height: 16px;
+  background: linear-gradient(180deg, #FF8C00, #FFB347);
+  border-radius: 2px;
+}
+
+.progressBarBg {
+  height: 12px;
+  background: rgba(255, 140, 0, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #FF8C00, #FFD700);
+  border-radius: 6px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.progressText {
+  font-size: 0.8125rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.useButtons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.useButton {
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.useButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 140, 0, 0.4);
+}
+
+.useButton:active {
+  transform: translateY(0);
+}
+
+.couponList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.couponRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: linear-gradient(135deg, #FFF9E6 0%, #FFF5D6 100%);
+  border-radius: 12px;
+  border: 1px dashed #FFB347;
+  position: relative;
+  overflow: hidden;
+}
+
+.couponRow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 24px;
+  background: white;
+  border-radius: 0 12px 12px 0;
+}
+
+.couponRow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 24px;
+  background: white;
+  border-radius: 12px 0 0 12px;
+}
+
+.couponRowUsed {
+  composes: couponRow;
+  opacity: 0.5;
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.couponIcon {
+  font-size: 1.5rem;
+  z-index: 1;
+}
+
+.couponInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 1;
+}
+
+.couponText {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.couponTextUsed {
+  composes: couponText;
+  text-decoration: line-through;
+  color: #999;
+}
+
+.couponDate {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.couponStatus {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #FF8C00;
+  background: rgba(255, 140, 0, 0.1);
+  padding: 4px 10px;
+  border-radius: 12px;
+  z-index: 1;
+}
+
+.emptyText {
+  font-size: 0.9375rem;
+  color: #aaa;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.infoSection {
+  padding: 14px 16px;
+  background: rgba(255, 140, 0, 0.05);
+  border-radius: 12px;
+}
+
+.infoItem {
+  font-size: 0.8125rem;
+  color: #666;
+  line-height: 1.8;
+}
+
+.confirmOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.confirmBox {
+  background: white;
+  padding: 28px 24px;
+  border-radius: 20px;
+  text-align: center;
+  width: 280px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.confirmBox p {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.confirmButtons button {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #f0f0f0;
+  color: #555;
+  transition: transform 0.2s;
+}
+
+.confirmButtons button:active {
+  transform: scale(0.98);
+}
+
+.confirmOk {
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+}
+
+.toast {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  color: white;
+  padding: 14px 28px;
+  border-radius: 24px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  animation: slideUp 0.3s ease;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}

@@ -1,0 +1,14 @@
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px;
+  background: rgba(139, 69, 19, 0.15);
+  border-radius: 16px;
+  border: 2px solid rgba(139, 69, 19, 0.3);
+}
+
+.row {
+  display: flex;
+  gap: 3px;
+}

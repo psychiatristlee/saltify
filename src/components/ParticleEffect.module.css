@@ -1,0 +1,78 @@
+.container {
+  position: fixed;
+  pointer-events: none;
+  z-index: 200;
+}
+
+.particle {
+  position: absolute;
+  width: var(--size);
+  height: var(--size);
+  background: var(--color);
+  transform: translate(-50%, -50%) rotate(var(--rotation));
+}
+
+.crumb {
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  animation: crumbFly 0.6s ease-out forwards;
+}
+
+.sparkle {
+  border-radius: 50%;
+  box-shadow: 0 0 4px var(--color), 0 0 8px var(--color);
+  animation: sparkleFly 0.5s ease-out forwards;
+}
+
+.firework {
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--color), 0 0 12px var(--color);
+  animation: fireworkFly 1.2s ease-out forwards;
+}
+
+@keyframes crumbFly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--rotation)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(
+      calc(-50% + calc(var(--vx) * 30px)),
+      calc(-50% + calc(var(--vy) * 30px) + 20px)
+    ) rotate(calc(var(--rotation) + 180deg)) scale(0.3);
+  }
+}
+
+@keyframes sparkleFly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(
+      calc(-50% + calc(var(--vx) * 25px)),
+      calc(-50% + calc(var(--vy) * 25px))
+    ) scale(0);
+  }
+}
+
+@keyframes fireworkFly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(
+      calc(-50% + calc(var(--vx) * 50px)),
+      calc(-50% + calc(var(--vy) * 50px) + 30px)
+    ) scale(0.2);
+  }
+}
