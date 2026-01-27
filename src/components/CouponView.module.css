@@ -487,6 +487,17 @@
   color: #333;
 }
 
+.couponUsageNote {
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  color: #888 !important;
+  margin-bottom: 12px !important;
+  padding: 8px 12px;
+  background: #FFF9E6;
+  border-radius: 8px;
+  border: 1px dashed #FFB347;
+}
+
 .passwordSection {
   display: flex;
   flex-direction: column;

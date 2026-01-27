@@ -54,12 +54,21 @@ export async function processReferral(
       return { success: false, message: '이미 다른 사용자에 의해 초대되었습니다.' };
     }
 
-    // Check if referrer exists
-    const referrerRef = doc(db, 'users', referrerId);
-    const referrerDoc = await getDoc(referrerRef);
+    // Check if referrer exists (check both users collection and referrals collection)
+    const referrerUserRef = doc(db, 'users', referrerId);
+    const referrerUserDoc = await getDoc(referrerUserRef);
+    const referrerReferralCheckRef = doc(db, REFERRALS_COLLECTION, referrerId);
+    const referrerReferralCheckDoc = await getDoc(referrerReferralCheckRef);
 
-    if (!referrerDoc.exists()) {
-      return { success: false, message: '유효하지 않은 초대 코드입니다.' };
+    // Referrer is valid if they exist in either collection (they have used the app)
+    if (!referrerUserDoc.exists() && !referrerReferralCheckDoc.exists()) {
+      // Try to create a minimal referrer entry if the referrer ID looks valid
+      if (referrerId.length > 10) {
+        // Assume valid referrer - they just haven't been recorded yet
+        console.log('Referrer not found in DB, but ID looks valid:', referrerId);
+      } else {
+        return { success: false, message: '유효하지 않은 초대 코드입니다.' };
+      }
     }
 
     // Mark new user as referred

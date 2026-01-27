@@ -6,6 +6,15 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "redirects": [
+      {
+        "source": "**",
+        "destination": "https://salt-bbang.com/:splat",
+        "type": 301,
+        "regex": false,
+        "host": "www.salt-bbang.com"
+      }
+    ],
     "rewrites": [
       {
         "source": "**",

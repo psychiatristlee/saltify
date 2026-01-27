@@ -214,6 +214,7 @@ export default function CouponView({ couponManager, onClose }: Props) {
                 className={styles.confirmImage}
               />
               <p>{getCouponDisplayInfo(selectedCoupon).titleKo} 쿠폰을 사용하시겠습니까?</p>
+              <p className={styles.couponUsageNote}>한번 구매시 1개만 사용 가능합니다.</p>
               <div className={styles.passwordSection}>
                 <label className={styles.passwordLabel}>비밀번호</label>
                 <input
