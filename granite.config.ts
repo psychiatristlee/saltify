@@ -3,7 +3,7 @@
 export default {
   appName: 'saltify',
   brand: {
-    displayName: '소금빵 크러쉬',
+    displayName: '소금, 빵',
     primaryColor: '#D4A574',
     icon: '',
     bridgeColorMode: 'basic',

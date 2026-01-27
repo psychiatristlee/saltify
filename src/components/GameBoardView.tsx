@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { Board, ROWS, COLS, isAdjacent } from '../models/GameBoard';
 import { Position, positionKey } from '../models/BreadCell';
-import { BREAD_COLOR } from '../models/BreadType';
+import { BREAD_DATA } from '../models/BreadType';
 import BreadCellView from './BreadCellView';
 import ParticleEffect from './ParticleEffect';
 import styles from './GameBoardView.module.css';
@@ -40,7 +40,6 @@ export default function GameBoardView({
 }: Props) {
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [dropTarget, setDropTarget] = useState<Position | null>(null);
-  const [useImages, setUseImages] = useState(false);
   const [popEffects, setPopEffects] = useState<PopEffect[]>([]);
   const boardRef = useRef<HTMLDivElement>(null);
   const effectIdRef = useRef(0);
@@ -60,13 +59,6 @@ export default function GameBoardView({
 
   const gap = 3;
   const padding = 6;
-
-  // Check if images exist
-  useEffect(() => {
-    fetch('/breads/salt-bread.png', { method: 'HEAD' })
-      .then((res) => setUseImages(res.ok))
-      .catch(() => setUseImages(false));
-  }, []);
 
   // Trigger pop effects when matches occur
   useEffect(() => {
@@ -93,7 +85,7 @@ export default function GameBoardView({
             id: effectIdRef.current++,
             x,
             y,
-            color: BREAD_COLOR[cell.breadType],
+            color: BREAD_DATA[cell.breadType].color,
           });
         }
       });
@@ -219,7 +211,6 @@ export default function GameBoardView({
                   dragOffset={getDragOffset(row, col)}
                   onTap={() => {}}
                   onDragStart={(e) => handlePointerDown(row, col, e)}
-                  useImages={useImages}
                 />
               );
             })}

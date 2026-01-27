@@ -1,7 +1,9 @@
 import { useState, useCallback, useRef } from 'react';
 import { Position } from '../models/BreadCell';
+import { BreadType, getAllBreadTypes } from '../models/BreadType';
 import {
   Board,
+  BreadCrushCounts,
   fillBoardWithoutMatches,
   findMatches,
   swapCells,
@@ -38,7 +40,10 @@ interface State {
   showLevelUp: boolean;
 }
 
-export function useGameViewModel(onSaltBreadCrushed: (count: number) => void) {
+// Callback type for when breads are crushed (called with bread type and count)
+type OnBreadCrushed = (breadType: BreadType, count: number) => void;
+
+export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
   const [state, setState] = useState<State>(() => ({
     board: fillBoardWithoutMatches(),
     score: 0,
@@ -53,8 +58,18 @@ export function useGameViewModel(onSaltBreadCrushed: (count: number) => void) {
     showLevelUp: false,
   }));
 
-  const onSaltBreadCrushedRef = useRef(onSaltBreadCrushed);
-  onSaltBreadCrushedRef.current = onSaltBreadCrushed;
+  const onBreadCrushedRef = useRef(onBreadCrushed);
+  onBreadCrushedRef.current = onBreadCrushed;
+
+  // Helper to notify all crushed breads
+  const notifyCrushedBreads = useCallback((crushCounts: BreadCrushCounts) => {
+    getAllBreadTypes().forEach((breadType) => {
+      const count = crushCounts[breadType];
+      if (count > 0) {
+        onBreadCrushedRef.current(breadType, count);
+      }
+    });
+  }, []);
 
   const checkLevelUp = useCallback((score: number, level: number, moves: number): { shouldLevelUp: boolean; isGameOver: boolean } => {
     const targetScore = getTargetScore(level);
@@ -88,10 +103,10 @@ export function useGameViewModel(onSaltBreadCrushed: (count: number) => void) {
     const comboBonus = newCombo > 1 ? newCombo * 5 : 0;
     const newScore = currentScore + baseScore + comboBonus;
 
-    const { board: boardAfterRemove, saltBreadCount } = removeMatches(currentBoard, matches);
-    if (saltBreadCount > 0) {
-      onSaltBreadCrushedRef.current(saltBreadCount);
-    }
+    const { board: boardAfterRemove, crushCounts } = removeMatches(currentBoard, matches);
+
+    // Notify each bread type that was crushed
+    notifyCrushedBreads(crushCounts);
 
     setState((prev) => ({
       ...prev,
@@ -168,7 +183,7 @@ export function useGameViewModel(onSaltBreadCrushed: (count: number) => void) {
         }
       }, CASCADE_DELAY);
     }, GRAVITY_DELAY);
-  }, [checkLevelUp]);
+  }, [checkLevelUp, notifyCrushedBreads]);
 
   const trySwap = useCallback((from: Position, to: Position) => {
     setState((prev) => {

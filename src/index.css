@@ -13,6 +13,7 @@ body {
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
+  background: #E8DFD0;
 }
 
 #root {

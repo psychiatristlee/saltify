@@ -3,16 +3,494 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
-    <title>소금빵 크러쉬</title>
+
+    <!-- Primary Meta Tags -->
+    <title>솔트빵 - 홍대 소금빵 맛집 | 마포구 베이커리</title>
+    <meta name="title" content="솔트빵 - 홍대 소금빵 맛집 | 마포구 베이커리" />
+    <meta name="description" content="홍대입구역 도보 5분, 바삭하고 고소한 프리미엄 소금빵 전문점 솔트빵입니다. 플레인(3,000원), 갈릭버터, 올리브치즈 등 6종의 수제 소금빵을 매일 갓 구워 제공합니다. 영업시간 11:00-21:00, 일요일 휴무." />
+    <meta name="keywords" content="솔트빵, 소금빵, 홍대 소금빵, 마포구 베이커리, 홍대 빵집, 소금빵 맛집, 연남동 빵집, 홍대입구역 베이커리, 수제 소금빵, 갈릭버터 소금빵" />
+    <meta name="author" content="솔트빵" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://saltify-game.web.app" />
+
+    <!-- Geographic Meta Tags -->
+    <meta name="geo.region" content="KR-11" />
+    <meta name="geo.placename" content="서울특별시 마포구" />
+    <meta name="geo.position" content="37.5621326;126.9237369" />
+    <meta name="ICBM" content="37.5621326, 126.9237369" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="restaurant" />
+    <meta property="og:url" content="https://saltify-game.web.app" />
+    <meta property="og:title" content="솔트빵 - 홍대 소금빵 맛집 | 마포구 베이커리" />
+    <meta property="og:description" content="홍대입구역 도보 5분! 바삭하고 고소한 수제 소금빵 전문점. 플레인, 갈릭버터, 올리브치즈 등 6종. 영업시간 11:00-21:00" />
+    <meta property="og:image" content="https://saltify-game.web.app/brandings/thumbnail.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="솔트빵 - 홍대 소금빵 전문점" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:site_name" content="솔트빵" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://saltify-game.web.app" />
+    <meta name="twitter:title" content="솔트빵 - 홍대 소금빵 맛집" />
+    <meta name="twitter:description" content="홍대입구역 도보 5분! 바삭하고 고소한 수제 소금빵 전문점" />
+    <meta name="twitter:image" content="https://saltify-game.web.app/brandings/thumbnail.png" />
+
+    <!-- Naver -->
+    <meta name="naver-site-verification" content="" />
+
+    <!-- Google -->
+    <meta name="google-site-verification" content="" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/brandings/plain.png" />
+    <link rel="apple-touch-icon" href="/brandings/plain.png" />
+
+    <!-- Structured Data - Local Business -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Bakery",
+      "@id": "https://saltify-game.web.app/#bakery",
+      "name": "솔트빵",
+      "alternateName": "Saltify",
+      "image": [
+        "https://saltify-game.web.app/brandings/thumbnail.png",
+        "https://saltify-game.web.app/brandings/header.png"
+      ],
+      "description": "홍대입구역 도보 5분 거리에 위치한 프리미엄 수제 소금빵 전문점입니다. 매일 갓 구운 바삭하고 고소한 소금빵을 맛보세요.",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "동교로 39길 10 1층",
+        "addressLocality": "마포구",
+        "addressRegion": "서울특별시",
+        "postalCode": "04030",
+        "addressCountry": "KR"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 37.5621326,
+        "longitude": 126.9237369
+      },
+      "url": "https://saltify-game.web.app",
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          "opens": "11:00",
+          "closes": "21:00"
+        }
+      ],
+      "priceRange": "₩3,000 - ₩4,300",
+      "servesCuisine": ["베이커리", "소금빵", "빵"],
+      "currenciesAccepted": "KRW",
+      "paymentAccepted": "현금, 카드",
+      "areaServed": {
+        "@type": "City",
+        "name": "서울특별시"
+      },
+      "hasMenu": {
+        "@type": "Menu",
+        "name": "소금빵 메뉴",
+        "hasMenuSection": {
+          "@type": "MenuSection",
+          "name": "소금빵",
+          "hasMenuItem": [
+            {"@type": "MenuItem", "name": "플레인 소금빵", "description": "클래식한 바삭 소금빵", "offers": {"@type": "Offer", "price": "3000", "priceCurrency": "KRW"}},
+            {"@type": "MenuItem", "name": "에브리띵 소금빵", "description": "다양한 토핑이 올라간 소금빵", "offers": {"@type": "Offer", "price": "3500", "priceCurrency": "KRW"}},
+            {"@type": "MenuItem", "name": "올리브치즈 소금빵", "description": "올리브와 치즈가 들어간 소금빵", "offers": {"@type": "Offer", "price": "3800", "priceCurrency": "KRW"}},
+            {"@type": "MenuItem", "name": "바질토마토 소금빵", "description": "바질과 토마토 풍미의 소금빵", "offers": {"@type": "Offer", "price": "3800", "priceCurrency": "KRW"}},
+            {"@type": "MenuItem", "name": "갈릭버터 소금빵", "description": "마늘버터 향이 풍부한 소금빵", "offers": {"@type": "Offer", "price": "4300", "priceCurrency": "KRW"}},
+            {"@type": "MenuItem", "name": "호떡 소금빵", "description": "달콤한 호떡 필링이 들어간 소금빵", "offers": {"@type": "Offer", "price": "4300", "priceCurrency": "KRW"}}
+          ]
+        }
+      },
+      "sameAs": [
+        "https://map.naver.com/p/entry/place/2082452936"
+      ]
+    }
+    </script>
+
+    <!-- Structured Data - BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "홈",
+          "item": "https://saltify-game.web.app"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "메뉴",
+          "item": "https://saltify-game.web.app/#menu"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "찾아오는 길",
+          "item": "https://saltify-game.web.app/#location"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Structured Data - WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "솔트빵",
+      "url": "https://saltify-game.web.app",
+      "description": "홍대 소금빵 맛집 솔트빵 공식 웹사이트"
+    }
+    </script>
+
+    <!-- Fonts -->
     <link
       rel="stylesheet"
       as="style"
       crossorigin
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
     />
+
+    <style>
+      /* Critical CSS for landing page - loads before React */
+      :root {
+        --primary: #FF8C00;
+        --primary-light: #FFB347;
+        --bg-cream: #FFF9E6;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg-cream);
+        min-height: 100vh;
+      }
+
+      .landing {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .landing-hero {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        padding: 60px 20px 40px;
+        text-align: center;
+        color: white;
+      }
+
+      .landing-logo {
+        width: 120px;
+        height: 120px;
+        border-radius: 24px;
+        object-fit: cover;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        margin-bottom: 20px;
+      }
+
+      .landing-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .landing-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+      }
+
+      .landing-menu {
+        padding: 24px 16px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .menu-card {
+        background: white;
+        border-radius: 16px;
+        padding: 16px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      }
+
+      .menu-card img {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        margin-bottom: 8px;
+      }
+
+      .menu-card h3 {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 4px;
+      }
+
+      .menu-card .price {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--primary);
+      }
+
+      .landing-cta {
+        padding: 20px;
+        text-align: center;
+      }
+
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        padding: 16px 32px;
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 4px 16px rgba(255,140,0,0.4);
+      }
+
+      .landing-map {
+        padding: 24px 16px;
+        max-width: 600px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .map-section {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      }
+
+      .map-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .map-title::before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: linear-gradient(180deg, var(--primary), var(--primary-light));
+        border-radius: 2px;
+      }
+
+      .map-container {
+        width: 100%;
+        height: 200px;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 16px;
+        background: #f5f5f5;
+      }
+
+      .map-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+
+      .store-info {
+        margin-bottom: 16px;
+      }
+
+      .store-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #333;
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .store-address {
+        font-size: 0.875rem;
+        color: #666;
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .store-hours {
+        font-size: 0.875rem;
+        color: #888;
+      }
+
+      .map-button {
+        display: block;
+        width: 100%;
+        background: #03C75A;
+        color: white;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      /* Hide landing when React loads */
+      #root:not(:empty) + .landing-fallback {
+        display: none;
+      }
+
+      .loading {
+        display: none;
+      }
+
+      #root:empty ~ .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        inset: 0;
+        background: var(--bg-cream);
+        z-index: 1000;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--primary-light);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- SEO Landing Content (visible before React loads and to crawlers) -->
+    <noscript>
+      <div class="landing" itemscope itemtype="https://schema.org/Bakery">
+        <header class="landing-hero">
+          <img src="/brandings/plain.png" alt="솔트빵 - 홍대 소금빵 전문점 로고" class="landing-logo" itemprop="image" />
+          <h1 class="landing-title" itemprop="name">솔트빵</h1>
+          <p class="landing-subtitle">홍대입구역 5분 | 바삭하고 고소한 프리미엄 수제 소금빵</p>
+          <meta itemprop="description" content="홍대입구역 도보 5분 거리에 위치한 프리미엄 수제 소금빵 전문점입니다." />
+        </header>
+
+        <section class="landing-menu" id="menu">
+          <h2 style="text-align:center; margin-bottom:16px; color:#333;">소금빵 메뉴</h2>
+          <div class="menu-card" itemscope itemtype="https://schema.org/Product">
+            <img src="/brandings/plain.png" alt="플레인 소금빵 - 클래식한 바삭 소금빵" itemprop="image" />
+            <h3 itemprop="name">플레인 소금빵</h3>
+            <span class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+              <span itemprop="price" content="3000">3,000</span><span itemprop="priceCurrency" content="KRW">원</span>
+            </span>
+          </div>
+          <div class="menu-card" itemscope itemtype="https://schema.org/Product">
+            <img src="/brandings/everything.png" alt="에브리띵 소금빵 - 다양한 토핑" itemprop="image" />
+            <h3 itemprop="name">에브리띵 소금빵</h3>
+            <span class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+              <span itemprop="price" content="3500">3,500</span><span itemprop="priceCurrency" content="KRW">원</span>
+            </span>
+          </div>
+          <div class="menu-card" itemscope itemtype="https://schema.org/Product">
+            <img src="/brandings/olive-cheese.png" alt="올리브치즈 소금빵" itemprop="image" />
+            <h3 itemprop="name">올리브치즈 소금빵</h3>
+            <span class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+              <span itemprop="price" content="3800">3,800</span><span itemprop="priceCurrency" content="KRW">원</span>
+            </span>
+          </div>
+          <div class="menu-card" itemscope itemtype="https://schema.org/Product">
+            <img src="/brandings/basil-tomato.png" alt="바질토마토 소금빵" itemprop="image" />
+            <h3 itemprop="name">바질토마토 소금빵</h3>
+            <span class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+              <span itemprop="price" content="3800">3,800</span><span itemprop="priceCurrency" content="KRW">원</span>
+            </span>
+          </div>
+          <div class="menu-card" itemscope itemtype="https://schema.org/Product">
+            <img src="/brandings/garlic-butter.png" alt="갈릭버터 소금빵 - 마늘버터 향이 풍부한" itemprop="image" />
+            <h3 itemprop="name">갈릭버터 소금빵</h3>
+            <span class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+              <span itemprop="price" content="4300">4,300</span><span itemprop="priceCurrency" content="KRW">원</span>
+            </span>
+          </div>
+          <div class="menu-card" itemscope itemtype="https://schema.org/Product">
+            <img src="/brandings/hotteok.png" alt="호떡 소금빵 - 달콤한 호떡 필링" itemprop="image" />
+            <h3 itemprop="name">호떡 소금빵</h3>
+            <span class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+              <span itemprop="price" content="4300">4,300</span><span itemprop="priceCurrency" content="KRW">원</span>
+            </span>
+          </div>
+          <div class="menu-card" itemscope itemtype="https://schema.org/Product">
+            <img src="/brandings/cube-choco-cream.png" alt="큐브 초코크림 소금빵 - 대표 메뉴" itemprop="image" />
+            <h3 itemprop="name">큐브 초코크림</h3>
+            <span class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+              <span itemprop="price" content="4800">4,800</span><span itemprop="priceCurrency" content="KRW">원</span>
+            </span>
+          </div>
+          <div class="menu-card" itemscope itemtype="https://schema.org/Product">
+            <img src="/brandings/cube-matcha-cream.png" alt="큐브 말차크림 소금빵 - 대표 메뉴" itemprop="image" />
+            <h3 itemprop="name">큐브 말차크림</h3>
+            <span class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+              <span itemprop="price" content="4800">4,800</span><span itemprop="priceCurrency" content="KRW">원</span>
+            </span>
+          </div>
+        </section>
+
+        <section class="landing-map" id="location">
+          <div class="map-section">
+            <h2 class="map-title">찾아오는 길</h2>
+            <div class="store-info" itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
+              <span class="store-name">솔트빵 (홍대점)</span>
+              <span class="store-address">
+                <span itemprop="addressRegion">서울</span>
+                <span itemprop="addressLocality">마포구</span>
+                <span itemprop="streetAddress">동교로 39길 10 1층</span>
+              </span>
+              <span class="store-hours">영업시간: 11:00 - 21:00 (일요일 휴무)</span>
+              <meta itemprop="postalCode" content="04030" />
+              <meta itemprop="addressCountry" content="KR" />
+            </div>
+            <div itemprop="geo" itemscope itemtype="https://schema.org/GeoCoordinates">
+              <meta itemprop="latitude" content="37.5621326" />
+              <meta itemprop="longitude" content="126.9237369" />
+            </div>
+            <a href="https://map.naver.com/p/entry/place/2082452936" class="map-button" target="_blank" rel="noopener" itemprop="hasMap">
+              네이버 지도에서 길찾기
+            </a>
+          </div>
+        </section>
+      </div>
+    </noscript>
+
+    <!-- Loading spinner -->
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>

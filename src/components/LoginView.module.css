@@ -1,0 +1,159 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: transparent;
+  padding: 0;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+.header {
+  width: 100%;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  background: transparent;
+}
+
+.headerImage {
+  height: 120px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.headerImage:hover {
+  opacity: 0.8;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 320px;
+  padding: 20px;
+}
+
+.logo {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  margin-bottom: 24px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #8B4513;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0 0 32px;
+}
+
+.googleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 24px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.googleButton:hover:not(:disabled) {
+  background: #f8f8f8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.googleButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.googleButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.googleIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.kakaoButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 24px;
+  background: #FEE500;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 12px;
+}
+
+.kakaoButton:hover:not(:disabled) {
+  background: #F5DD00;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.kakaoButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.kakaoButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.kakaoIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.error {
+  margin-top: 16px;
+  font-size: 0.875rem;
+  color: #E53E3E;
+}
+
+.notice {
+  margin-top: 24px;
+  font-size: 0.75rem;
+  color: #999;
+}

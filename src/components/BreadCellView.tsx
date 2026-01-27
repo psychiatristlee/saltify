@@ -1,16 +1,7 @@
 import { memo } from 'react';
 import { BreadCell } from '../models/BreadCell';
-import { BreadType, BREAD_EMOJI, BREAD_DISPLAY_NAME, BREAD_COLOR } from '../models/BreadType';
+import { BREAD_DATA } from '../models/BreadType';
 import styles from './BreadCellView.module.css';
-
-const BREAD_IMAGE: Record<BreadType, string> = {
-  [BreadType.SaltBread]: '/breads/salt-bread.png',
-  [BreadType.Croissant]: '/breads/croissant.png',
-  [BreadType.Baguette]: '/breads/baguette.png',
-  [BreadType.MelonBread]: '/breads/melon-bread.png',
-  [BreadType.RedBeanBread]: '/breads/red-bean-bread.png',
-  [BreadType.CreamBread]: '/breads/cream-bread.png',
-};
 
 interface Props {
   cell: BreadCell;
@@ -22,7 +13,6 @@ interface Props {
   dragOffset: { x: number; y: number } | null;
   onTap: () => void;
   onDragStart: (e: React.PointerEvent) => void;
-  useImages: boolean;
 }
 
 export default memo(function BreadCellView({
@@ -35,8 +25,9 @@ export default memo(function BreadCellView({
   dragOffset,
   onTap,
   onDragStart,
-  useImages,
 }: Props) {
+  const breadInfo = BREAD_DATA[cell.breadType];
+
   const className = [
     styles.cell,
     isSelected ? styles.selected : '',
@@ -48,7 +39,7 @@ export default memo(function BreadCellView({
   const style: React.CSSProperties = {
     width: cellSize,
     height: cellSize,
-    backgroundColor: BREAD_COLOR[cell.breadType],
+    backgroundColor: breadInfo.color,
   };
 
   if (isDragging && dragOffset) {
@@ -63,19 +54,13 @@ export default memo(function BreadCellView({
       onClick={onTap}
       onPointerDown={onDragStart}
     >
-      {useImages ? (
-        <img
-          src={BREAD_IMAGE[cell.breadType]}
-          alt={BREAD_DISPLAY_NAME[cell.breadType]}
-          className={styles.icon}
-          style={{ width: cellSize * 0.85, height: cellSize * 0.85 }}
-          draggable={false}
-        />
-      ) : (
-        <span className={styles.emoji} style={{ fontSize: cellSize * 0.5 }}>
-          {BREAD_EMOJI[cell.breadType]}
-        </span>
-      )}
+      <img
+        src={breadInfo.image}
+        alt={breadInfo.nameKo}
+        className={styles.icon}
+        style={{ width: cellSize * 0.85, height: cellSize * 0.85 }}
+        draggable={false}
+      />
     </div>
   );
 });

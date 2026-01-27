@@ -2,14 +2,14 @@ import styles from './GameOverView.module.css';
 
 interface Props {
   score: number;
-  totalSaltBreadCrushed: number;
+  totalPoints: number;
   availableCouponsCount: number;
   onRestart: () => void;
 }
 
 export default function GameOverView({
   score,
-  totalSaltBreadCrushed,
+  totalPoints,
   availableCouponsCount,
   onRestart,
 }: Props) {
@@ -23,8 +23,8 @@ export default function GameOverView({
         </div>
         <div className={styles.stats}>
           <div className={styles.statItem}>
-            <span>🥖 소금빵 크러쉬</span>
-            <span className={styles.statValue}>{totalSaltBreadCrushed}개</span>
+            <span>🥖 적립 포인트</span>
+            <span className={styles.statValue}>{totalPoints.toLocaleString()}P</span>
           </div>
           <div className={styles.statItem}>
             <span>🎫 보유 쿠폰</span>

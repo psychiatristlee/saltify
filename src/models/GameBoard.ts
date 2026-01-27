@@ -1,5 +1,16 @@
 import { BreadCell, Position, createBreadCell, positionKey } from './BreadCell';
-import { BreadType, randomBreadType } from './BreadType';
+import { BreadType, randomBreadType, getAllBreadTypes } from './BreadType';
+
+// Count of crushed breads per type
+export type BreadCrushCounts = Record<BreadType, number>;
+
+function createEmptyCrushCounts(): BreadCrushCounts {
+  const counts: Partial<BreadCrushCounts> = {};
+  getAllBreadTypes().forEach((type) => {
+    counts[type] = 0;
+  });
+  return counts as BreadCrushCounts;
+}
 
 export const ROWS = 8;
 export const COLS = 7;
@@ -13,7 +24,7 @@ function cloneBoard(cells: Board): Board {
 export function fillBoardWithoutMatches(): Board {
   const cells: Board = Array.from({ length: ROWS }, (_, row) =>
     Array.from({ length: COLS }, (_, col) =>
-      createBreadCell(BreadType.SaltBread, row, col)
+      createBreadCell(BreadType.Plain, row, col)
     )
   );
 
@@ -99,19 +110,18 @@ export function swapCells(cells: Board, from: Position, to: Position): Board {
 
 export function removeMatches(cells: Board, positions: Position[]): {
   board: Board;
-  saltBreadCount: number;
+  crushCounts: BreadCrushCounts;
 } {
   const newCells = cloneBoard(cells);
-  let saltBreadCount = 0;
+  const crushCounts = createEmptyCrushCounts();
 
   for (const pos of positions) {
-    if (newCells[pos.row][pos.col].breadType === BreadType.SaltBread) {
-      saltBreadCount++;
-    }
+    const breadType = newCells[pos.row][pos.col].breadType;
+    crushCounts[breadType]++;
     newCells[pos.row][pos.col].isMatched = true;
   }
 
-  return { board: newCells, saltBreadCount };
+  return { board: newCells, crushCounts };
 }
 
 export function applyGravity(cells: Board): Board {

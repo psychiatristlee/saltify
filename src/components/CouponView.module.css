@@ -6,11 +6,18 @@
 }
 
 .container {
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
   background: linear-gradient(180deg, #FFF9E6 0%, #FFF5D6 100%);
   display: flex;
   flex-direction: column;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .header {
@@ -18,16 +25,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
-  border-bottom: none;
-  box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
+  background: #FFF9E6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .title {
   font-size: 1.25rem;
   font-weight: 800;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  color: #8B4513;
 }
 
 .closeButton {
@@ -37,16 +42,16 @@
   align-items: center;
   justify-content: center;
   border: none;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 50%;
   font-size: 1.125rem;
-  color: white;
+  color: #666;
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .closeButton:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .content {
@@ -58,32 +63,165 @@
   gap: 16px;
 }
 
-.statsRow {
+.totalPoints {
   display: flex;
-  gap: 10px;
-}
-
-.statCard {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  gap: 6px;
-  padding: 16px 10px;
+  padding: 16px 20px;
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(255, 140, 0, 0.12);
   border: 1px solid rgba(255, 140, 0, 0.1);
 }
 
-.statIcon {
-  font-size: 1.75rem;
+.totalLabel {
+  font-size: 0.9375rem;
+  color: #666;
+  font-weight: 500;
 }
 
-.statIconImg {
-  width: 36px;
-  height: 36px;
+.totalValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #FF8C00;
+}
+
+.menuSection {
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 140, 0, 0.08);
+}
+
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.menuCard {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  background: linear-gradient(135deg, #FFF9E6 0%, #FFF5D6 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 140, 0, 0.15);
+}
+
+.menuImageWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menuImage {
+  width: 72px;
+  height: 72px;
   object-fit: contain;
+  border-radius: 10px;
+  background: white;
+}
+
+.couponBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ff6b6b;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.menuInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.menuHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.menuName {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.menuPrice {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #FF8C00;
+}
+
+.menuDesc {
+  font-size: 0.75rem;
+  color: #666;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.menuProgress {
+  margin-top: 4px;
+}
+
+.menuProgress .progressBarBg {
+  height: 6px;
+  margin-bottom: 4px;
+}
+
+.menuProgress .progressText {
+  font-size: 0.6875rem;
+}
+
+.useCouponBtn {
+  align-self: flex-start;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: transform 0.2s;
+}
+
+.useCouponBtn:hover {
+  transform: scale(1.02);
+}
+
+.couponImage {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: white;
+  z-index: 1;
+}
+
+.couponMeta {
+  font-size: 0.6875rem;
+  color: #999;
+}
+
+.confirmImage {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 12px;
 }
 
 .useCouponButton {
@@ -345,8 +483,56 @@
 .confirmBox p {
   font-size: 1.0625rem;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   color: #333;
+}
+
+.passwordSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.passwordLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #666;
+  text-align: left;
+}
+
+.passwordInput {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.passwordInput:focus {
+  border-color: #FF8C00;
+}
+
+.passwordInputError {
+  border-color: #E53E3E;
+  animation: shake 0.3s ease;
+}
+
+.passwordErrorText {
+  font-size: 0.75rem;
+  color: #E53E3E;
+  font-weight: 500;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
 }
 
 .confirmButtons {
@@ -406,4 +592,109 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+}
+
+/* Map Section */
+.mapSection {
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 140, 0, 0.08);
+}
+
+.mapContainer {
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  background: #f5f5f5;
+}
+
+.mapContainer iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.storeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.storeName {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.storeAddress {
+  font-size: 0.8125rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.storeHours {
+  font-size: 0.8125rem;
+  color: #888;
+}
+
+.directionsButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  background: #03C75A;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: transform 0.2s;
+}
+
+.directionsButton:hover {
+  transform: scale(1.02);
+}
+
+.directionsButton:active {
+  transform: scale(0.98);
+}
+
+/* Instagram Link */
+.instagramLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 14px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(220, 39, 67, 0.3);
+  margin-top: 8px;
+}
+
+.instagramLink:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(220, 39, 67, 0.4);
+}
+
+.instagramLink:active {
+  transform: scale(0.98);
+}
+
+.instagramIcon {
+  width: 20px;
+  height: 20px;
 }
