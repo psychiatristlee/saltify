@@ -157,3 +157,41 @@
   font-size: 0.75rem;
   color: #999;
 }
+
+.webviewNotice {
+  font-size: 0.9375rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #FFF9E6;
+  border-radius: 12px;
+  border: 1px solid #FFE082;
+}
+
+.openBrowserButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  border: none;
+  border-radius: 12px;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+}
+
+.openBrowserButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 140, 0, 0.4);
+}
+
+.openBrowserButton:active {
+  transform: translateY(0);
+}
