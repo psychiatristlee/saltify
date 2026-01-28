@@ -50,5 +50,11 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow update: if isOwner(resource.data.userId);
     }
+
+    // Bread points collection
+    match /breadPoints/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
   }
 }
