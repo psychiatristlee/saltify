@@ -13,17 +13,17 @@ export default function RankingView({ currentUserId, onClose }: Props) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchRankings()
+    fetchRankings(currentUserId)
       .then(setRankings)
       .catch(console.error)
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [currentUserId]);
 
   return (
     <div className={styles.overlay}>
       <div className={styles.container}>
         <header className={styles.header}>
-          <h2 className={styles.title}>랭킹</h2>
+          <h2 className={styles.title}>👥 친구 랭킹</h2>
           <button className={styles.closeButton} onClick={onClose}>✕</button>
         </header>
 
@@ -31,7 +31,10 @@ export default function RankingView({ currentUserId, onClose }: Props) {
           {isLoading ? (
             <div className={styles.loading}>로딩 중...</div>
           ) : rankings.length === 0 ? (
-            <div className={styles.empty}>아직 랭킹 데이터가 없습니다.</div>
+            <div className={styles.empty}>
+              아직 친구가 없어요!<br />
+              친구를 초대해서 함께 경쟁해보세요 🎉
+            </div>
           ) : (
             <div className={styles.rankingList}>
               {rankings.map((user) => (
@@ -90,8 +93,9 @@ export default function RankingView({ currentUserId, onClose }: Props) {
           )}
 
           <div className={styles.infoSection}>
+            <p className={styles.infoItem}>• 나를 초대한 사람 + 내가 초대한 친구들과 경쟁해요!</p>
             <p className={styles.infoItem}>• 쿠폰 사용 개수가 많은 순서로 정렬됩니다.</p>
-            <p className={styles.infoItem}>• 사용 개수가 같으면 발행 개수로 정렬됩니다.</p>
+            <p className={styles.infoItem}>• 친구를 초대하면 랭킹에 추가돼요.</p>
           </div>
         </div>
       </div>
