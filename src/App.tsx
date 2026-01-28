@@ -5,7 +5,7 @@ import { useCouponManager } from './hooks/useCouponManager';
 import { useReferral } from './hooks/useReferral';
 import { firestoreScoreService } from './services/score';
 import { getReferrerFromUrl } from './services/referral';
-import { BREAD_DATA, BreadType } from './models/BreadType';
+import { BREAD_DATA } from './models/BreadType';
 import { isNativeApp } from './lib/platform';
 import LandingPage from './components/LandingPage';
 import LoginView from './components/LoginView';
@@ -32,7 +32,6 @@ export default function App() {
   const [showAdminView, setShowAdminView] = useState(false);
   const [showInviteBubble, setShowInviteBubble] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [selectedBreadInfo, setSelectedBreadInfo] = useState<BreadType | null>(null);
   const [showLanding, setShowLanding] = useState(() => {
     // Skip landing page on native apps
     if (isNativeApp()) return false;
@@ -85,10 +84,20 @@ export default function App() {
     }
   }, [user, referral, couponManager]);
 
-  // Save score to Firestore when game ends
+  // Save bread points to Firestore when level up
+  useEffect(() => {
+    if (game.showLevelUp && user) {
+      couponManager.savePointsToFirestore();
+    }
+  }, [game.showLevelUp, user, couponManager.savePointsToFirestore]);
+
+  // Save score and points to Firestore when game ends
   useEffect(() => {
     if (game.gameState === 'gameOver' && user && !hasRecordedGameOver.current) {
       hasRecordedGameOver.current = true;
+      // Save bread points to Firestore
+      couponManager.savePointsToFirestore();
+      // Save game record
       firestoreScoreService.saveGameRecord({
         userId: user.id,
         score: game.score,
@@ -100,7 +109,7 @@ export default function App() {
     if (game.gameState === 'idle' && hasRecordedGameOver.current) {
       hasRecordedGameOver.current = false;
     }
-  }, [game.gameState, game.score, game.level, user, couponManager.totalPoints]);
+  }, [game.gameState, game.score, game.level, user, couponManager.totalPoints, couponManager.savePointsToFirestore]);
 
   if (isLoading) {
     return (
@@ -284,39 +293,6 @@ export default function App() {
           message={couponManager.newCouponMessage}
           onClose={couponManager.dismissAlert}
         />
-      )}
-
-      {selectedBreadInfo !== null && (
-        <div className={styles.breadInfoOverlay} onClick={() => setSelectedBreadInfo(null)}>
-          <div className={styles.breadInfoPopup} onClick={(e) => e.stopPropagation()}>
-            <img
-              src={BREAD_DATA[selectedBreadInfo].image}
-              alt={BREAD_DATA[selectedBreadInfo].nameKo}
-              className={styles.breadInfoImage}
-            />
-            <div className={styles.breadInfoContent}>
-              <h4 className={styles.breadInfoName}>{BREAD_DATA[selectedBreadInfo].nameKo}</h4>
-              <p className={styles.breadInfoPrice}>{BREAD_DATA[selectedBreadInfo].price.toLocaleString()}원</p>
-              <div className={styles.breadInfoProgress}>
-                <div className={styles.breadInfoProgressBar}>
-                  <div
-                    className={styles.breadInfoProgressFill}
-                    style={{ width: `${couponManager.getProgressForBread(selectedBreadInfo) * 100}%` }}
-                  />
-                </div>
-                <span className={styles.breadInfoProgressText}>
-                  {couponManager.breadPoints[selectedBreadInfo] % BREAD_DATA[selectedBreadInfo].price}P / {BREAD_DATA[selectedBreadInfo].price}P
-                </span>
-              </div>
-              {couponManager.getCouponsForBread(selectedBreadInfo).length > 0 && (
-                <div className={styles.breadInfoCoupon}>
-                  🎟️ 보유 쿠폰: {couponManager.getCouponsForBread(selectedBreadInfo).length}장
-                </div>
-              )}
-            </div>
-            <button className={styles.breadInfoClose} onClick={() => setSelectedBreadInfo(null)}>✕</button>
-          </div>
-        </div>
       )}
 
       {showCouponView && (

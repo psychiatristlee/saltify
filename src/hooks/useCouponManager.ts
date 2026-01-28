@@ -1,16 +1,15 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Coupon, isCouponExpired } from '../models/Coupon';
 import { BreadType, BREAD_DATA, POINTS_PER_CRUSH, getAllBreadTypes } from '../models/BreadType';
-import { loadData, saveData } from '../utils/storage';
 import {
   createCouponForUser,
   subscribeToCoupons,
   useCouponInFirestore,
   createReferralCoupons,
   FirestoreCoupon,
+  saveBreadPointsToFirestore,
+  loadBreadPointsFromFirestore,
 } from '../services/coupon';
-
-const BREAD_POINTS_KEY = 'breadPoints';
 
 // Points per bread type (initialized to 0 for each)
 export type BreadPoints = Record<BreadType, number>;
@@ -52,27 +51,33 @@ export function useCouponManager(userId: string | null = null) {
     newCouponMessage: '',
     newCouponBreadType: null,
   });
-  const initialized = useRef(false);
   const unsubscribeRef = useRef<(() => void) | null>(null);
+  const pointsLoadedRef = useRef(false);
 
-  // Load bread points from localStorage (still local for game progress)
-  useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
-
-    async function loadPoints() {
-      const breadPoints = await loadData<BreadPoints>(BREAD_POINTS_KEY, createInitialBreadPoints());
-      setState((prev) => ({ ...prev, breadPoints }));
-    }
-    loadPoints();
-  }, []);
-
-  // Subscribe to coupons from Firestore when user is logged in
+  // Subscribe to coupons and load points from Firestore when user is logged in
   useEffect(() => {
     if (!userId) {
-      // Clear coupons when logged out
-      setState((prev) => ({ ...prev, coupons: [] }));
+      // Clear data when logged out
+      setState((prev) => ({ ...prev, coupons: [], breadPoints: createInitialBreadPoints() }));
+      pointsLoadedRef.current = false;
       return;
+    }
+
+    // Load bread points from Firestore
+    if (!pointsLoadedRef.current) {
+      pointsLoadedRef.current = true;
+      loadBreadPointsFromFirestore(userId).then((points) => {
+        if (points) {
+          // Merge with initial points to ensure all bread types exist
+          const mergedPoints = { ...createInitialBreadPoints() };
+          getAllBreadTypes().forEach((breadType) => {
+            if (points[breadType] !== undefined) {
+              mergedPoints[breadType] = points[breadType];
+            }
+          });
+          setState((prev) => ({ ...prev, breadPoints: mergedPoints }));
+        }
+      });
     }
 
     // Subscribe to real-time coupon updates
@@ -91,9 +96,12 @@ export function useCouponManager(userId: string | null = null) {
     };
   }, [userId]);
 
-  const persistPoints = useCallback((breadPoints: BreadPoints) => {
-    saveData(BREAD_POINTS_KEY, breadPoints);
-  }, []);
+  // Save points to Firestore (called externally on level up / game over)
+  const savePointsToFirestore = useCallback(() => {
+    if (userId) {
+      saveBreadPointsToFirestore(userId, state.breadPoints);
+    }
+  }, [userId, state.breadPoints]);
 
   const availableCoupons = state.coupons.filter((c) => !c.isUsed && !isCouponExpired(c));
 
@@ -131,8 +139,6 @@ export function useCouponManager(userId: string | null = null) {
         [breadType]: newPoints,
       };
 
-      persistPoints(newBreadPoints);
-
       // Create coupons in Firestore for each earned
       if (earnedCoupons > 0) {
         for (let i = 0; i < earnedCoupons; i++) {
@@ -153,7 +159,7 @@ export function useCouponManager(userId: string | null = null) {
         breadPoints: newBreadPoints,
       };
     });
-  }, [userId, persistPoints]);
+  }, [userId]);
 
   // Add referral coupons for both referrer and referred user
   const addReferralCoupons = useCallback(async (referrerId: string, referredUserId: string): Promise<boolean> => {
@@ -213,5 +219,6 @@ export function useCouponManager(userId: string | null = null) {
     showReferralCouponAlert,
     useCoupon,
     dismissAlert,
+    savePointsToFirestore,
   };
 }

@@ -106,13 +106,12 @@ export default function CouponView({ couponManager, level, score, targetScore, o
             </div>
           </div>
 
-          {/* 메뉴별 쿠폰 현황 - 네이버 플레이스 스타일 */}
+          {/* 메뉴별 포인트 현황 */}
           <div className={styles.menuSection}>
-            <h3 className={styles.sectionTitle}>메뉴별 쿠폰</h3>
+            <h3 className={styles.sectionTitle}>메뉴별 포인트</h3>
             <div className={styles.menuList}>
               {allBreadTypes.map((breadType) => {
                 const breadInfo = BREAD_DATA[breadType];
-                const coupons = couponManager.getCouponsForBread(breadType);
                 const progress = couponManager.getProgressForBread(breadType);
                 const currentPoints = couponManager.breadPoints[breadType];
 
@@ -124,9 +123,6 @@ export default function CouponView({ couponManager, level, score, targetScore, o
                         alt={breadInfo.nameKo}
                         className={styles.menuImage}
                       />
-                      {coupons.length > 0 && (
-                        <span className={styles.couponBadge}>{coupons.length}</span>
-                      )}
                     </div>
                     <div className={styles.menuInfo}>
                       <div className={styles.menuHeader}>
@@ -147,14 +143,6 @@ export default function CouponView({ couponManager, level, score, targetScore, o
                           {currentPoints % breadInfo.price}P / {breadInfo.price}P
                         </span>
                       </div>
-                      {coupons.length > 0 && (
-                        <button
-                          className={styles.useCouponBtn}
-                          onClick={() => handleUseCoupon(coupons[0])}
-                        >
-                          무료 쿠폰 사용
-                        </button>
-                      )}
                     </div>
                   </div>
                 );

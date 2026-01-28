@@ -2,6 +2,7 @@ import {
   collection,
   doc,
   getDocs,
+  getDoc,
   setDoc,
   updateDoc,
   query,
@@ -191,4 +192,43 @@ export async function createReferralCoupons(
   );
 
   return { referrerCoupon, referredCoupon };
+}
+
+// Bread points collection
+const BREAD_POINTS_COLLECTION = 'breadPoints';
+
+// Save bread points to Firestore
+export async function saveBreadPointsToFirestore(
+  userId: string,
+  breadPoints: Record<string, number>
+): Promise<void> {
+  try {
+    await setDoc(doc(db, BREAD_POINTS_COLLECTION, userId), {
+      ...breadPoints,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error saving bread points:', error);
+  }
+}
+
+// Load bread points from Firestore
+export async function loadBreadPointsFromFirestore(
+  userId: string
+): Promise<Record<string, number> | null> {
+  try {
+    const docRef = doc(db, BREAD_POINTS_COLLECTION, userId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      // Remove non-point fields
+      const { updatedAt, ...points } = data;
+      return points as Record<string, number>;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error loading bread points:', error);
+    return null;
+  }
 }
