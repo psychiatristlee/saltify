@@ -1,3 +1,4 @@
+import { useLanguage } from '../contexts/LanguageContext';
 import styles from './GameOverView.module.css';
 
 interface Props {
@@ -13,26 +14,28 @@ export default function GameOverView({
   availableCouponsCount,
   onRestart,
 }: Props) {
+  const { t } = useLanguage();
+
   return (
     <div className={styles.overlay}>
       <div className={styles.card}>
-        <h2 className={styles.title}>Game Over!</h2>
+        <h2 className={styles.title}>{t('gameOver')}</h2>
         <div className={styles.scoreSection}>
-          <span className={styles.scoreLabel}>최종 점수</span>
+          <span className={styles.scoreLabel}>{t('finalScore')}</span>
           <span className={styles.scoreValue}>{score}</span>
         </div>
         <div className={styles.stats}>
           <div className={styles.statItem}>
-            <span>🥖 적립 포인트</span>
+            <span>🥖 {t('totalPoints')}</span>
             <span className={styles.statValue}>{totalPoints.toLocaleString()}P</span>
           </div>
           <div className={styles.statItem}>
-            <span>🎫 보유 쿠폰</span>
-            <span className={styles.statValue}>{availableCouponsCount}장</span>
+            <span>🎫 {t('availableCoupons')}</span>
+            <span className={styles.statValue}>{availableCouponsCount}</span>
           </div>
         </div>
         <button className={styles.restartButton} onClick={onRestart}>
-          다시 시작
+          {t('playAgain')}
         </button>
       </div>
     </div>

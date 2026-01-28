@@ -1,5 +1,6 @@
 import { useAuth } from '../hooks/useAuth';
 import { isRestrictedWebview, openInExternalBrowser } from '../lib/platform';
+import { useLanguage } from '../contexts/LanguageContext';
 import styles from './LoginView.module.css';
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 
 export default function LoginView({ onBackToLanding }: Props) {
   const { signInWithGoogle, signInWithKakao, isLoading, error } = useAuth();
+  const { t } = useLanguage();
 
   const handleGoogleLogin = async () => {
     // In restricted webviews, open external browser instead
@@ -42,7 +44,7 @@ export default function LoginView({ onBackToLanding }: Props) {
       <header className={styles.header}>
         <img
           src="/brandings/header.png"
-          alt="솔트빵"
+          alt={t('storeName')}
           className={styles.headerImage}
           onClick={onBackToLanding}
         />
@@ -50,11 +52,11 @@ export default function LoginView({ onBackToLanding }: Props) {
       <div className={styles.content}>
         <img
           src="/breads/plain.png"
-          alt="소금빵"
+          alt={t('storeName')}
           className={styles.logo}
         />
-        <h1 className={styles.title}>솔트, 빵 💥</h1>
-        <p className={styles.subtitle}>맛있는 빵을 모아 쿠폰을 받으세요!</p>
+        <h1 className={styles.title}>{t('loginTitle')}</h1>
+        <p className={styles.subtitle}>{t('loginSubtitle')}</p>
 
         <button
           className={styles.googleButton}
@@ -79,7 +81,7 @@ export default function LoginView({ onBackToLanding }: Props) {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          {isLoading ? '로그인 중...' : 'Google로 시작하기'}
+          {isLoading ? t('loggingIn') : t('loginWithGoogle')}
         </button>
 
         <button
@@ -93,14 +95,12 @@ export default function LoginView({ onBackToLanding }: Props) {
               d="M12 3C6.477 3 2 6.463 2 10.691c0 2.687 1.79 5.049 4.478 6.377-.197.732-.715 2.654-.819 3.065-.129.512.188.506.395.368.163-.109 2.593-1.76 3.644-2.475.753.111 1.527.169 2.302.169 5.523 0 10-3.463 10-7.504C22 6.463 17.523 3 12 3z"
             />
           </svg>
-          {isLoading ? '로그인 중...' : '카카오로 시작하기'}
+          {isLoading ? t('loggingIn') : t('loginWithKakao')}
         </button>
 
         {error && <p className={styles.error}>{error}</p>}
 
-        <p className={styles.notice}>
-          로그인하면 게임 기록이 저장됩니다
-        </p>
+        <p className={styles.notice}>{t('loginNotice')}</p>
       </div>
     </div>
   );

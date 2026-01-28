@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth';
 import { useGameViewModel } from './hooks/useGameViewModel';
 import { useCouponManager } from './hooks/useCouponManager';
 import { useReferral } from './hooks/useReferral';
+import { useLanguage } from './contexts/LanguageContext';
 import { firestoreScoreService } from './services/score';
 import { getReferrerFromUrl } from './services/referral';
 import { BREAD_DATA } from './models/BreadType';
@@ -23,6 +24,7 @@ import styles from './App.module.css';
 
 export default function App() {
   const { user, isLoading, isAuthenticated, signOut, deleteAccount } = useAuth();
+  const { t } = useLanguage();
   const couponManager = useCouponManager(user?.id || null);
   const game = useGameViewModel(couponManager.addCrushedBread);
   const referral = useReferral(user?.id || null);
@@ -32,6 +34,7 @@ export default function App() {
   const [showAdminView, setShowAdminView] = useState(false);
   const [showInviteBubble, setShowInviteBubble] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showSaveToast, setShowSaveToast] = useState(false);
   const [showLanding, setShowLanding] = useState(() => {
     // Skip landing page on native apps
     if (isNativeApp()) return false;
@@ -103,6 +106,10 @@ export default function App() {
         score: game.score,
         level: game.level,
         saltBreadCrushed: couponManager.totalPoints,
+      }).then(() => {
+        // Show save toast
+        setShowSaveToast(true);
+        setTimeout(() => setShowSaveToast(false), 2000);
       }).catch(console.error);
     }
     // Reset flag when game restarts
@@ -114,8 +121,8 @@ export default function App() {
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
-        <img src="/breads/plain.png" alt="로딩" className={styles.loadingIcon} />
-        <p>로딩 중...</p>
+        <img src="/breads/plain.png" alt={t('loading')} className={styles.loadingIcon} />
+        <p>{t('loading')}</p>
       </div>
     );
   }
@@ -155,7 +162,7 @@ export default function App() {
         </div>
         <img
           src="/brandings/header.png"
-          alt="솔트빵"
+          alt={t('storeName')}
           className={styles.logoImage}
           onClick={() => setShowLanding(true)}
         />
@@ -173,7 +180,7 @@ export default function App() {
           </button>
           <button className={styles.profileButton} onClick={handleLogout}>
             {user?.photoURL ? (
-              <img src={user.photoURL} alt="프로필" className={styles.profileImg} />
+              <img src={user.photoURL} alt="" className={styles.profileImg} />
             ) : (
               <span>👤</span>
             )}
@@ -186,6 +193,7 @@ export default function App() {
         moves={game.moves}
         getProgressForBread={couponManager.getProgressForBread}
         getCouponsForBread={couponManager.getCouponsForBread}
+        onBreadClick={() => setShowCouponView(true)}
       />
 
       <div className={styles.boardArea}>
@@ -196,13 +204,12 @@ export default function App() {
           isAnimating={game.isAnimating}
           onCellTap={game.selectCell}
           onSwap={game.trySwap}
-          onBreadInfo={() => setShowCouponView(true)}
         />
       </div>
 
       <div className={styles.actionButtons}>
         <button className={styles.newGameButton} onClick={game.startNewGame}>
-          ↻ 새 게임
+          ↻ {t('newGame')}
         </button>
         <InviteButton
           referralLink={referral.referralLink}
@@ -212,11 +219,11 @@ export default function App() {
         />
       </div>
 
-      {/* 친구 초대 온보딩 말풍선 */}
+      {/* Invite bubble */}
       {showInviteBubble && referral.referralLink && (
         <div className={styles.inviteBubble} onClick={() => setShowInviteModal(true)}>
           <img src="/breads/plain.png" alt="" className={styles.bubbleImage} />
-          <span>친구를 초대하면 1+1 쿠폰을 드려요!</span>
+          <span>{t('inviteBubble')}</span>
           <button
             className={styles.bubbleClose}
             onClick={(e) => {
@@ -229,7 +236,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 친구 초대 모달 */}
+      {/* Invite modal */}
       {showInviteModal && referral.referralLink && (
         <div className={styles.alertOverlay}>
           <div className={styles.inviteModal}>
@@ -237,11 +244,8 @@ export default function App() {
               ✕
             </button>
             <div className={styles.inviteIcon}>🎁</div>
-            <h3 className={styles.inviteTitle}>친구 초대하기</h3>
-            <p className={styles.inviteDesc}>
-              친구를 초대하면 나와 친구 모두<br />
-              <strong>플레인 1+1 쿠폰</strong>을 받아요!
-            </p>
+            <h3 className={styles.inviteTitle}>{t('inviteTitle')}</h3>
+            <p className={styles.inviteDesc}>{t('inviteDesc')}</p>
             <div className={styles.linkBox}>
               <input
                 type="text"
@@ -253,18 +257,18 @@ export default function App() {
                 className={styles.copyButton}
                 onClick={async () => {
                   const success = await referral.copyReferralLink();
-                  if (success) alert('링크가 복사되었습니다!');
+                  if (success) alert(t('linkCopied'));
                 }}
               >
-                복사
+                {t('copy')}
               </button>
             </div>
             <button className={styles.shareButton} onClick={referral.shareReferralLink}>
-              📤 공유하기
+              📤 {t('share')}
             </button>
             {referral.referredCount > 0 && (
               <div className={styles.inviteStats}>
-                <span>👥 초대한 친구: {referral.referredCount}명</span>
+                <span>👥 {t('invitedFriends')}: {referral.referredCount}</span>
               </div>
             )}
           </div>
@@ -320,23 +324,29 @@ export default function App() {
       {showLogoutConfirm && (
         <div className={styles.alertOverlay}>
           <div className={styles.alertBox}>
-            <h3>로그아웃</h3>
-            <p>로그아웃 하시겠습니까?</p>
+            <h3>{t('logout')}</h3>
+            <p>{t('logoutConfirm')}</p>
             <div className={styles.alertButtons}>
               <button
                 className={styles.alertCancelButton}
                 onClick={() => setShowLogoutConfirm(false)}
               >
-                취소
+                {t('cancel')}
               </button>
               <button
                 className={styles.alertConfirmButton}
                 onClick={confirmLogout}
               >
-                로그아웃
+                {t('logout')}
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {showSaveToast && (
+        <div className={styles.saveToast}>
+          ✓ {t('pointsSaved')}
         </div>
       )}
     </div>

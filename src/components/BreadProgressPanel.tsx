@@ -7,6 +7,7 @@ interface BreadProgressPanelProps {
   moves: number;
   getProgressForBread: (breadType: BreadType) => number;
   getCouponsForBread: (breadType: BreadType) => { id: string }[];
+  onBreadClick?: () => void;
 }
 
 export default function BreadProgressPanel({
@@ -14,6 +15,7 @@ export default function BreadProgressPanel({
   moves,
   getProgressForBread,
   getCouponsForBread,
+  onBreadClick,
 }: BreadProgressPanelProps) {
   const allBreadTypes = getAllBreadTypes();
 
@@ -38,7 +40,12 @@ export default function BreadProgressPanel({
           const coupons = getCouponsForBread(breadType);
 
           return (
-            <div key={breadType} className={styles.breadItem}>
+            <div
+              key={breadType}
+              className={styles.breadItem}
+              onClick={onBreadClick}
+              style={{ cursor: onBreadClick ? 'pointer' : 'default' }}
+            >
               <DonutProgress
                 progress={progress}
                 size={44}

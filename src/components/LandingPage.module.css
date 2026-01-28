@@ -14,6 +14,7 @@
 /* Hero Header */
 .heroHeader {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 16px;
@@ -22,6 +23,13 @@
   max-width: 430px;
   margin: 0 auto;
   box-sizing: border-box;
+  position: relative;
+}
+
+.languageSelector {
+  position: absolute;
+  top: 16px;
+  right: 16px;
 }
 
 .heroHeaderImage {
@@ -212,6 +220,68 @@
 .howToPlayIcon {
   font-size: 1.25rem;
   flex-shrink: 0;
+}
+
+/* Special Items Section */
+.specialItemsSection {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 20px;
+}
+
+.specialItemsTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-align: center;
+  opacity: 0.95;
+}
+
+.specialItemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.specialItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.specialItemImage {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.specialItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.specialItemName {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.specialItemRule {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.specialItemEffect {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #FFE082;
 }
 
 .ctaButton {

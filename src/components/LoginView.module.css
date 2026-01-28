@@ -16,6 +16,13 @@
   display: flex;
   justify-content: center;
   background: transparent;
+  position: relative;
+}
+
+.languageSelector {
+  position: absolute;
+  top: 16px;
+  right: 16px;
 }
 
 .headerImage {

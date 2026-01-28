@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import styles from './LandingPage.module.css';
 import { BREAD_DATA, getAllBreadTypes } from '../models/BreadType';
 import { useNaverMap, openNaverMapPlace } from '../hooks/useNaverMap';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // 랜딩 페이지 전용 메뉴 (게임에 포함되지 않음)
 const LANDING_ONLY_BREADS = [
@@ -29,6 +30,7 @@ interface Props {
 export default function LandingPage({ onStartGame, onAdminClick }: Props) {
   const allBreadTypes = getAllBreadTypes();
   const mapRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
   useNaverMap(mapRef);
 
   return (
@@ -37,7 +39,7 @@ export default function LandingPage({ onStartGame, onAdminClick }: Props) {
       <header className={styles.heroHeader}>
         <img
           src="/brandings/horizontal-thumbnail.png"
-          alt="솔트빵"
+          alt={t('storeName')}
           className={styles.heroHeaderImage}
         />
       </header>
@@ -45,33 +47,73 @@ export default function LandingPage({ onStartGame, onAdminClick }: Props) {
       {/* Game CTA Section */}
       <section className={styles.ctaSection}>
         <div className={styles.ctaCard}>
-          <h2 className={styles.ctaTitle}>솔트, 빵 💥 퍼즐</h2>
-          <p className={styles.ctaDesc}>
-            게임을 플레이하고 <strong>솔트빵 무료 쿠폰</strong>을 받아보세요!
-          </p>
+          <h2 className={styles.ctaTitle}>{t('puzzleTitle')}</h2>
+          <p className={styles.ctaDesc}>{t('ctaDesc')}</p>
           <div className={styles.howToPlay}>
             <div className={styles.howToPlayItem}>
               <span className={styles.howToPlayIcon}>🧩</span>
-              <span>같은 빵 3개를 맞추면 빵이 터져요!</span>
+              <span>{t('howToPlay1')}</span>
             </div>
             <div className={styles.howToPlayItem}>
               <span className={styles.howToPlayIcon}>🎁</span>
-              <span>빵을 터뜨리면 무료 쿠폰을 드려요!</span>
+              <span>{t('howToPlay2')}</span>
             </div>
             <div className={styles.howToPlayItem}>
               <span className={styles.howToPlayIcon}>✨</span>
-              <span>4개 이상 맞추면 특수 아이템 등장!</span>
+              <span>{t('howToPlay3')}</span>
+            </div>
+          </div>
+
+          <div className={styles.specialItemsSection}>
+            <div className={styles.specialItemsTitle}>{t('specialItemsGuide')}</div>
+            <div className={styles.specialItemsList}>
+              <div className={styles.specialItem}>
+                <img
+                  src="/brandings/cube-matcha-cream.png"
+                  alt={t('matchaCube')}
+                  className={styles.specialItemImage}
+                />
+                <div className={styles.specialItemInfo}>
+                  <span className={styles.specialItemName}>{t('matchaCube')}</span>
+                  <span className={styles.specialItemRule}>{t('matchaCubeRule')}</span>
+                  <span className={styles.specialItemEffect}>{t('matchaCubeEffect')}</span>
+                </div>
+              </div>
+              <div className={styles.specialItem}>
+                <img
+                  src="/brandings/cube-choco-cream.png"
+                  alt={t('chocoCream')}
+                  className={styles.specialItemImage}
+                />
+                <div className={styles.specialItemInfo}>
+                  <span className={styles.specialItemName}>{t('chocoCream')}</span>
+                  <span className={styles.specialItemRule}>{t('chocoCreamRule')}</span>
+                  <span className={styles.specialItemEffect}>{t('chocoCreamEffect')}</span>
+                </div>
+              </div>
+              <div className={styles.specialItem}>
+                <img
+                  src="/breads/milktea.png"
+                  alt={t('milkTea')}
+                  className={styles.specialItemImage}
+                />
+                <div className={styles.specialItemInfo}>
+                  <span className={styles.specialItemName}>{t('milkTea')}</span>
+                  <span className={styles.specialItemRule}>{t('milkTeaRule')}</span>
+                  <span className={styles.specialItemEffect}>{t('milkTeaEffect')}</span>
+                </div>
+              </div>
             </div>
           </div>
           <button className={styles.ctaButton} onClick={onStartGame}>
-            게임 시작하기
+            {t('startGame')}
           </button>
         </div>
       </section>
 
       {/* Menu Section */}
       <section className={styles.menuSection}>
-        <h2 className={styles.sectionTitle}>메뉴</h2>
+        <h2 className={styles.sectionTitle}>{t('menu')}</h2>
         <div className={styles.menuGrid}>
           {allBreadTypes.map((breadType) => {
             const breadInfo = BREAD_DATA[breadType];
@@ -109,20 +151,16 @@ export default function LandingPage({ onStartGame, onAdminClick }: Props) {
 
       {/* Map Section - Naver Map API */}
       <section className={styles.mapSection}>
-        <h2 className={styles.sectionTitle}>찾아오는 길</h2>
+        <h2 className={styles.sectionTitle}>{t('findUs')}</h2>
         <div className={styles.mapCard}>
           <div ref={mapRef} className={styles.mapContainer} />
           <div className={styles.storeInfo}>
-            <span className={styles.storeName}>솔트빵</span>
-            <span className={styles.storeAddress}>
-              서울 마포구 동교로 39길 10 1층
-            </span>
-            <span className={styles.storeHours}>
-              영업시간: 11:00 - 21:00 (일요일 휴무)
-            </span>
+            <span className={styles.storeName}>{t('storeName')}</span>
+            <span className={styles.storeAddress}>{t('storeAddress')}</span>
+            <span className={styles.storeHours}>{t('storeHours')}</span>
           </div>
           <button className={styles.mapButton} onClick={openNaverMapPlace}>
-            네이버 지도에서 길찾기
+            {t('getDirections')}
           </button>
         </div>
       </section>
@@ -146,9 +184,9 @@ export default function LandingPage({ onStartGame, onAdminClick }: Props) {
             className={styles.adminTrigger}
             onClick={onAdminClick}
           >
-            솔티파이
+            Saltify
           </span>
-          . All rights reserved.
+          {t('allRightsReserved')}
         </p>
       </footer>
     </div>

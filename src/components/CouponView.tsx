@@ -5,6 +5,7 @@ import { BreadPoints } from '../hooks/useCouponManager';
 import { useNaverMap, openNaverMapPlace } from '../hooks/useNaverMap';
 import { validateBranchPassword } from '../services/admin';
 import { hasUsedCouponToday } from '../services/coupon';
+import { useLanguage } from '../contexts/LanguageContext';
 import styles from './CouponView.module.css';
 
 interface CouponManager {
@@ -38,6 +39,7 @@ export default function CouponView({ couponManager, level, score, targetScore, o
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   useNaverMap(mapRef);
 
@@ -85,7 +87,7 @@ export default function CouponView({ couponManager, level, score, targetScore, o
     <div className={styles.overlay}>
       <div className={styles.container}>
         <header className={styles.header}>
-          <h2 className={styles.title}>내 쿠폰</h2>
+          <h2 className={styles.title}>{t('myCoupons')}</h2>
           <button className={styles.closeButton} onClick={onClose}>✕</button>
         </header>
 
@@ -106,9 +108,9 @@ export default function CouponView({ couponManager, level, score, targetScore, o
             </div>
           </div>
 
-          {/* 메뉴별 포인트 현황 */}
+          {/* Menu points */}
           <div className={styles.menuSection}>
-            <h3 className={styles.sectionTitle}>메뉴별 포인트</h3>
+            <h3 className={styles.sectionTitle}>{t('menuPoints')}</h3>
             <div className={styles.menuList}>
               {allBreadTypes.map((breadType) => {
                 const breadInfo = BREAD_DATA[breadType];
@@ -150,11 +152,11 @@ export default function CouponView({ couponManager, level, score, targetScore, o
             </div>
           </div>
 
-          {/* 쿠폰 내역 */}
+          {/* Coupon history */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>쿠폰 내역</h3>
+            <h3 className={styles.sectionTitle}>{t('couponHistory')}</h3>
             {couponManager.coupons.length === 0 ? (
-              <p className={styles.emptyText}>아직 쿠폰이 없어요. 게임을 플레이하세요!</p>
+              <p className={styles.emptyText}>{t('noCoupons')}</p>
             ) : (
               <div className={styles.couponList}>
                 {[...couponManager.coupons].reverse().map((coupon) => {
@@ -180,15 +182,15 @@ export default function CouponView({ couponManager, level, score, targetScore, o
                           {info.titleKo}
                         </span>
                         <span className={styles.couponMeta}>
-                          {coupon.source === 'referral' ? '초대 보상' : '게임 획득'}
+                          {coupon.source === 'referral' ? t('referralReward') : t('gameEarned')}
                         </span>
                         <span className={isInactive ? styles.couponMeta : styles.couponExpiry}>
-                          유효기간: {new Date(coupon.expiresAt).toLocaleDateString('ko-KR')}
+                          {t('expiryDate')}: {new Date(coupon.expiresAt).toLocaleDateString()}
                           {!isInactive && ` (D-${daysLeft})`}
                         </span>
                       </div>
                       <span className={styles.couponStatus}>
-                        {coupon.isUsed ? '사용됨' : expired ? '만료됨' : '사용하기'}
+                        {coupon.isUsed ? t('used') : expired ? t('expired') : t('use')}
                       </span>
                     </div>
                   );
@@ -197,12 +199,12 @@ export default function CouponView({ couponManager, level, score, targetScore, o
             )}
           </div>
 
-          {/* 안내 */}
+          {/* Info */}
           <div className={styles.infoSection}>
-            <p className={styles.infoItem}>• 빵 1개 매치 = 1 포인트</p>
-            <p className={styles.infoItem}>• 각 빵의 가격만큼 포인트를 모으면 해당 빵의 무료 쿠폰 획득!</p>
-            <p className={styles.infoItem}>• 하루에 1개 사용 가능</p>
-            <p className={styles.infoItem}>• 빵 구매시 함께 사용 가능</p>
+            <p className={styles.infoItem}>• {t('couponInfo1')}</p>
+            <p className={styles.infoItem}>• {t('couponInfo2')}</p>
+            <p className={styles.infoItem}>• {t('couponInfo3')}</p>
+            <p className={styles.infoItem}>• {t('couponInfo4')}</p>
           </div>
 
           {/* Instagram Link */}
@@ -215,37 +217,33 @@ export default function CouponView({ couponManager, level, score, targetScore, o
             <svg className={styles.instagramIcon} viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
             </svg>
-            <span>인스타그램 팔로우</span>
+            <span>{t('followInstagram')}</span>
           </a>
 
-          {/* 찾아오는 길 - Naver Map API */}
+          {/* Map section */}
           <div className={styles.mapSection}>
-            <h3 className={styles.sectionTitle}>솔트빵 찾아오는 길</h3>
+            <h3 className={styles.sectionTitle}>{t('findUs')}</h3>
             <div ref={mapRef} className={styles.mapContainer} />
             <div className={styles.storeInfo}>
-              <span className={styles.storeName}>솔트빵</span>
-              <span className={styles.storeAddress}>
-                서울 마포구 동교로 39길 10 1층
-              </span>
-              <span className={styles.storeHours}>
-                영업시간: 11:00 - 21:00 (일요일 휴무)
-              </span>
+              <span className={styles.storeName}>{t('storeName')}</span>
+              <span className={styles.storeAddress}>{t('storeAddress')}</span>
+              <span className={styles.storeHours}>{t('storeHours')}</span>
             </div>
             <button className={styles.directionsButton} onClick={openNaverMapPlace}>
-              네이버 지도에서 길찾기
+              {t('getDirections')}
             </button>
           </div>
 
-          {/* 회원 탈퇴 */}
+          {/* Delete account */}
           <button
             className={styles.deleteAccountLink}
             onClick={() => setShowDeleteConfirm(true)}
           >
-            회원 탈퇴
+            {t('deleteAccount')}
           </button>
         </div>
 
-        {/* 확인 다이얼로그 */}
+        {/* Confirm dialog */}
         {selectedCoupon && (
           <div className={styles.confirmOverlay}>
             <div className={styles.confirmBox}>
@@ -254,10 +252,10 @@ export default function CouponView({ couponManager, level, score, targetScore, o
                 alt=""
                 className={styles.confirmImage}
               />
-              <p>{getCouponDisplayInfo(selectedCoupon).titleKo}을 사용하시겠습니까?</p>
-              <p className={styles.couponUsageNote}>하루 1개, 빵 구매시 함께 사용 가능</p>
+              <p>{getCouponDisplayInfo(selectedCoupon).titleKo} {t('useCouponConfirm')}</p>
+              <p className={styles.couponUsageNote}>{t('couponUsageNote')}</p>
               <div className={styles.passwordSection}>
-                <label className={styles.passwordLabel}>비밀번호</label>
+                <label className={styles.passwordLabel}>{t('password')}</label>
                 <input
                   type="password"
                   inputMode="numeric"
@@ -269,16 +267,16 @@ export default function CouponView({ couponManager, level, score, targetScore, o
                     setPasswordError(false);
                   }}
                   className={`${styles.passwordInput} ${passwordError ? styles.passwordInputError : ''}`}
-                  placeholder="4자리 비밀번호"
+                  placeholder={t('passwordPlaceholder')}
                   autoFocus
                 />
                 {passwordError && (
-                  <span className={styles.passwordErrorText}>비밀번호가 틀렸습니다</span>
+                  <span className={styles.passwordErrorText}>{t('wrongPassword')}</span>
                 )}
               </div>
               <div className={styles.confirmButtons}>
-                <button onClick={() => setSelectedCoupon(null)}>취소</button>
-                <button className={styles.confirmOk} onClick={confirmUse}>사용하기</button>
+                <button onClick={() => setSelectedCoupon(null)}>{t('cancel')}</button>
+                <button className={styles.confirmOk} onClick={confirmUse}>{t('use')}</button>
               </div>
             </div>
           </div>
@@ -289,40 +287,36 @@ export default function CouponView({ couponManager, level, score, targetScore, o
           <div className={styles.toast}>{usedMessage}</div>
         )}
 
-        {/* 오늘 이미 사용한 경우 */}
+        {/* Already used today */}
         {alreadyUsedToday && (
           <div className={styles.confirmOverlay}>
             <div className={styles.confirmBox}>
-              <p className={styles.dailyLimitTitle}>⚠️ 오늘 이미 쿠폰을 사용했습니다</p>
-              <p className={styles.dailyLimitNote}>쿠폰은 하루에 1개만 사용할 수 있어요.<br />내일 다시 이용해주세요!</p>
+              <p className={styles.dailyLimitTitle}>⚠️ {t('alreadyUsedToday')}</p>
+              <p className={styles.dailyLimitNote}>{t('alreadyUsedNote')}</p>
               <div className={styles.confirmButtons}>
-                <button className={styles.confirmOk} onClick={() => setAlreadyUsedToday(false)}>확인</button>
+                <button className={styles.confirmOk} onClick={() => setAlreadyUsedToday(false)}>{t('confirm')}</button>
               </div>
             </div>
           </div>
         )}
 
-        {/* 로딩 */}
+        {/* Loading */}
         {isCheckingDaily && (
           <div className={styles.confirmOverlay}>
             <div className={styles.confirmBox}>
-              <p>확인 중...</p>
+              <p>{t('loading')}</p>
             </div>
           </div>
         )}
 
-        {/* 회원 탈퇴 확인 */}
+        {/* Delete account confirm */}
         {showDeleteConfirm && (
           <div className={styles.confirmOverlay}>
             <div className={styles.confirmBox}>
-              <p className={styles.deleteWarningTitle}>⚠️ 회원 탈퇴</p>
-              <p className={styles.deleteWarningText}>
-                탈퇴 시 모든 쿠폰과 포인트가<br />
-                삭제되며 복구할 수 없습니다.<br />
-                정말 탈퇴하시겠습니까?
-              </p>
+              <p className={styles.deleteWarningTitle}>⚠️ {t('deleteAccount')}</p>
+              <p className={styles.deleteWarningText}>{t('deleteWarning')}</p>
               <div className={styles.confirmButtons}>
-                <button onClick={() => setShowDeleteConfirm(false)}>취소</button>
+                <button onClick={() => setShowDeleteConfirm(false)}>{t('cancel')}</button>
                 <button
                   className={styles.deleteConfirmButton}
                   onClick={async () => {
@@ -330,14 +324,14 @@ export default function CouponView({ couponManager, level, score, targetScore, o
                     try {
                       await onDeleteAccount();
                     } catch {
-                      alert('회원 탈퇴에 실패했습니다. 다시 시도해주세요.');
+                      // Error handling
                     }
                     setIsDeleting(false);
                     setShowDeleteConfirm(false);
                   }}
                   disabled={isDeleting}
                 >
-                  {isDeleting ? '처리 중...' : '탈퇴하기'}
+                  {isDeleting ? t('processing') : t('deleteConfirm')}
                 </button>
               </div>
             </div>

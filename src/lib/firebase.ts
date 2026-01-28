@@ -3,6 +3,7 @@ import { getAuth, indexedDBLocalPersistence, setPersistence } from 'firebase/aut
 import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 import { getAnalytics, logEvent, Analytics } from 'firebase/analytics';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAq5RwfKdw9USo4DVvpghmM_Vh_qwm0szc",
@@ -15,6 +16,15 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// Initialize App Check with reCAPTCHA Enterprise
+if (typeof window !== 'undefined') {
+  initializeAppCheck(app, {
+    provider: new ReCaptchaEnterpriseProvider('6Lc7F1ksAAAAAE6SsCE2B8Zf9fn9N6jh-C5swoci'),
+    isTokenAutoRefreshEnabled: true,
+  });
+}
+
 export const auth = getAuth(app);
 
 // Set persistence to indexedDB to avoid sessionStorage issues

@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { Board, ROWS, COLS, isAdjacent } from '../models/GameBoard';
 import { Position, positionKey, SpecialItemType, isSpecialItem } from '../models/BreadCell';
-import { BREAD_DATA, BreadType } from '../models/BreadType';
+import { BREAD_DATA } from '../models/BreadType';
 import BreadCellView from './BreadCellView';
 import ParticleEffect from './ParticleEffect';
 import ExplosionEffect from './ExplosionEffect';
@@ -14,7 +14,6 @@ interface Props {
   isAnimating: boolean;
   onCellTap: (row: number, col: number) => void;
   onSwap: (from: Position, to: Position) => void;
-  onBreadInfo?: (breadType: BreadType) => void;
 }
 
 interface DragState {
@@ -46,7 +45,6 @@ export default function GameBoardView({
   isAnimating,
   onCellTap,
   onSwap,
-  onBreadInfo,
 }: Props) {
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [dropTarget, setDropTarget] = useState<Position | null>(null);
@@ -238,17 +236,12 @@ export default function GameBoardView({
       // If no significant drag, treat as tap
       if (absX < 5 && absY < 5) {
         onCellTap(dragState.position.row, dragState.position.col);
-        // Show bread info when tapping
-        const cell = board[dragState.position.row][dragState.position.col];
-        if (cell && !isSpecialItem(cell) && onBreadInfo) {
-          onBreadInfo(cell.breadType);
-        }
       }
     }
 
     setDragState(null);
     setDropTarget(null);
-  }, [dragState, cellSize, onSwap, onCellTap, board, onBreadInfo]);
+  }, [dragState, cellSize, onSwap, onCellTap]);
 
   const getDragOffset = useCallback((row: number, col: number): { x: number; y: number } | null => {
     if (!dragState || dragState.position.row !== row || dragState.position.col !== col) {
