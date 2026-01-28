@@ -202,7 +202,7 @@ export default function CouponView({ couponManager, level, score, targetScore, o
             <p className={styles.infoItem}>• 빵 1개 매치 = 1 포인트</p>
             <p className={styles.infoItem}>• 각 빵의 가격만큼 포인트를 모으면 해당 빵의 무료 쿠폰 획득!</p>
             <p className={styles.infoItem}>• 하루에 1개 사용 가능</p>
-            <p className={styles.infoItem}>• 다른 물품 구매시 사용 가능</p>
+            <p className={styles.infoItem}>• 빵 구매시 함께 사용 가능</p>
           </div>
 
           {/* Instagram Link */}
@@ -255,7 +255,7 @@ export default function CouponView({ couponManager, level, score, targetScore, o
                 className={styles.confirmImage}
               />
               <p>{getCouponDisplayInfo(selectedCoupon).titleKo}을 사용하시겠습니까?</p>
-              <p className={styles.couponUsageNote}>하루 1개, 다른 물품 구매시 사용 가능</p>
+              <p className={styles.couponUsageNote}>하루 1개, 빵 구매시 함께 사용 가능</p>
               <div className={styles.passwordSection}>
                 <label className={styles.passwordLabel}>비밀번호</label>
                 <input
