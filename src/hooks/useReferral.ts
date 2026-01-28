@@ -103,8 +103,8 @@ export function useReferral(userId: string | null) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: '소금, 빵',
-          text: '소금, 빵 게임에 초대합니다! 가입하면 플레인 1+1 쿠폰을 받을 수 있어요!',
+          title: '솔트, 빵 💥',
+          text: '솔트, 빵 💥 게임에 초대합니다! 가입하면 플레인 1+1 쿠폰을 받을 수 있어요!',
           url: state.referralLink,
         });
         return true;

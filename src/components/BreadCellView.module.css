@@ -47,6 +47,34 @@
   box-shadow: 0 0 0 3px #10B981, 0 4px 8px rgba(16, 185, 129, 0.4);
 }
 
+.cell.special {
+  animation: specialPulse 1.5s ease-in-out infinite;
+}
+
+/* Matcha - green glow (smallest explosion) */
+.cell.specialMatcha {
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.6), 0 2px 4px rgba(128, 128, 128, 0.3);
+}
+
+/* Choco - brown/orange glow (medium explosion) */
+.cell.specialChoco {
+  box-shadow: 0 0 12px rgba(139, 69, 19, 0.6), 0 2px 4px rgba(128, 128, 128, 0.3);
+}
+
+/* MilkTea - golden glow (largest explosion) */
+.cell.specialMilkTea {
+  box-shadow: 0 0 12px rgba(255, 165, 0, 0.6), 0 2px 4px rgba(128, 128, 128, 0.3);
+}
+
+@keyframes specialPulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2);
+  }
+}
+
 .emoji {
   line-height: 1;
   pointer-events: none;

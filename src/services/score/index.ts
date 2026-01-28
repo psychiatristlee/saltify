@@ -1,2 +1,2 @@
 export * from './types';
-export { firestoreScoreService, syncUserProfile } from './firestoreScore';
+export { firestoreScoreService, syncUserProfile, deleteUserData } from './firestoreScore';

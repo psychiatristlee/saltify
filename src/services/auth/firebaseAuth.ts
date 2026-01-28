@@ -3,6 +3,7 @@ import {
   OAuthProvider,
   signInWithPopup,
   signOut as firebaseSignOut,
+  deleteUser,
   onAuthStateChanged as firebaseOnAuthStateChanged,
   User as FirebaseUser,
 } from 'firebase/auth';
@@ -44,6 +45,12 @@ export const firebaseAuthService: AuthService = {
 
   async signOut() {
     await firebaseSignOut(auth);
+  },
+
+  async deleteAccount() {
+    const user = auth.currentUser;
+    if (!user) throw new Error('로그인이 필요합니다.');
+    await deleteUser(user);
   },
 
   onAuthStateChanged(callback) {

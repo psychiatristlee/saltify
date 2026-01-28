@@ -63,10 +63,8 @@
   gap: 16px;
 }
 
-.totalPoints {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* 레벨 섹션 */
+.levelSection {
   padding: 16px 20px;
   background: white;
   border-radius: 16px;
@@ -74,16 +72,37 @@
   border: 1px solid rgba(255, 140, 0, 0.1);
 }
 
-.totalLabel {
-  font-size: 0.9375rem;
-  color: #666;
-  font-weight: 500;
+.levelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-.totalValue {
-  font-size: 1.5rem;
-  font-weight: 800;
+.levelBadge {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #8B4513;
+}
+
+.levelScore {
+  font-size: 0.875rem;
+  font-weight: 600;
   color: #FF8C00;
+}
+
+.levelProgressBg {
+  height: 10px;
+  background: rgba(139, 69, 19, 0.15);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.levelProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #FF8C00, #FFB347);
+  border-radius: 5px;
+  transition: width 0.3s ease;
 }
 
 .menuSection {
@@ -215,6 +234,12 @@
 .couponMeta {
   font-size: 0.6875rem;
   color: #999;
+}
+
+.couponExpiry {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #E53E3E;
 }
 
 .confirmImage {
@@ -402,6 +427,20 @@
   border-color: #ccc;
 }
 
+.couponRowClickable {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.couponRowClickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.2);
+}
+
+.couponRowClickable:active {
+  transform: translateY(0);
+}
+
 .couponIcon {
   font-size: 1.5rem;
   z-index: 1;
@@ -435,11 +474,17 @@
 .couponStatus {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #FF8C00;
-  background: rgba(255, 140, 0, 0.1);
+  color: #999;
+  background: rgba(0, 0, 0, 0.05);
   padding: 4px 10px;
   border-radius: 12px;
   z-index: 1;
+}
+
+.couponRowClickable .couponStatus {
+  color: white;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
 }
 
 .emptyText {
@@ -496,6 +541,20 @@
   background: #FFF9E6;
   border-radius: 8px;
   border: 1px dashed #FFB347;
+}
+
+.dailyLimitTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #d97706;
+  margin-bottom: 12px;
+}
+
+.dailyLimitNote {
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 20px;
 }
 
 .passwordSection {
@@ -708,4 +767,39 @@
 .instagramIcon {
   width: 20px;
   height: 20px;
+}
+
+/* 회원 탈퇴 */
+.deleteAccountLink {
+  display: block;
+  width: 100%;
+  margin-top: 24px;
+  padding: 12px;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: center;
+}
+
+.deleteWarningTitle {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  color: #dc3545 !important;
+  margin-bottom: 12px !important;
+}
+
+.deleteWarningText {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: #666 !important;
+  line-height: 1.6 !important;
+  margin-bottom: 20px !important;
+}
+
+.deleteConfirmButton {
+  background: #dc3545 !important;
+  color: white !important;
 }

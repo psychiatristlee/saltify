@@ -11,6 +11,7 @@ import {
   limit as firestoreLimit,
   serverTimestamp,
   Timestamp,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { GameRecord, UserStats, LeaderboardEntry, ScoreService } from './types';
@@ -146,4 +147,46 @@ export async function syncUserProfile(user: {
     },
     { merge: true }
   );
+}
+
+// Delete all user data from Firestore
+export async function deleteUserData(userId: string): Promise<void> {
+  const batch = writeBatch(db);
+
+  // Delete user document
+  batch.delete(doc(db, USERS_COLLECTION, userId));
+
+  // Delete referral document
+  batch.delete(doc(db, 'referrals', userId));
+
+  // Commit the batch
+  await batch.commit();
+
+  // Delete coupons (need to query first)
+  const couponsQuery = query(
+    collection(db, 'coupons'),
+    where('userId', '==', userId)
+  );
+  const couponsSnapshot = await getDocs(couponsQuery);
+  const couponBatch = writeBatch(db);
+  couponsSnapshot.forEach((couponDoc) => {
+    couponBatch.delete(couponDoc.ref);
+  });
+  if (!couponsSnapshot.empty) {
+    await couponBatch.commit();
+  }
+
+  // Delete game records
+  const gamesQuery = query(
+    collection(db, GAMES_COLLECTION),
+    where('userId', '==', userId)
+  );
+  const gamesSnapshot = await getDocs(gamesQuery);
+  const gamesBatch = writeBatch(db);
+  gamesSnapshot.forEach((gameDoc) => {
+    gamesBatch.delete(gameDoc.ref);
+  });
+  if (!gamesSnapshot.empty) {
+    await gamesBatch.commit();
+  }
 }

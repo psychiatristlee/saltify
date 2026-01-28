@@ -40,7 +40,7 @@ export default function LoginView({ onBackToLanding }: Props) {
           alt="소금빵"
           className={styles.logo}
         />
-        <h1 className={styles.title}>소금, 빵</h1>
+        <h1 className={styles.title}>솔트, 빵 💥</h1>
         <p className={styles.subtitle}>맛있는 빵을 모아 쿠폰을 받으세요!</p>
 
         <button

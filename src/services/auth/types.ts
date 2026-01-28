@@ -11,5 +11,6 @@ export interface AuthService {
   signInWithGoogle(): Promise<User>;
   signInWithKakao(): Promise<User>;
   signOut(): Promise<void>;
+  deleteAccount(): Promise<void>;
   onAuthStateChanged(callback: (user: User | null) => void): () => void;
 }

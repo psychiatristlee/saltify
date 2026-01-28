@@ -5,7 +5,7 @@ import {
   Board,
   BreadCrushCounts,
   fillBoardWithoutMatches,
-  findMatches,
+  findMatchesWithInfo,
   swapCells,
   removeMatches,
   applyGravity,
@@ -18,7 +18,7 @@ const MOVES_PER_LEVEL = 30;
 const SWAP_REJECT_DELAY = 300;
 const GRAVITY_DELAY = 400;
 const CASCADE_DELAY = 300;
-const COMBO_DISPLAY_DURATION = 800;
+const COMBO_DISPLAY_DURATION = 1200;
 const LEVEL_UP_DISPLAY_DURATION = 2000;
 
 // Candy Crush style: target score increases with each level
@@ -61,6 +61,8 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
   const onBreadCrushedRef = useRef(onBreadCrushed);
   onBreadCrushedRef.current = onBreadCrushed;
 
+  const comboTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Helper to notify all crushed breads
   const notifyCrushedBreads = useCallback((crushCounts: BreadCrushCounts) => {
     getAllBreadTypes().forEach((breadType) => {
@@ -82,20 +84,83 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
     return { shouldLevelUp: false, isGameOver: false };
   }, []);
 
-  const processMatches = useCallback((
-    matches: Position[],
+  const processMatchesWithInfo = useCallback((
     currentBoard: Board,
     currentScore: number,
     currentMoves: number,
     currentCombo: number,
     currentLevel: number,
   ) => {
+    const matchResult = findMatchesWithInfo(currentBoard);
+    const matches = matchResult.positions;
+
+    if (matches.length === 0) {
+      // Check for level up or game over
+      const { shouldLevelUp, isGameOver } = checkLevelUp(currentScore, currentLevel, currentMoves);
+
+      if (shouldLevelUp) {
+        const bonusPoints = currentMoves * 20;
+        const finalScore = currentScore + bonusPoints;
+        const newLevel = currentLevel + 1;
+
+        setState((prev) => ({
+          ...prev,
+          score: finalScore,
+          showLevelUp: true,
+          gameState: 'levelUp',
+        }));
+
+        setTimeout(() => {
+          const newBoard = fillBoardWithoutMatches();
+          setState((prev) => ({
+            ...prev,
+            board: newBoard,
+            score: 0,
+            moves: MOVES_PER_LEVEL,
+            level: newLevel,
+            targetScore: getTargetScore(newLevel),
+            showLevelUp: false,
+            gameState: 'idle',
+          }));
+
+          // Check for initial matches on new board
+          setTimeout(() => {
+            setState((prev) => {
+              const initialResult = findMatchesWithInfo(prev.board);
+              if (initialResult.positions.length > 0) {
+                setTimeout(() => {
+                  processMatchesWithInfo(prev.board, 0, MOVES_PER_LEVEL, 0, newLevel);
+                }, 0);
+              }
+              return prev;
+            });
+          }, 500);
+        }, LEVEL_UP_DISPLAY_DURATION);
+      } else if (isGameOver) {
+        setState((prev) => ({
+          ...prev,
+          gameState: 'gameOver',
+        }));
+      } else {
+        setState((prev) => ({
+          ...prev,
+          gameState: 'idle',
+        }));
+      }
+      return;
+    }
+
     const newCombo = currentCombo + 1;
 
     if (newCombo > 1) {
+      // Clear previous combo timeout to reset timer for new combo
+      if (comboTimeoutRef.current) {
+        clearTimeout(comboTimeoutRef.current);
+      }
       setState((prev) => ({ ...prev, showCombo: true, comboCount: newCombo }));
-      setTimeout(() => {
+      comboTimeoutRef.current = setTimeout(() => {
         setState((prev) => ({ ...prev, showCombo: false }));
+        comboTimeoutRef.current = null;
       }, COMBO_DISPLAY_DURATION);
     }
 
@@ -103,7 +168,13 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
     const comboBonus = newCombo > 1 ? newCombo * 5 : 0;
     const newScore = currentScore + baseScore + comboBonus;
 
-    const { board: boardAfterRemove, crushCounts } = removeMatches(currentBoard, matches);
+    const { board: boardAfterRemove, crushCounts } = removeMatches(
+      currentBoard,
+      matches,
+      matchResult.specialSpawnPosition,
+      matchResult.specialSpawnType,
+      matchResult.specialSpawnBreadType
+    );
 
     // Notify each bread type that was crushed
     notifyCrushedBreads(crushCounts);
@@ -127,60 +198,7 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
       }));
 
       setTimeout(() => {
-        const newMatches = findMatches(boardAfterGravity);
-        if (newMatches.length > 0) {
-          processMatches(newMatches, boardAfterGravity, newScore, currentMoves, newCombo, currentLevel);
-        } else {
-          // Check for level up or game over
-          const { shouldLevelUp, isGameOver } = checkLevelUp(newScore, currentLevel, currentMoves);
-
-          if (shouldLevelUp) {
-            // Level up with bonus points for remaining moves
-            const bonusPoints = currentMoves * 20;
-            const finalScore = newScore + bonusPoints;
-            const newLevel = currentLevel + 1;
-
-            setState((prev) => ({
-              ...prev,
-              score: finalScore,
-              showLevelUp: true,
-              gameState: 'levelUp',
-            }));
-
-            // After level up animation, start new level
-            setTimeout(() => {
-              const newBoard = fillBoardWithoutMatches();
-              setState((prev) => ({
-                ...prev,
-                board: newBoard,
-                score: 0,
-                moves: MOVES_PER_LEVEL,
-                level: newLevel,
-                targetScore: getTargetScore(newLevel),
-                showLevelUp: false,
-                gameState: 'idle',
-              }));
-
-              // Check for initial matches on new board
-              setTimeout(() => {
-                const initialMatches = findMatches(newBoard);
-                if (initialMatches.length > 0) {
-                  processMatches(initialMatches, newBoard, 0, MOVES_PER_LEVEL, 0, newLevel);
-                }
-              }, 500);
-            }, LEVEL_UP_DISPLAY_DURATION);
-          } else if (isGameOver) {
-            setState((prev) => ({
-              ...prev,
-              gameState: 'gameOver',
-            }));
-          } else {
-            setState((prev) => ({
-              ...prev,
-              gameState: 'idle',
-            }));
-          }
-        }
+        processMatchesWithInfo(boardAfterGravity, newScore, currentMoves, newCombo, currentLevel);
       }, CASCADE_DELAY);
     }, GRAVITY_DELAY);
   }, [checkLevelUp, notifyCrushedBreads]);
@@ -190,9 +208,9 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
       if (prev.gameState === 'animating' || prev.gameState === 'levelUp') return prev;
 
       const swappedBoard = swapCells(prev.board, from, to);
-      const matches = findMatches(swappedBoard);
+      const matchResult = findMatchesWithInfo(swappedBoard);
 
-      if (matches.length === 0) {
+      if (matchResult.positions.length === 0) {
         setTimeout(() => {
           setState((p) => ({
             ...p,
@@ -211,7 +229,7 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
         const newMoves = prev.moves - 1;
 
         setTimeout(() => {
-          processMatches(matches, swappedBoard, prev.score, newMoves, 0, prev.level);
+          processMatchesWithInfo(swappedBoard, prev.score, newMoves, 0, prev.level);
         }, 0);
 
         return {
@@ -224,7 +242,7 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
         };
       }
     });
-  }, [processMatches]);
+  }, [processMatchesWithInfo]);
 
   const selectCell = useCallback((row: number, col: number) => {
     setState((prev) => {
@@ -262,12 +280,9 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
     });
 
     setTimeout(() => {
-      const initialMatches = findMatches(newBoard);
-      if (initialMatches.length > 0) {
-        processMatches(initialMatches, newBoard, 0, MOVES_PER_LEVEL, 0, 1);
-      }
+      processMatchesWithInfo(newBoard, 0, MOVES_PER_LEVEL, 0, 1);
     }, 500);
-  }, [processMatches]);
+  }, [processMatchesWithInfo]);
 
   return {
     ...state,

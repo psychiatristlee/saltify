@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authService, User } from '../services/auth';
-import { syncUserProfile } from '../services/score';
+import { syncUserProfile, deleteUserData } from '../services/score';
 
 interface AuthState {
   user: User | null;
@@ -65,6 +65,27 @@ export function useAuth() {
     }
   }, []);
 
+  const deleteAccount = useCallback(async () => {
+    const currentUser = state.user;
+    if (!currentUser) throw new Error('로그인이 필요합니다.');
+
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    try {
+      // Delete user data from Firestore first
+      await deleteUserData(currentUser.id);
+      // Then delete the Firebase Auth account
+      await authService.deleteAccount();
+      // Clear local storage
+      localStorage.removeItem('breadPoints');
+      localStorage.removeItem('saltify_visited');
+      setState({ user: null, isLoading: false, error: null });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '회원 탈퇴 실패';
+      setState((prev) => ({ ...prev, isLoading: false, error: message }));
+      throw error;
+    }
+  }, [state.user]);
+
   return {
     user: state.user,
     isLoading: state.isLoading,
@@ -73,5 +94,6 @@ export function useAuth() {
     signInWithGoogle,
     signInWithKakao,
     signOut,
+    deleteAccount,
   };
 }

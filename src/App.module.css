@@ -73,6 +73,21 @@
   gap: 8px;
 }
 
+.rankingButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #FFF9E6;
+  color: #8B4513;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
 .couponButton {
   display: flex;
   align-items: center;
@@ -124,9 +139,16 @@
   min-height: 0;
 }
 
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+
 .newGameButton {
-  margin: 8px auto;
-  padding: 12px 32px;
+  padding: 12px 24px;
   background: #8B4513;
   color: white;
   border: none;
@@ -210,5 +232,299 @@
   border-radius: 10px;
   font-size: 0.875rem;
   font-weight: 600;
+  cursor: pointer;
+}
+
+.alertDeleteButton {
+  padding: 10px 24px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.deleteAccountLink {
+  display: block;
+  margin-top: 16px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* 친구 초대 온보딩 말풍선 */
+.inviteBubble {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 36px 10px 14px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-size: 0.8125rem;
+  color: #8B4513;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  z-index: 50;
+  animation: bubbleBounce 2s ease-in-out infinite;
+}
+
+@keyframes bubbleBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-4px); }
+}
+
+.bubbleImage {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.bubbleClose {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 50%;
+  font-size: 0.625rem;
+  color: #888;
+  cursor: pointer;
+  padding: 0;
+}
+
+.bubbleClose:hover {
+  background: #e0e0e0;
+  color: #666;
+}
+
+/* 친구 초대 모달 */
+.inviteModal {
+  position: relative;
+  background: white;
+  padding: 32px 24px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modalCloseButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 50%;
+  font-size: 1rem;
+  color: #666;
+  cursor: pointer;
+}
+
+.inviteIcon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.inviteTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.inviteDesc {
+  font-size: 0.9375rem;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.inviteDesc strong {
+  color: #FF8C00;
+}
+
+.linkBox {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.linkInput {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  color: #666;
+  background: #f9f9f9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.copyButton {
+  padding: 12px 16px;
+  background: #FF8C00;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.shareButton {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.inviteStats {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* 빵 정보 팝업 */
+.breadInfoOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 80;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.breadInfoPopup {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 430px;
+  padding: 18px 20px;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.breadInfoImage {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.breadInfoContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.breadInfoName {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.breadInfoPrice {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #FF8C00;
+  margin: 0;
+}
+
+.breadInfoProgress {
+  margin-top: 4px;
+}
+
+.breadInfoProgressBar {
+  height: 8px;
+  background: rgba(255, 140, 0, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.breadInfoProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #FF8C00, #FFB347);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.breadInfoProgressText {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.breadInfoCoupon {
+  margin-top: 4px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #4CAF50;
+}
+
+.breadInfoClose {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 50%;
+  font-size: 0.875rem;
+  color: #666;
   cursor: pointer;
 }

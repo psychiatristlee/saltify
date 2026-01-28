@@ -5,27 +5,34 @@ import { useCouponManager } from './hooks/useCouponManager';
 import { useReferral } from './hooks/useReferral';
 import { firestoreScoreService } from './services/score';
 import { getReferrerFromUrl } from './services/referral';
-import { BREAD_DATA } from './models/BreadType';
+import { BREAD_DATA, BreadType } from './models/BreadType';
 import { isNativeApp } from './lib/platform';
 import LandingPage from './components/LandingPage';
 import LoginView from './components/LoginView';
 import GameBoardView from './components/GameBoardView';
-import ScoreView from './components/ScoreView';
 import ComboView from './components/ComboView';
 import GameOverView from './components/GameOverView';
 import LevelUpView from './components/LevelUpView';
 import CouponView from './components/CouponView';
+import CouponCelebration from './components/CouponCelebration';
+import RankingView from './components/RankingView';
 import BreadProgressPanel from './components/BreadProgressPanel';
 import InviteButton from './components/InviteButton';
+import AdminView from './components/AdminView';
 import styles from './App.module.css';
 
 export default function App() {
-  const { user, isLoading, isAuthenticated, signOut } = useAuth();
-  const couponManager = useCouponManager();
+  const { user, isLoading, isAuthenticated, signOut, deleteAccount } = useAuth();
+  const couponManager = useCouponManager(user?.id || null);
   const game = useGameViewModel(couponManager.addCrushedBread);
   const referral = useReferral(user?.id || null);
   const [showCouponView, setShowCouponView] = useState(false);
+  const [showRankingView, setShowRankingView] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showAdminView, setShowAdminView] = useState(false);
+  const [showInviteBubble, setShowInviteBubble] = useState(true);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [selectedBreadInfo, setSelectedBreadInfo] = useState<BreadType | null>(null);
   const [showLanding, setShowLanding] = useState(() => {
     // Skip landing page on native apps
     if (isNativeApp()) return false;
@@ -57,14 +64,22 @@ export default function App() {
     if (
       user &&
       referral.hasPendingReferral &&
+      referral.pendingReferrerId &&
       !referralProcessed.current &&
       !referral.isProcessing
     ) {
       referralProcessed.current = true;
-      referral.processPendingReferral().then((result) => {
-        if (result.success) {
-          // Give coupon to both referrer and new user
-          couponManager.addReferralCoupon();
+      referral.processPendingReferral().then(async (result) => {
+        if (result.success && referral.pendingReferrerId) {
+          // Give coupon to both referrer and new user in Firestore
+          const couponSuccess = await couponManager.addReferralCoupons(
+            referral.pendingReferrerId,
+            user.id
+          );
+          if (couponSuccess) {
+            // Show alert for the current user
+            couponManager.showReferralCouponAlert();
+          }
         }
       });
     }
@@ -98,7 +113,20 @@ export default function App() {
 
   // Show landing page
   if (showLanding) {
-    return <LandingPage onStartGame={handleStartGame} />;
+    return (
+      <>
+        <LandingPage
+          onStartGame={handleStartGame}
+          onAdminClick={() => setShowAdminView(true)}
+        />
+        {showAdminView && (
+          <AdminView
+            userId={user?.id || null}
+            onClose={() => setShowAdminView(false)}
+          />
+        )}
+      </>
+    );
   }
 
   if (!isAuthenticated) {
@@ -109,12 +137,12 @@ export default function App() {
     <div className={styles.container}>
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <InviteButton
-            referralLink={referral.referralLink}
-            referredCount={referral.referredCount}
-            onCopy={referral.copyReferralLink}
-            onShare={referral.shareReferralLink}
-          />
+          <button
+            className={styles.rankingButton}
+            onClick={() => setShowRankingView(true)}
+          >
+            🏆
+          </button>
         </div>
         <img
           src="/brandings/header.png"
@@ -145,15 +173,10 @@ export default function App() {
       </header>
 
       <BreadProgressPanel
+        level={game.level}
+        moves={game.moves}
         getProgressForBread={couponManager.getProgressForBread}
         getCouponsForBread={couponManager.getCouponsForBread}
-      />
-
-      <ScoreView
-        level={game.level}
-        score={game.score}
-        targetScore={game.targetScore}
-        moves={game.moves}
       />
 
       <div className={styles.boardArea}>
@@ -164,14 +187,82 @@ export default function App() {
           isAnimating={game.isAnimating}
           onCellTap={game.selectCell}
           onSwap={game.trySwap}
+          onBreadInfo={() => setShowCouponView(true)}
         />
       </div>
 
-      <button className={styles.newGameButton} onClick={game.startNewGame}>
-        ↻ 새 게임
-      </button>
+      <div className={styles.actionButtons}>
+        <button className={styles.newGameButton} onClick={game.startNewGame}>
+          ↻ 새 게임
+        </button>
+        <InviteButton
+          referralLink={referral.referralLink}
+          referredCount={referral.referredCount}
+          onCopy={referral.copyReferralLink}
+          onShare={referral.shareReferralLink}
+        />
+      </div>
 
-      {game.showCombo && <ComboView comboCount={game.comboCount} />}
+      {/* 친구 초대 온보딩 말풍선 */}
+      {showInviteBubble && referral.referralLink && (
+        <div className={styles.inviteBubble} onClick={() => setShowInviteModal(true)}>
+          <img src="/breads/plain.png" alt="" className={styles.bubbleImage} />
+          <span>친구를 초대하면 1+1 쿠폰을 드려요!</span>
+          <button
+            className={styles.bubbleClose}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowInviteBubble(false);
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* 친구 초대 모달 */}
+      {showInviteModal && referral.referralLink && (
+        <div className={styles.alertOverlay}>
+          <div className={styles.inviteModal}>
+            <button className={styles.modalCloseButton} onClick={() => setShowInviteModal(false)}>
+              ✕
+            </button>
+            <div className={styles.inviteIcon}>🎁</div>
+            <h3 className={styles.inviteTitle}>친구 초대하기</h3>
+            <p className={styles.inviteDesc}>
+              친구를 초대하면 나와 친구 모두<br />
+              <strong>플레인 1+1 쿠폰</strong>을 받아요!
+            </p>
+            <div className={styles.linkBox}>
+              <input
+                type="text"
+                value={referral.referralLink}
+                readOnly
+                className={styles.linkInput}
+              />
+              <button
+                className={styles.copyButton}
+                onClick={async () => {
+                  const success = await referral.copyReferralLink();
+                  if (success) alert('링크가 복사되었습니다!');
+                }}
+              >
+                복사
+              </button>
+            </div>
+            <button className={styles.shareButton} onClick={referral.shareReferralLink}>
+              📤 공유하기
+            </button>
+            {referral.referredCount > 0 && (
+              <div className={styles.inviteStats}>
+                <span>👥 초대한 친구: {referral.referredCount}명</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {game.showCombo && <ComboView key={game.comboCount} comboCount={game.comboCount} />}
 
       {game.gameState === 'gameOver' && (
         <GameOverView
@@ -187,16 +278,43 @@ export default function App() {
       )}
 
       {couponManager.showCouponAlert && couponManager.newCouponBreadType !== null && (
-        <div className={styles.alertOverlay}>
-          <div className={styles.alertBox}>
+        <CouponCelebration
+          breadImage={BREAD_DATA[couponManager.newCouponBreadType].image}
+          breadName={BREAD_DATA[couponManager.newCouponBreadType].nameKo}
+          message={couponManager.newCouponMessage}
+          onClose={couponManager.dismissAlert}
+        />
+      )}
+
+      {selectedBreadInfo !== null && (
+        <div className={styles.breadInfoOverlay} onClick={() => setSelectedBreadInfo(null)}>
+          <div className={styles.breadInfoPopup} onClick={(e) => e.stopPropagation()}>
             <img
-              src={BREAD_DATA[couponManager.newCouponBreadType].image}
-              alt=""
-              className={styles.alertImage}
+              src={BREAD_DATA[selectedBreadInfo].image}
+              alt={BREAD_DATA[selectedBreadInfo].nameKo}
+              className={styles.breadInfoImage}
             />
-            <h3>쿠폰 획득!</h3>
-            <p>{couponManager.newCouponMessage}</p>
-            <button onClick={couponManager.dismissAlert}>확인</button>
+            <div className={styles.breadInfoContent}>
+              <h4 className={styles.breadInfoName}>{BREAD_DATA[selectedBreadInfo].nameKo}</h4>
+              <p className={styles.breadInfoPrice}>{BREAD_DATA[selectedBreadInfo].price.toLocaleString()}원</p>
+              <div className={styles.breadInfoProgress}>
+                <div className={styles.breadInfoProgressBar}>
+                  <div
+                    className={styles.breadInfoProgressFill}
+                    style={{ width: `${couponManager.getProgressForBread(selectedBreadInfo) * 100}%` }}
+                  />
+                </div>
+                <span className={styles.breadInfoProgressText}>
+                  {couponManager.breadPoints[selectedBreadInfo] % BREAD_DATA[selectedBreadInfo].price}P / {BREAD_DATA[selectedBreadInfo].price}P
+                </span>
+              </div>
+              {couponManager.getCouponsForBread(selectedBreadInfo).length > 0 && (
+                <div className={styles.breadInfoCoupon}>
+                  🎟️ 보유 쿠폰: {couponManager.getCouponsForBread(selectedBreadInfo).length}장
+                </div>
+              )}
+            </div>
+            <button className={styles.breadInfoClose} onClick={() => setSelectedBreadInfo(null)}>✕</button>
           </div>
         </div>
       )}
@@ -204,7 +322,22 @@ export default function App() {
       {showCouponView && (
         <CouponView
           couponManager={couponManager}
+          level={game.level}
+          score={game.score}
+          targetScore={game.targetScore}
           onClose={() => setShowCouponView(false)}
+          onDeleteAccount={async () => {
+            await deleteAccount();
+            setShowCouponView(false);
+            setShowLanding(true);
+          }}
+        />
+      )}
+
+      {showRankingView && (
+        <RankingView
+          currentUserId={user?.id || null}
+          onClose={() => setShowRankingView(false)}
         />
       )}
 

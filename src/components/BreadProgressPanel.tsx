@@ -3,11 +3,15 @@ import DonutProgress from './DonutProgress';
 import styles from './BreadProgressPanel.module.css';
 
 interface BreadProgressPanelProps {
+  level: number;
+  moves: number;
   getProgressForBread: (breadType: BreadType) => number;
   getCouponsForBread: (breadType: BreadType) => { id: string }[];
 }
 
 export default function BreadProgressPanel({
+  level,
+  moves,
   getProgressForBread,
   getCouponsForBread,
 }: BreadProgressPanelProps) {
@@ -15,6 +19,18 @@ export default function BreadProgressPanel({
 
   return (
     <div className={styles.container}>
+      <div className={styles.statsRow}>
+        <div className={styles.statBox}>
+          <span className={styles.statLabel}>레벨</span>
+          <span className={styles.statValue}>{level}</span>
+        </div>
+        <div className={styles.statBox}>
+          <span className={styles.statLabel}>남은 이동</span>
+          <span className={moves <= 5 ? styles.statValueLow : styles.statValue}>
+            {moves}
+          </span>
+        </div>
+      </div>
       <div className={styles.panel}>
         {allBreadTypes.map((breadType) => {
           const breadInfo = BREAD_DATA[breadType];
@@ -25,7 +41,7 @@ export default function BreadProgressPanel({
             <div key={breadType} className={styles.breadItem}>
               <DonutProgress
                 progress={progress}
-                size={48}
+                size={44}
                 strokeWidth={3}
                 imageUrl={breadInfo.image}
                 color={breadInfo.color}

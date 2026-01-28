@@ -23,9 +23,10 @@ const LANDING_ONLY_BREADS = [
 
 interface Props {
   onStartGame: () => void;
+  onAdminClick?: () => void;
 }
 
-export default function LandingPage({ onStartGame }: Props) {
+export default function LandingPage({ onStartGame, onAdminClick }: Props) {
   const allBreadTypes = getAllBreadTypes();
   const mapRef = useRef<HTMLDivElement>(null);
   useNaverMap(mapRef);
@@ -44,10 +45,24 @@ export default function LandingPage({ onStartGame }: Props) {
       {/* Game CTA Section */}
       <section className={styles.ctaSection}>
         <div className={styles.ctaCard}>
-          <h2 className={styles.ctaTitle}>소금, 빵 ! 퍼즐</h2>
+          <h2 className={styles.ctaTitle}>솔트, 빵 💥 퍼즐</h2>
           <p className={styles.ctaDesc}>
-            게임을 플레이하고 <strong>1+1 쿠폰</strong>을 획득하세요!
+            게임을 플레이하고 <strong>솔트빵 무료 쿠폰</strong>을 받아보세요!
           </p>
+          <div className={styles.howToPlay}>
+            <div className={styles.howToPlayItem}>
+              <span className={styles.howToPlayIcon}>🧩</span>
+              <span>같은 빵 3개를 맞추면 빵이 터져요!</span>
+            </div>
+            <div className={styles.howToPlayItem}>
+              <span className={styles.howToPlayIcon}>🎁</span>
+              <span>빵을 터뜨리면 무료 쿠폰을 드려요!</span>
+            </div>
+            <div className={styles.howToPlayItem}>
+              <span className={styles.howToPlayIcon}>✨</span>
+              <span>4개 이상 맞추면 특수 아이템 등장!</span>
+            </div>
+          </div>
           <button className={styles.ctaButton} onClick={onStartGame}>
             게임 시작하기
           </button>
@@ -125,7 +140,16 @@ export default function LandingPage({ onStartGame }: Props) {
           </svg>
           <span>@salt_bread_official</span>
         </a>
-        <p className={styles.footerText}>© 2026 솔티파이. All rights reserved.</p>
+        <p className={styles.footerText}>
+          © 2026{' '}
+          <span
+            className={styles.adminTrigger}
+            onClick={onAdminClick}
+          >
+            솔티파이
+          </span>
+          . All rights reserved.
+        </p>
       </footer>
     </div>
   );

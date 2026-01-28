@@ -1,9 +1,10 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { Board, ROWS, COLS, isAdjacent } from '../models/GameBoard';
-import { Position, positionKey } from '../models/BreadCell';
-import { BREAD_DATA } from '../models/BreadType';
+import { Position, positionKey, SpecialItemType, isSpecialItem } from '../models/BreadCell';
+import { BREAD_DATA, BreadType } from '../models/BreadType';
 import BreadCellView from './BreadCellView';
 import ParticleEffect from './ParticleEffect';
+import ExplosionEffect from './ExplosionEffect';
 import styles from './GameBoardView.module.css';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
   isAnimating: boolean;
   onCellTap: (row: number, col: number) => void;
   onSwap: (from: Position, to: Position) => void;
+  onBreadInfo?: (breadType: BreadType) => void;
 }
 
 interface DragState {
@@ -30,6 +32,13 @@ interface PopEffect {
   color: string;
 }
 
+interface SpecialExplosion {
+  id: number;
+  x: number;
+  y: number;
+  type: SpecialItemType;
+}
+
 export default function GameBoardView({
   board,
   selectedPosition,
@@ -37,13 +46,16 @@ export default function GameBoardView({
   isAnimating,
   onCellTap,
   onSwap,
+  onBreadInfo,
 }: Props) {
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [dropTarget, setDropTarget] = useState<Position | null>(null);
   const [popEffects, setPopEffects] = useState<PopEffect[]>([]);
+  const [specialExplosions, setSpecialExplosions] = useState<SpecialExplosion[]>([]);
   const boardRef = useRef<HTMLDivElement>(null);
   const effectIdRef = useRef(0);
   const prevMatchedRef = useRef<string[]>([]);
+  const prevBoardRef = useRef<Board | null>(null);
 
   const matchedSet = useMemo(() => {
     const set = new Set<string>();
@@ -60,10 +72,11 @@ export default function GameBoardView({
   const gap = 3;
   const padding = 6;
 
-  // Trigger pop effects when matches occur
+  // Trigger pop effects and special explosions when matches occur
   useEffect(() => {
     if (matchedPositions.length === 0) {
       prevMatchedRef.current = [];
+      prevBoardRef.current = board;
       return;
     }
 
@@ -73,48 +86,63 @@ export default function GameBoardView({
     if (newMatches.length > 0 && boardRef.current) {
       const rect = boardRef.current.getBoundingClientRect();
       const newEffects: PopEffect[] = [];
+      const newExplosions: SpecialExplosion[] = [];
+
+      // Use previous board state to check for special items (they might already be removed from current board)
+      const boardToCheck = prevBoardRef.current || board;
 
       matchedPositions.forEach((pos) => {
         const key = positionKey(pos);
         if (newMatches.includes(key)) {
-          const cell = board[pos.row][pos.col];
+          const cell = boardToCheck[pos.row]?.[pos.col] || board[pos.row][pos.col];
           const x = rect.left + padding + pos.col * (cellSize + gap) + cellSize / 2;
           const y = rect.top + padding + pos.row * (cellSize + gap) + cellSize / 2;
 
-          newEffects.push({
-            id: effectIdRef.current++,
-            x,
-            y,
-            color: BREAD_DATA[cell.breadType].color,
-          });
+          // Check if this was a special item
+          if (isSpecialItem(cell)) {
+            newExplosions.push({
+              id: effectIdRef.current++,
+              x,
+              y,
+              type: cell.specialType,
+            });
+          } else {
+            newEffects.push({
+              id: effectIdRef.current++,
+              x,
+              y,
+              color: BREAD_DATA[cell.breadType].color,
+            });
+          }
         }
       });
 
-      setPopEffects(prev => [...prev, ...newEffects]);
+      if (newEffects.length > 0) {
+        setPopEffects(prev => [...prev, ...newEffects]);
+      }
+      if (newExplosions.length > 0) {
+        setSpecialExplosions(prev => [...prev, ...newExplosions]);
+      }
     }
 
     prevMatchedRef.current = currentKeys;
+    prevBoardRef.current = board;
   }, [matchedPositions, board, cellSize]);
 
   const removePopEffect = useCallback((id: number) => {
     setPopEffects(prev => prev.filter(e => e.id !== id));
   }, []);
 
-  const getPositionFromPoint = useCallback((x: number, y: number): Position | null => {
-    if (!boardRef.current) return null;
+  // Auto-remove special explosions after animation completes
+  useEffect(() => {
+    if (specialExplosions.length === 0) return;
 
-    const rect = boardRef.current.getBoundingClientRect();
-    const relX = x - rect.left - padding;
-    const relY = y - rect.top - padding;
+    const timer = setTimeout(() => {
+      setSpecialExplosions([]);
+    }, 600);
 
-    const col = Math.floor(relX / (cellSize + gap));
-    const row = Math.floor(relY / (cellSize + gap));
-
-    if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
-      return { row, col };
-    }
-    return null;
-  }, [cellSize]);
+    return () => clearTimeout(timer);
+  }, [specialExplosions]);
 
   const handlePointerDown = useCallback((row: number, col: number, e: React.PointerEvent) => {
     if (isAnimating) return;
@@ -134,41 +162,93 @@ export default function GameBoardView({
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!dragState) return;
 
+    const dx = e.clientX - dragState.startX;
+    const dy = e.clientY - dragState.startY;
+
+    // Determine the primary direction (horizontal or vertical) based on which has larger movement
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+
+    let constrainedX = dragState.startX;
+    let constrainedY = dragState.startY;
+    let targetRow = dragState.position.row;
+    let targetCol = dragState.position.col;
+
+    const threshold = cellSize * 0.3; // Minimum drag distance to trigger direction
+
+    if (absX > absY && absX > threshold) {
+      // Horizontal movement - constrain to horizontal axis
+      const maxOffset = cellSize + gap;
+      constrainedX = dragState.startX + Math.max(-maxOffset, Math.min(maxOffset, dx));
+      targetCol = dx > 0 ? Math.min(dragState.position.col + 1, COLS - 1) : Math.max(dragState.position.col - 1, 0);
+    } else if (absY > absX && absY > threshold) {
+      // Vertical movement - constrain to vertical axis
+      const maxOffset = cellSize + gap;
+      constrainedY = dragState.startY + Math.max(-maxOffset, Math.min(maxOffset, dy));
+      targetRow = dy > 0 ? Math.min(dragState.position.row + 1, ROWS - 1) : Math.max(dragState.position.row - 1, 0);
+    }
+
     const newDragState = {
       ...dragState,
-      currentX: e.clientX,
-      currentY: e.clientY,
+      currentX: constrainedX,
+      currentY: constrainedY,
     };
     setDragState(newDragState);
 
-    const targetPos = getPositionFromPoint(e.clientX, e.clientY);
-    if (targetPos && isAdjacent(dragState.position, targetPos)) {
+    const targetPos = { row: targetRow, col: targetCol };
+    if (isAdjacent(dragState.position, targetPos)) {
       setDropTarget(targetPos);
     } else {
       setDropTarget(null);
     }
-  }, [dragState, getPositionFromPoint]);
+  }, [dragState, cellSize, gap]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (!dragState) return;
 
     (e.target as HTMLElement).releasePointerCapture(e.pointerId);
 
-    const targetPos = getPositionFromPoint(e.clientX, e.clientY);
+    const dx = e.clientX - dragState.startX;
+    const dy = e.clientY - dragState.startY;
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+
+    const threshold = cellSize * 0.3;
+
+    // Determine target based on cardinal direction
+    let targetPos: Position | null = null;
+
+    if (absX > absY && absX > threshold) {
+      // Horizontal swipe
+      const targetCol = dx > 0
+        ? Math.min(dragState.position.col + 1, COLS - 1)
+        : Math.max(dragState.position.col - 1, 0);
+      targetPos = { row: dragState.position.row, col: targetCol };
+    } else if (absY > absX && absY > threshold) {
+      // Vertical swipe
+      const targetRow = dy > 0
+        ? Math.min(dragState.position.row + 1, ROWS - 1)
+        : Math.max(dragState.position.row - 1, 0);
+      targetPos = { row: targetRow, col: dragState.position.col };
+    }
 
     if (targetPos && isAdjacent(dragState.position, targetPos)) {
       onSwap(dragState.position, targetPos);
     } else {
-      const dx = Math.abs(e.clientX - dragState.startX);
-      const dy = Math.abs(e.clientY - dragState.startY);
-      if (dx < 5 && dy < 5) {
+      // If no significant drag, treat as tap
+      if (absX < 5 && absY < 5) {
         onCellTap(dragState.position.row, dragState.position.col);
+        // Show bread info when tapping
+        const cell = board[dragState.position.row][dragState.position.col];
+        if (cell && !isSpecialItem(cell) && onBreadInfo) {
+          onBreadInfo(cell.breadType);
+        }
       }
     }
 
     setDragState(null);
     setDropTarget(null);
-  }, [dragState, getPositionFromPoint, onSwap, onCellTap]);
+  }, [dragState, cellSize, onSwap, onCellTap, board, onBreadInfo]);
 
   const getDragOffset = useCallback((row: number, col: number): { x: number; y: number } | null => {
     if (!dragState || dragState.position.row !== row || dragState.position.col !== col) {
@@ -226,6 +306,15 @@ export default function GameBoardView({
           y={effect.y}
           color={effect.color}
           onComplete={() => removePopEffect(effect.id)}
+        />
+      ))}
+
+      {specialExplosions.map((explosion) => (
+        <ExplosionEffect
+          key={explosion.id}
+          x={explosion.x}
+          y={explosion.y}
+          type={explosion.type}
         />
       ))}
     </>

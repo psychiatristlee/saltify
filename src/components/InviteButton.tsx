@@ -34,7 +34,7 @@ export default function InviteButton({
   return (
     <>
       <button className={styles.inviteButton} onClick={() => setShowModal(true)}>
-        친구 초대
+        👥 친구 초대
       </button>
 
       {showModal && (

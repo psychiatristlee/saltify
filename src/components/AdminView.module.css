@@ -1,0 +1,528 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  background: white;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #8B4513;
+  color: white;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.headerCloseButton {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+}
+
+.loadingText {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.accessDenied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px;
+  text-align: center;
+}
+
+.accessDeniedIcon {
+  font-size: 3rem;
+}
+
+.accessDenied h2 {
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.accessDenied p {
+  color: #666;
+}
+
+.closeButton {
+  padding: 12px 32px;
+  background: #8B4513;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #eee;
+}
+
+.tab {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  background: none;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.activeTab {
+  color: #8B4513;
+  border-bottom: 2px solid #8B4513;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sectionHeader h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.addButton {
+  padding: 8px 16px;
+  background: #FF8C00;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.branchForm {
+  background: #FFF9E6;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.branchForm h4 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  margin-bottom: 10px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #FF8C00;
+}
+
+.formButtons {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.cancelButton {
+  flex: 1;
+  padding: 10px;
+  background: #f0f0f0;
+  color: #555;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saveButton {
+  flex: 1;
+  padding: 10px;
+  background: #FF8C00;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.branchList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.branchItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  background: #f9f9f9;
+  border-radius: 10px;
+}
+
+.branchInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.branchName {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.branchPassword {
+  font-size: 0.8125rem;
+  color: #888;
+}
+
+.branchActions {
+  display: flex;
+  gap: 6px;
+}
+
+.editButton {
+  padding: 6px 12px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.deleteButton {
+  padding: 6px 12px;
+  background: #E53E3E;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.emptyText {
+  text-align: center;
+  padding: 24px;
+  color: #999;
+}
+
+.refreshButton {
+  width: 100%;
+  padding: 10px;
+  background: #f0f0f0;
+  color: #555;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.statsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.statCard {
+  background: #f9f9f9;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.statHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.statBranchName {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.statTotal {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #FF8C00;
+}
+
+.statBreakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.statBreadItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: white;
+  border-radius: 8px;
+}
+
+.statBreadImage {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.statBreadName {
+  font-size: 0.75rem;
+  color: #333;
+}
+
+.statBreadCount {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #FF8C00;
+}
+
+.recentUsages {
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+}
+
+.recentUsages h5 {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.usageItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.8125rem;
+  color: #555;
+}
+
+.usageDate {
+  color: #999;
+}
+
+/* Admins Section */
+.adminsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.adminList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adminItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 10px;
+}
+
+.adminInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adminAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.adminAvatarPlaceholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.adminDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.adminName {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adminEmail {
+  font-size: 0.8125rem;
+  color: #888;
+}
+
+.adminBadge {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: white;
+  background: #8B4513;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.removeAdminButton {
+  padding: 6px 12px;
+  background: #E53E3E;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.addAdminButton {
+  padding: 6px 12px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Search Section */
+.searchSection {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.searchSection h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.searchBox {
+  display: flex;
+  gap: 8px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #FF8C00;
+}
+
+.searchButton {
+  padding: 12px 20px;
+  background: #FF8C00;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.searchButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.searchResults {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.searchResultItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+}
