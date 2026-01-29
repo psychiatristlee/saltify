@@ -196,39 +196,103 @@ export async function createReferralCoupons(
 
 // Bread points collection
 const BREAD_POINTS_COLLECTION = 'breadPoints';
+const BREAD_POINTS_LOCAL_KEY = 'breadPoints';
 
-// Save bread points to Firestore
+// Merge two bread points records by taking the MAX of each key
+function mergeBreadPoints(
+  a: Record<string, number>,
+  b: Record<string, number>
+): Record<string, number> {
+  const merged: Record<string, number> = { ...a };
+  for (const key of Object.keys(b)) {
+    merged[key] = Math.max(merged[key] || 0, b[key]);
+  }
+  return merged;
+}
+
+// Save bread points to Firestore (with localStorage backup)
 export async function saveBreadPointsToFirestore(
   userId: string,
   breadPoints: Record<string, number>
 ): Promise<void> {
+  // Save to localStorage first (synchronous, survives tab close)
+  try {
+    localStorage.setItem(BREAD_POINTS_LOCAL_KEY, JSON.stringify(breadPoints));
+  } catch (_) {
+    // localStorage might be unavailable (private browsing, quota exceeded)
+  }
+
   try {
     await setDoc(doc(db, BREAD_POINTS_COLLECTION, userId), {
       ...breadPoints,
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error('Error saving bread points:', error);
+    console.error('Error saving bread points to Firestore (saved locally):', error);
   }
 }
 
-// Load bread points from Firestore
+// Load bread points from Firestore (with localStorage fallback and merge)
 export async function loadBreadPointsFromFirestore(
   userId: string
 ): Promise<Record<string, number> | null> {
+  // Read localStorage backup
+  let localPoints: Record<string, number> | null = null;
+  try {
+    const raw = localStorage.getItem(BREAD_POINTS_LOCAL_KEY);
+    if (raw) {
+      localPoints = JSON.parse(raw) as Record<string, number>;
+    }
+  } catch (_) {
+    // ignore parse errors
+  }
+
   try {
     const docRef = doc(db, BREAD_POINTS_COLLECTION, userId);
     const docSnap = await getDoc(docRef);
 
+    let firestorePoints: Record<string, number> | null = null;
     if (docSnap.exists()) {
       const data = docSnap.data();
-      // Remove non-point fields
       const { updatedAt, ...points } = data;
-      return points as Record<string, number>;
+      firestorePoints = points as Record<string, number>;
     }
-    return null;
+
+    // Merge: take MAX of each bread type from both sources
+    if (firestorePoints && localPoints) {
+      const merged = mergeBreadPoints(firestorePoints, localPoints);
+
+      // If local had higher values, sync back to Firestore
+      const needsSync = Object.keys(merged).some(
+        (k) => merged[k] > (firestorePoints![k] || 0)
+      );
+      if (needsSync) {
+        setDoc(doc(db, BREAD_POINTS_COLLECTION, userId), {
+          ...merged,
+          updatedAt: serverTimestamp(),
+        }).catch((err) => console.error('Error syncing merged points:', err));
+      }
+
+      // Cache merged result locally
+      try {
+        localStorage.setItem(BREAD_POINTS_LOCAL_KEY, JSON.stringify(merged));
+      } catch (_) {}
+
+      return merged;
+    }
+
+    if (firestorePoints) {
+      // Cache Firestore data locally
+      try {
+        localStorage.setItem(BREAD_POINTS_LOCAL_KEY, JSON.stringify(firestorePoints));
+      } catch (_) {}
+      return firestorePoints;
+    }
+
+    return localPoints;
   } catch (error) {
-    console.error('Error loading bread points:', error);
-    return null;
+    console.error('Error loading bread points from Firestore:', error);
+    // Fallback to localStorage data
+    return localPoints;
   }
 }

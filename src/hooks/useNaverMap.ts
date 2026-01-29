@@ -87,7 +87,7 @@ export function useNaverMap(
   mapRef: RefObject<HTMLDivElement | null>,
   options: UseNaverMapOptions = {}
 ) {
-  const { zoom = 17, markerTitle = '솔트빵' } = options;
+  const { zoom = 17, markerTitle = 'salt, 0' } = options;
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const mapInstance = useRef<unknown>(null);

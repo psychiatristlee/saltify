@@ -1,23 +1,34 @@
 import { useRef } from 'react';
 import styles from './LandingPage.module.css';
-import { BREAD_DATA, getAllBreadTypes } from '../models/BreadType';
+import { BreadType, BREAD_DATA, getAllBreadTypes } from '../models/BreadType';
 import { useNaverMap, openNaverMapPlace } from '../hooks/useNaverMap';
 import { useLanguage } from '../contexts/LanguageContext';
+import { TranslationKey } from '../lib/i18n';
+
+// Bread type to i18n key mapping
+const BREAD_I18N: Record<BreadType, { name: TranslationKey; desc: TranslationKey }> = {
+  [BreadType.Plain]: { name: 'breadPlainName', desc: 'breadPlainDesc' },
+  [BreadType.Everything]: { name: 'breadEverythingName', desc: 'breadEverythingDesc' },
+  [BreadType.OliveCheese]: { name: 'breadOliveCheeseName', desc: 'breadOliveCheeseDesc' },
+  [BreadType.BasilTomato]: { name: 'breadBasilTomatoName', desc: 'breadBasilTomatoDesc' },
+  [BreadType.GarlicButter]: { name: 'breadGarlicButterName', desc: 'breadGarlicButterDesc' },
+  [BreadType.Hotteok]: { name: 'breadHotteokName', desc: 'breadHotteokDesc' },
+};
 
 // 랜딩 페이지 전용 메뉴 (게임에 포함되지 않음)
 const LANDING_ONLY_BREADS = [
   {
     id: 'cube-choco',
-    nameKo: '큐브 초코크림',
+    nameKey: 'landingCubeChocoName' as TranslationKey,
+    descKey: 'landingCubeChocoDesc' as TranslationKey,
     price: 4800,
-    description: '꾸덕하고 진한 초코크림과 입안에서 톡 터지는 초코칩이 가득 들어가 있는 큐브 소금빵',
     image: '/brandings/cube-choco-cream.png',
   },
   {
     id: 'cube-matcha',
-    nameKo: '큐브 말차크림',
+    nameKey: 'landingCubeMatchaName' as TranslationKey,
+    descKey: 'landingCubeMatchaDesc' as TranslationKey,
     price: 4800,
-    description: '4면이 바삭한 귀여운 큐브소금빵 안에 꾸덕한 말차크림이 한가득 들어간 소금빵',
     image: '/brandings/cube-matcha-cream.png',
   },
 ];
@@ -117,17 +128,18 @@ export default function LandingPage({ onStartGame, onAdminClick }: Props) {
         <div className={styles.menuGrid}>
           {allBreadTypes.map((breadType) => {
             const breadInfo = BREAD_DATA[breadType];
+            const i18nKeys = BREAD_I18N[breadType];
             return (
               <div key={breadType} className={styles.menuCard}>
                 <img
                   src={breadInfo.image}
-                  alt={breadInfo.nameKo}
+                  alt={t(i18nKeys.name)}
                   className={styles.menuImage}
                 />
-                <h3 className={styles.menuName}>{breadInfo.nameKo}</h3>
-                <p className={styles.menuDesc}>{breadInfo.description}</p>
+                <h3 className={styles.menuName}>{t(i18nKeys.name)}</h3>
+                <p className={styles.menuDesc}>{t(i18nKeys.desc)}</p>
                 <span className={styles.menuPrice}>
-                  {breadInfo.price.toLocaleString()}원
+                  {breadInfo.price.toLocaleString()}{t('currencyUnit')}
                 </span>
               </div>
             );
@@ -136,13 +148,13 @@ export default function LandingPage({ onStartGame, onAdminClick }: Props) {
             <div key={bread.id} className={styles.menuCard}>
               <img
                 src={bread.image}
-                alt={bread.nameKo}
+                alt={t(bread.nameKey)}
                 className={styles.menuImage}
               />
-              <h3 className={styles.menuName}>{bread.nameKo}</h3>
-              <p className={styles.menuDesc}>{bread.description}</p>
+              <h3 className={styles.menuName}>{t(bread.nameKey)}</h3>
+              <p className={styles.menuDesc}>{t(bread.descKey)}</p>
               <span className={styles.menuPrice}>
-                {bread.price.toLocaleString()}원
+                {bread.price.toLocaleString()}{t('currencyUnit')}
               </span>
             </div>
           ))}

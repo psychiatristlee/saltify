@@ -8,17 +8,17 @@ const SPECIAL_ITEM_INFO: Record<SpecialItemType, { image: string; name: string; 
   [SpecialItemType.None]: { image: '', name: '', color: '' },
   [SpecialItemType.Matcha]: {
     image: '/brandings/cube-matcha-cream.png',
-    name: '말차 소금빵',
+    name: 'Matcha Cube',
     color: '#a8d5a2',
   },
   [SpecialItemType.Choco]: {
     image: '/brandings/cube-choco-cream.png',
-    name: '초코 크림 큐브빵',
+    name: 'Choco Cream Cube',
     color: '#8b4513',
   },
   [SpecialItemType.MilkTea]: {
     image: '/breads/milktea.png',
-    name: '밀크티',
+    name: 'Milk Tea',
     color: '#f5e6d3',
   },
 };
@@ -74,7 +74,7 @@ export default memo(function BreadCellView({
   }
 
   const imageSrc = isSpecial && specialInfo ? specialInfo.image : breadInfo.image;
-  const imageAlt = isSpecial && specialInfo ? specialInfo.name : breadInfo.nameKo;
+  const imageAlt = isSpecial && specialInfo ? specialInfo.name : breadInfo.name;
 
   return (
     <div

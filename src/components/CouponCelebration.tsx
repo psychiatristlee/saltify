@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import styles from './CouponCelebration.module.css';
 
 interface Props {
@@ -24,6 +25,7 @@ function generateConfetti(count: number) {
 
 export default function CouponCelebration({ breadImage, breadName, message, onClose }: Props) {
   const confetti = useMemo(() => generateConfetti(50), []);
+  const { t } = useLanguage();
 
   // Vibrate on mobile devices
   useEffect(() => {
@@ -64,14 +66,14 @@ export default function CouponCelebration({ breadImage, breadName, message, onCl
           <div className={styles.iconRing2} />
           <img src={breadImage} alt={breadName} className={styles.icon} />
         </div>
-        <h2 className={styles.title}>쿠폰 획득!</h2>
+        <h2 className={styles.title}>{t('couponEarned')}</h2>
         <p className={styles.message}>{message}</p>
         <div className={styles.couponTag}>
           <span className={styles.tagIcon}>🎟️</span>
-          <span>{breadName} 쿠폰</span>
+          <span>{breadName} {t('onePlusOneCoupon')}</span>
         </div>
         <button className={styles.button} onClick={onClose}>
-          확인
+          {t('confirm')}
         </button>
       </div>
 

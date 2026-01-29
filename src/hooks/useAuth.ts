@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authService, User } from '../services/auth';
 import { syncUserProfile, deleteUserData } from '../services/score';
+import { t, getDefaultLanguage } from '../lib/i18n';
 
 interface AuthState {
   user: User | null;
@@ -34,7 +35,7 @@ export function useAuth() {
       setState({ user, isLoading: false, error: null });
       return user;
     } catch (error) {
-      const message = error instanceof Error ? error.message : '로그인 실패';
+      const message = error instanceof Error ? error.message : t('loginFailed', getDefaultLanguage());
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       throw error;
     }
@@ -47,7 +48,7 @@ export function useAuth() {
       setState({ user, isLoading: false, error: null });
       return user;
     } catch (error) {
-      const message = error instanceof Error ? error.message : '카카오 로그인 실패';
+      const message = error instanceof Error ? error.message : t('kakaoLoginFailed', getDefaultLanguage());
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       throw error;
     }
@@ -59,7 +60,7 @@ export function useAuth() {
       await authService.signOut();
       setState({ user: null, isLoading: false, error: null });
     } catch (error) {
-      const message = error instanceof Error ? error.message : '로그아웃 실패';
+      const message = error instanceof Error ? error.message : t('logoutFailed', getDefaultLanguage());
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       throw error;
     }
@@ -67,7 +68,7 @@ export function useAuth() {
 
   const deleteAccount = useCallback(async () => {
     const currentUser = state.user;
-    if (!currentUser) throw new Error('로그인이 필요합니다.');
+    if (!currentUser) throw new Error(t('loginRequired', getDefaultLanguage()));
 
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
@@ -80,7 +81,7 @@ export function useAuth() {
       localStorage.removeItem('saltify_visited');
       setState({ user: null, isLoading: false, error: null });
     } catch (error) {
-      const message = error instanceof Error ? error.message : '회원 탈퇴 실패';
+      const message = error instanceof Error ? error.message : t('deleteAccountFailed', getDefaultLanguage());
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       throw error;
     }

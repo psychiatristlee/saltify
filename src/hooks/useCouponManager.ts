@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Coupon, isCouponExpired } from '../models/Coupon';
 import { BreadType, BREAD_DATA, POINTS_PER_CRUSH, getAllBreadTypes } from '../models/BreadType';
+import { t, getDefaultLanguage } from '../lib/i18n';
 import {
   createCouponForUser,
   subscribeToCoupons,
@@ -149,7 +150,7 @@ export function useCouponManager(userId: string | null = null) {
           ...prev,
           breadPoints: newBreadPoints,
           showCouponAlert: true,
-          newCouponMessage: `축하합니다! 🎉\n${BREAD_DATA[breadType].nameKo} 1+1 쿠폰을 획득했어요!`,
+          newCouponMessage: `🎉 ${BREAD_DATA[breadType].name}\n${t('congratsCoupon', getDefaultLanguage())}`,
           newCouponBreadType: breadType,
         };
       }
@@ -177,7 +178,7 @@ export function useCouponManager(userId: string | null = null) {
     setState((prev) => ({
       ...prev,
       showCouponAlert: true,
-      newCouponMessage: '초대 보상으로 플레인 1+1 쿠폰을 받았어요! 🎁',
+      newCouponMessage: `${t('referralCouponMessage', getDefaultLanguage())} 🎁`,
       newCouponBreadType: BreadType.Plain,
     }));
   }, []);

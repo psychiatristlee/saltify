@@ -6,6 +6,7 @@ import {
   processReferral,
   getReferralStats,
 } from '../services/referral';
+import { t, getDefaultLanguage } from '../lib/i18n';
 
 interface ReferralState {
   referralLink: string | null;
@@ -79,7 +80,7 @@ export function useReferral(userId: string | null) {
     } catch (error) {
       setState((prev) => ({ ...prev, isProcessing: false }));
       processedRef.current = false;
-      return { success: false, message: '오류가 발생했습니다.' };
+      return { success: false, message: t('errorOccurred', getDefaultLanguage()) };
     }
   }, [userId, state.pendingReferrerId]);
 
@@ -103,8 +104,8 @@ export function useReferral(userId: string | null) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: '솔트, 빵 💥',
-          text: '솔트, 빵 💥 게임에 초대합니다! 가입하면 플레인 1+1 쿠폰을 받을 수 있어요!',
+          title: t('shareTitle', getDefaultLanguage()),
+          text: t('shareText', getDefaultLanguage()),
           url: state.referralLink,
         });
         return true;

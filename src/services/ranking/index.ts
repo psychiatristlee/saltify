@@ -1,6 +1,7 @@
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { BreadType } from '../../models/BreadType';
+import { t, getDefaultLanguage } from '../../lib/i18n';
 
 const COUPONS_COLLECTION = 'coupons';
 const USERS_COLLECTION = 'users';
@@ -125,7 +126,7 @@ export async function fetchRankings(currentUserId?: string | null): Promise<User
   usersSnapshot.forEach((docSnap) => {
     const data = docSnap.data();
     userInfo.set(docSnap.id, {
-      displayName: data.displayName || '익명',
+      displayName: data.displayName || t('anonymous', getDefaultLanguage()),
       photoURL: data.photoURL || null,
     });
   });
@@ -134,7 +135,7 @@ export async function fetchRankings(currentUserId?: string | null): Promise<User
   const rankings: UserRanking[] = [];
 
   userStats.forEach((stats, odwnerId) => {
-    const info = userInfo.get(odwnerId) || { displayName: '익명', photoURL: null };
+    const info = userInfo.get(odwnerId) || { displayName: t('anonymous', getDefaultLanguage()), photoURL: null };
 
     // Convert breadCounts map to array
     const breadCounts: BreadCouponCount[] = [];

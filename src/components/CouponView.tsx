@@ -1,12 +1,22 @@
 import { useState, useRef } from 'react';
-import { Coupon, getCouponDisplayInfo, getDaysUntilExpiration, isCouponExpired } from '../models/Coupon';
+import { Coupon, getDaysUntilExpiration, isCouponExpired } from '../models/Coupon';
 import { BreadType, getAllBreadTypes, BREAD_DATA } from '../models/BreadType';
 import { BreadPoints } from '../hooks/useCouponManager';
 import { useNaverMap, openNaverMapPlace } from '../hooks/useNaverMap';
 import { validateBranchPassword } from '../services/admin';
 import { hasUsedCouponToday } from '../services/coupon';
 import { useLanguage } from '../contexts/LanguageContext';
+import { TranslationKey } from '../lib/i18n';
 import styles from './CouponView.module.css';
+
+const BREAD_I18N: Record<BreadType, { name: TranslationKey; desc: TranslationKey }> = {
+  [BreadType.Plain]: { name: 'breadPlainName', desc: 'breadPlainDesc' },
+  [BreadType.Everything]: { name: 'breadEverythingName', desc: 'breadEverythingDesc' },
+  [BreadType.OliveCheese]: { name: 'breadOliveCheeseName', desc: 'breadOliveCheeseDesc' },
+  [BreadType.BasilTomato]: { name: 'breadBasilTomatoName', desc: 'breadBasilTomatoDesc' },
+  [BreadType.GarlicButter]: { name: 'breadGarlicButterName', desc: 'breadGarlicButterDesc' },
+  [BreadType.Hotteok]: { name: 'breadHotteokName', desc: 'breadHotteokDesc' },
+};
 
 interface CouponManager {
   coupons: Coupon[];
@@ -70,13 +80,13 @@ export default function CouponView({ couponManager, level, score, targetScore, o
       return;
     }
 
-    const info = getCouponDisplayInfo(selectedCoupon);
+    const couponName = `${t(BREAD_I18N[selectedCoupon.breadType].name)} ${t('onePlusOneCoupon')}`;
     const success = await couponManager.useCoupon(selectedCoupon.id, branch.id, branch.name);
     setSelectedCoupon(null);
     setPassword('');
     setPasswordError(false);
     if (success) {
-      setUsedMessage(`${info.titleKo} 쿠폰이 사용되었습니다! (${branch.name})`);
+      setUsedMessage(`${couponName} ${t('couponUsedMessage')} (${branch.name})`);
       setTimeout(() => setUsedMessage(''), 2000);
     }
   };
@@ -114,6 +124,7 @@ export default function CouponView({ couponManager, level, score, targetScore, o
             <div className={styles.menuList}>
               {allBreadTypes.map((breadType) => {
                 const breadInfo = BREAD_DATA[breadType];
+                const i18nKeys = BREAD_I18N[breadType];
                 const progress = couponManager.getProgressForBread(breadType);
                 const currentPoints = couponManager.breadPoints[breadType];
 
@@ -122,18 +133,18 @@ export default function CouponView({ couponManager, level, score, targetScore, o
                     <div className={styles.menuImageWrap}>
                       <img
                         src={breadInfo.image}
-                        alt={breadInfo.nameKo}
+                        alt={t(i18nKeys.name)}
                         className={styles.menuImage}
                       />
                     </div>
                     <div className={styles.menuInfo}>
                       <div className={styles.menuHeader}>
-                        <span className={styles.menuName}>{breadInfo.name}</span>
+                        <span className={styles.menuName}>{t(i18nKeys.name)}</span>
                         <span className={styles.menuPrice}>
-                          {breadInfo.price.toLocaleString()}원
+                          {breadInfo.price.toLocaleString()}{t('currencyUnit')}
                         </span>
                       </div>
-                      <p className={styles.menuDesc}>{breadInfo.description}</p>
+                      <p className={styles.menuDesc}>{t(i18nKeys.desc)}</p>
                       <div className={styles.menuProgress}>
                         <div className={styles.progressBarBg}>
                           <div
@@ -160,7 +171,8 @@ export default function CouponView({ couponManager, level, score, targetScore, o
             ) : (
               <div className={styles.couponList}>
                 {[...couponManager.coupons].reverse().map((coupon) => {
-                  const info = getCouponDisplayInfo(coupon);
+                  const couponBreadInfo = BREAD_DATA[coupon.breadType];
+                  const couponI18n = BREAD_I18N[coupon.breadType];
                   const expired = isCouponExpired(coupon);
                   const daysLeft = getDaysUntilExpiration(coupon);
                   const isInactive = coupon.isUsed || expired;
@@ -173,13 +185,13 @@ export default function CouponView({ couponManager, level, score, targetScore, o
                       onClick={() => canUse && handleUseCoupon(coupon)}
                     >
                       <img
-                        src={info.image}
+                        src={couponBreadInfo.image}
                         alt=""
                         className={styles.couponImage}
                       />
                       <div className={styles.couponInfo}>
                         <span className={isInactive ? styles.couponTextUsed : styles.couponText}>
-                          {info.titleKo}
+                          {t(couponI18n.name)} {t('onePlusOneCoupon')}
                         </span>
                         <span className={styles.couponMeta}>
                           {coupon.source === 'referral' ? t('referralReward') : t('gameEarned')}
@@ -248,11 +260,11 @@ export default function CouponView({ couponManager, level, score, targetScore, o
           <div className={styles.confirmOverlay}>
             <div className={styles.confirmBox}>
               <img
-                src={getCouponDisplayInfo(selectedCoupon).image}
+                src={BREAD_DATA[selectedCoupon.breadType].image}
                 alt=""
                 className={styles.confirmImage}
               />
-              <p>{getCouponDisplayInfo(selectedCoupon).titleKo} {t('useCouponConfirm')}</p>
+              <p>{t(BREAD_I18N[selectedCoupon.breadType].name)} {t('onePlusOneCoupon')} {t('useCouponConfirm')}</p>
               <p className={styles.couponUsageNote}>{t('couponUsageNote')}</p>
               <div className={styles.passwordSection}>
                 <label className={styles.passwordLabel}>{t('password')}</label>

@@ -1,0 +1,52 @@
+.container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.langButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 2px solid rgba(255, 140, 0, 0.3);
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.langButton:hover {
+  border-color: #FF8C00;
+  background: #FFF9E6;
+}
+
+.langButton.active {
+  border-color: #FF8C00;
+  background: linear-gradient(135deg, #FF8C00, #FFB347);
+  color: white;
+}
+
+.flag {
+  font-size: 1.1rem;
+}
+
+.name {
+  font-weight: 500;
+}
+
+.compactSelect {
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  border-radius: 8px;
+  background: white;
+  font-size: 0.875rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.compactSelect:focus {
+  border-color: #FF8C00;
+}

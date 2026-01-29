@@ -7,6 +7,7 @@ import {
   arrayUnion,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { t, getDefaultLanguage } from '../../lib/i18n';
 
 const REFERRALS_COLLECTION = 'referrals';
 
@@ -42,7 +43,7 @@ export async function processReferral(
 ): Promise<{ success: boolean; message: string }> {
   // Don't allow self-referral
   if (newUserId === referrerId) {
-    return { success: false, message: '자기 자신을 초대할 수 없습니다.' };
+    return { success: false, message: t('selfInviteError', getDefaultLanguage()) };
   }
 
   try {
@@ -51,7 +52,7 @@ export async function processReferral(
     const newUserDoc = await getDoc(newUserRef);
 
     if (newUserDoc.exists() && newUserDoc.data().referredBy) {
-      return { success: false, message: '이미 다른 사용자에 의해 초대되었습니다.' };
+      return { success: false, message: t('alreadyReferred', getDefaultLanguage()) };
     }
 
     // Check if referrer exists (check both users collection and referrals collection)
@@ -67,7 +68,7 @@ export async function processReferral(
         // Assume valid referrer - they just haven't been recorded yet
         console.log('Referrer not found in DB, but ID looks valid:', referrerId);
       } else {
-        return { success: false, message: '유효하지 않은 초대 코드입니다.' };
+        return { success: false, message: t('invalidReferralCode', getDefaultLanguage()) };
       }
     }
 
@@ -92,10 +93,10 @@ export async function processReferral(
       });
     }
 
-    return { success: true, message: '초대가 완료되었습니다!' };
+    return { success: true, message: t('referralComplete', getDefaultLanguage()) };
   } catch (error) {
     console.error('Referral processing error:', error);
-    return { success: false, message: '초대 처리 중 오류가 발생했습니다.' };
+    return { success: false, message: t('referralProcessError', getDefaultLanguage()) };
   }
 }
 

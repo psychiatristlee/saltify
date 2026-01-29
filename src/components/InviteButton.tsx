@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import styles from './InviteButton.module.css';
 
 interface Props {
@@ -16,6 +17,7 @@ export default function InviteButton({
 }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { t } = useLanguage();
 
   const handleCopy = async () => {
     const success = await onCopy();
@@ -34,7 +36,7 @@ export default function InviteButton({
   return (
     <>
       <button className={styles.inviteButton} onClick={() => setShowModal(true)}>
-        👥 친구 초대
+        👥 {t('inviteFriend')}
       </button>
 
       {showModal && (
@@ -45,11 +47,8 @@ export default function InviteButton({
             </button>
 
             <div className={styles.icon}>🎁</div>
-            <h3 className={styles.title}>친구 초대하기</h3>
-            <p className={styles.description}>
-              친구를 초대하면 나와 친구 모두<br />
-              <strong>플레인 1+1 쿠폰</strong>을 받아요!
-            </p>
+            <h3 className={styles.title}>{t('inviteTitle')}</h3>
+            <p className={styles.description}>{t('inviteDesc')}</p>
 
             <div className={styles.linkBox}>
               <input
@@ -59,18 +58,18 @@ export default function InviteButton({
                 className={styles.linkInput}
               />
               <button className={styles.copyButton} onClick={handleCopy}>
-                {copied ? '복사됨!' : '복사'}
+                {copied ? t('copied') : t('copy')}
               </button>
             </div>
 
             <button className={styles.shareButton} onClick={handleShare}>
-              📤 공유하기
+              📤 {t('share')}
             </button>
 
             {referredCount > 0 && (
               <div className={styles.stats}>
                 <span className={styles.statsIcon}>👥</span>
-                <span>초대한 친구: {referredCount}명</span>
+                <span>{t('invitedFriends')}: {referredCount}{t('people')}</span>
               </div>
             )}
           </div>

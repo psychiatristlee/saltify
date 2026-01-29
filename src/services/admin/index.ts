@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions, auth } from '../../lib/firebase';
+import { t, getDefaultLanguage } from '../../lib/i18n';
 
 const BRANCHES_COLLECTION = 'branches';
 
@@ -245,7 +246,7 @@ export async function getCouponStatsByBranch(): Promise<BranchStats[]> {
     // Add "Unknown" branch for coupons without branchId
     statsMap.set('unknown', {
       branchId: 'unknown',
-      branchName: '미지정',
+      branchName: t('unspecified', getDefaultLanguage()),
       totalUsed: 0,
       usageByBreadType: {},
       recentUsages: [],
@@ -259,7 +260,7 @@ export async function getCouponStatsByBranch(): Promise<BranchStats[]> {
         const branch = branchMap.get(branchId);
         statsMap.set(branchId, {
           branchId,
-          branchName: branch?.name || '알 수 없음',
+          branchName: branch?.name || t('unknownBranch', getDefaultLanguage()),
           totalUsed: 0,
           usageByBreadType: {},
           recentUsages: [],

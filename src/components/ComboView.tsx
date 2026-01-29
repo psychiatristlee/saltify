@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import styles from './ComboView.module.css';
 
 interface Props {
@@ -21,6 +22,7 @@ function generateParticles(count: number) {
 }
 
 export default function ComboView({ comboCount }: Props) {
+  const { t } = useLanguage();
   // More particles for higher combos
   const particleCount = Math.min(comboCount * 6, 30);
   const particles = useMemo(() => generateParticles(particleCount), [particleCount]);
@@ -64,7 +66,7 @@ export default function ComboView({ comboCount }: Props) {
       <div className={styles.textContainer}>
         <div className={styles.textShadow}>{comboCount}x</div>
         <div className={styles.text}>{comboCount}x</div>
-        <div className={styles.subText}>콤보!</div>
+        <div className={styles.subText}>{t('combo')}</div>
       </div>
 
       {/* Ring explosion */}

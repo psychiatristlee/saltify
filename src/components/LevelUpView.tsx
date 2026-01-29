@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import ParticleEffect from './ParticleEffect';
+import { useLanguage } from '../contexts/LanguageContext';
 import styles from './LevelUpView.module.css';
 
 interface Props {
@@ -15,6 +16,7 @@ interface Firework {
 
 export default function LevelUpView({ level, score }: Props) {
   const [fireworks, setFireworks] = useState<Firework[]>([]);
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Launch fireworks at random positions
@@ -45,13 +47,13 @@ export default function LevelUpView({ level, score }: Props) {
     <div className={styles.overlay}>
       <div className={styles.content}>
         <div className={styles.celebration}>🎉</div>
-        <h2 className={styles.title}>레벨 클리어!</h2>
+        <h2 className={styles.title}>{t('levelClear')}</h2>
         <div className={styles.levelBadge}>
           <span className={styles.levelLabel}>LEVEL</span>
           <span className={styles.levelNumber}>{level}</span>
         </div>
-        <p className={styles.score}>최종 점수: {score.toLocaleString()}</p>
-        <p className={styles.nextLevel}>레벨 {level + 1} 시작!</p>
+        <p className={styles.score}>{t('finalScoreLabel')} {score.toLocaleString()}</p>
+        <p className={styles.nextLevel}>{t('level')} {level + 1} {t('nextLevelStart')}</p>
       </div>
 
       {fireworks.map((fw) => (
