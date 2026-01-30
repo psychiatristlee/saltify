@@ -12,7 +12,7 @@ import {
   Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { BreadType } from '../../models/BreadType';
+import { BreadType, BREAD_DATA, getAllBreadTypes, randomBreadType } from '../../models/BreadType';
 
 const COUPONS_COLLECTION = 'coupons';
 
@@ -27,18 +27,19 @@ export interface FirestoreCoupon {
   createdAt: string;
   expiresAt: string;
   isUsed: boolean;
-  source: 'game' | 'referral';
+  source: 'game' | 'referral' | 'upgrade';
 }
 
 // Create a coupon for a user in Firestore
 export async function createCouponForUser(
   userId: string,
   breadType: BreadType,
-  source: 'game' | 'referral'
+  source: 'game' | 'referral' | 'upgrade',
+  validityDays: number = COUPON_VALIDITY_DAYS
 ): Promise<FirestoreCoupon> {
   const couponId = crypto.randomUUID();
   const now = new Date();
-  const expiresAt = new Date(now.getTime() + COUPON_VALIDITY_DAYS * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(now.getTime() + validityDays * 24 * 60 * 60 * 1000);
 
   const coupon: FirestoreCoupon = {
     id: couponId,
@@ -232,6 +233,87 @@ export async function saveBreadPointsToFirestore(
   }
 }
 
+// Issued coupon info returned from savePointsAndIssueCoupons
+export interface IssuedCouponInfo {
+  breadType: BreadType;
+  count: number;
+}
+
+// Save points to Firestore, issue coupons for thresholds crossed, save remainder
+// Returns: issued coupons list and the remainder points saved to Firestore
+export async function savePointsAndIssueCoupons(
+  userId: string,
+  localPoints: Record<string, number>
+): Promise<{ issuedCoupons: IssuedCouponInfo[]; remainderPoints: Record<string, number> }> {
+  const issuedCoupons: IssuedCouponInfo[] = [];
+
+  try {
+    // 1. Read current Firestore points
+    const docRef = doc(db, BREAD_POINTS_COLLECTION, userId);
+    const docSnap = await getDoc(docRef);
+
+    let firestorePoints: Record<string, number> = {};
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const { updatedAt, ...points } = data;
+      firestorePoints = points as Record<string, number>;
+    }
+
+    // 2. Merge local and Firestore points (take MAX of each)
+    const mergedPoints: Record<string, number> = { ...firestorePoints };
+    for (const key of Object.keys(localPoints)) {
+      mergedPoints[key] = Math.max(mergedPoints[key] || 0, localPoints[key] || 0);
+    }
+
+    // 3. For each bread type, check how many coupons to issue and compute remainder
+    const remainderPoints: Record<string, number> = {};
+
+    for (const breadType of getAllBreadTypes()) {
+      const key = String(breadType);
+      const totalPoints = mergedPoints[key] || 0;
+      const price = BREAD_DATA[breadType].price;
+      const couponsToIssue = Math.floor(totalPoints / price);
+      const remainder = totalPoints % price;
+
+      remainderPoints[key] = remainder;
+
+      // Compare with previously issued coupons from Firestore
+      // firestorePoints already had remainder from last save, so any full price amounts are new
+      const prevPoints = firestorePoints[key] || 0;
+      const prevCoupons = Math.floor(prevPoints / price);
+      const newCoupons = couponsToIssue - prevCoupons;
+
+      if (newCoupons > 0) {
+        issuedCoupons.push({ breadType, count: newCoupons });
+        // Issue coupons in Firestore
+        for (let i = 0; i < newCoupons; i++) {
+          await createCouponForUser(userId, breadType, 'game');
+        }
+      }
+    }
+
+    // 4. Save remainder points to Firestore
+    await setDoc(doc(db, BREAD_POINTS_COLLECTION, userId), {
+      ...remainderPoints,
+      updatedAt: serverTimestamp(),
+    });
+
+    // 5. Update localStorage with remainder
+    try {
+      localStorage.setItem(BREAD_POINTS_LOCAL_KEY, JSON.stringify(remainderPoints));
+    } catch (_) {}
+
+    return { issuedCoupons, remainderPoints };
+  } catch (error) {
+    console.error('Error in savePointsAndIssueCoupons:', error);
+    // Fallback: save to localStorage at least
+    try {
+      localStorage.setItem(BREAD_POINTS_LOCAL_KEY, JSON.stringify(localPoints));
+    } catch (_) {}
+    return { issuedCoupons: [], remainderPoints: localPoints };
+  }
+}
+
 // Load bread points from Firestore (with localStorage fallback and merge)
 export async function loadBreadPointsFromFirestore(
   userId: string
@@ -295,4 +377,48 @@ export async function loadBreadPointsFromFirestore(
     // Fallback to localStorage data
     return localPoints;
   }
+}
+
+// Upgrade 3 coupons into 1 upgraded coupon (3-month validity, random bread type)
+// 50% success rate. On failure, all 3 coupons are destroyed.
+const UPGRADE_VALIDITY_DAYS = 90;
+
+export interface UpgradeResult {
+  success: boolean;
+  newCoupon?: FirestoreCoupon;
+}
+
+export async function upgradeCoupons(
+  userId: string,
+  couponIds: string[]
+): Promise<UpgradeResult> {
+  if (couponIds.length !== 3) {
+    throw new Error('Exactly 3 coupons are required for upgrade');
+  }
+
+  // Mark all 3 coupons as used for upgrade
+  for (const couponId of couponIds) {
+    const couponRef = doc(db, COUPONS_COLLECTION, couponId);
+    await updateDoc(couponRef, {
+      isUsed: true,
+      usedAt: serverTimestamp(),
+      usedFor: 'upgrade',
+    });
+  }
+
+  // 50% success rate
+  const success = Math.random() < 0.5;
+
+  if (success) {
+    const newBreadType = randomBreadType();
+    const newCoupon = await createCouponForUser(
+      userId,
+      newBreadType,
+      'upgrade',
+      UPGRADE_VALIDITY_DAYS
+    );
+    return { success: true, newCoupon };
+  }
+
+  return { success: false };
 }

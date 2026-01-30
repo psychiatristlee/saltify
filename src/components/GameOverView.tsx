@@ -34,6 +34,7 @@ export default function GameOverView({
             <span className={styles.statValue}>{availableCouponsCount}</span>
           </div>
         </div>
+        <p className={styles.savedMessage}>✅ {t('pointsSaved')}</p>
         <button className={styles.restartButton} onClick={onRestart}>
           {t('playAgain')}
         </button>

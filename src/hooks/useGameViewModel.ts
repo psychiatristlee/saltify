@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { Position } from '../models/BreadCell';
 import { BreadType, getAllBreadTypes } from '../models/BreadType';
+import { trackGameStart, trackGameOver, trackLevelUp } from '../services/analytics';
 import {
   Board,
   BreadCrushCounts,
@@ -10,6 +11,8 @@ import {
   removeMatches,
   applyGravity,
   isAdjacent,
+  hasPossibleMoves,
+  shuffleBoard,
 } from '../models/GameBoard';
 
 export type GameState = 'idle' | 'selected' | 'animating' | 'levelUp' | 'gameOver';
@@ -63,12 +66,12 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
 
   const comboTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Helper to notify all crushed breads
-  const notifyCrushedBreads = useCallback((crushCounts: BreadCrushCounts) => {
+  // Helper to notify all crushed breads (with combo multiplier)
+  const notifyCrushedBreads = useCallback((crushCounts: BreadCrushCounts, comboMultiplier: number = 1) => {
     getAllBreadTypes().forEach((breadType) => {
       const count = crushCounts[breadType];
       if (count > 0) {
-        onBreadCrushedRef.current(breadType, count);
+        onBreadCrushedRef.current(breadType, count * comboMultiplier);
       }
     });
   }, []);
@@ -102,6 +105,8 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
         const bonusPoints = currentMoves * 20;
         const finalScore = currentScore + bonusPoints;
         const newLevel = currentLevel + 1;
+
+        trackLevelUp(newLevel, finalScore);
 
         setState((prev) => ({
           ...prev,
@@ -137,15 +142,25 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
           }, 500);
         }, LEVEL_UP_DISPLAY_DURATION);
       } else if (isGameOver) {
+        trackGameOver(currentLevel, currentScore, 0);
         setState((prev) => ({
           ...prev,
           gameState: 'gameOver',
         }));
       } else {
-        setState((prev) => ({
-          ...prev,
-          gameState: 'idle',
-        }));
+        // Check for deadlock before returning to idle
+        if (!hasPossibleMoves(currentBoard)) {
+          const shuffled = shuffleBoard(currentBoard);
+          setState((prev) => ({ ...prev, board: shuffled, gameState: 'animating' }));
+          setTimeout(() => {
+            processMatchesWithInfo(shuffled, currentScore, currentMoves, 0, currentLevel);
+          }, CASCADE_DELAY);
+        } else {
+          setState((prev) => ({
+            ...prev,
+            gameState: 'idle',
+          }));
+        }
       }
       return;
     }
@@ -176,8 +191,8 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
       matchResult.specialSpawnBreadType
     );
 
-    // Notify each bread type that was crushed
-    notifyCrushedBreads(crushCounts);
+    // Notify each bread type that was crushed (multiplied by combo count)
+    notifyCrushedBreads(crushCounts, newCombo);
 
     setState((prev) => ({
       ...prev,
@@ -264,6 +279,7 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
   }, [trySwap]);
 
   const startNewGame = useCallback(() => {
+    trackGameStart(1);
     const newBoard = fillBoardWithoutMatches();
     setState({
       board: newBoard,

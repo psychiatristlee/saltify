@@ -10,10 +10,10 @@ export interface Coupon {
   createdAt: string;
   expiresAt: string;
   isUsed: boolean;
-  source: 'game' | 'referral';
+  source: 'game' | 'referral' | 'upgrade';
 }
 
-export function createCoupon(breadType: BreadType, source: 'game' | 'referral' = 'game'): Coupon {
+export function createCoupon(breadType: BreadType, source: 'game' | 'referral' | 'upgrade' = 'game'): Coupon {
   const now = new Date();
   const expiresAt = new Date(now.getTime() + COUPON_VALIDITY_DAYS * 24 * 60 * 60 * 1000);
 

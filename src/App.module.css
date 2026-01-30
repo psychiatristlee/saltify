@@ -529,44 +529,95 @@
   cursor: pointer;
 }
 
-/* 저장 토스트 메시지 */
-.saveToast {
+/* 저장 토스트 - 종이 펼쳐지는 애니메이션 */
+.saveToastOverlay {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  inset: 0;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: rgba(76, 175, 80, 0.95);
-  color: white;
-  border-radius: 24px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 40px;
   z-index: 200;
-  animation: toastSlideIn 0.3s ease, toastSlideOut 0.3s ease 1.7s forwards;
+  pointer-events: none;
+  animation: overlayFade 0.3s ease, overlayFade 0.3s ease 2.2s reverse forwards;
 }
 
-@keyframes toastSlideIn {
+.saveToastPaper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 40px;
+  background: linear-gradient(135deg, #fffde7, #fff9c4);
+  border: 2px solid #f9a825;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 0 0 4px rgba(249, 168, 37, 0.15);
+  animation: paperUnfold 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    paperFold 0.4s ease 2s forwards;
+  transform-origin: center center;
+}
+
+.saveToastIcon {
+  font-size: 2rem;
+  animation: iconPop 0.4s ease 0.3s both;
+}
+
+.saveToastText {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #5d4037;
+  animation: textReveal 0.4s ease 0.35s both;
+}
+
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes paperUnfold {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.05) scaleX(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(0.6) scaleX(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1) scaleX(1);
+  }
+}
+
+@keyframes paperFold {
+  0% {
+    opacity: 1;
+    transform: scaleY(1) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(0.05) scaleX(0.6);
+  }
+}
+
+@keyframes iconPop {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-20px);
+    transform: scale(0.3);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: scale(1);
   }
 }
 
-@keyframes toastSlideOut {
+@keyframes textReveal {
   from {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    opacity: 0;
+    transform: translateY(8px);
   }
   to {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-20px);
+    opacity: 1;
+    transform: translateY(0);
   }
 }

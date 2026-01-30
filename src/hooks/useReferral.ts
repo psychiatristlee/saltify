@@ -7,6 +7,7 @@ import {
   getReferralStats,
 } from '../services/referral';
 import { t, getDefaultLanguage } from '../lib/i18n';
+import { trackReferralCopy, trackReferralShare } from '../services/analytics';
 
 interface ReferralState {
   referralLink: string | null;
@@ -90,6 +91,7 @@ export function useReferral(userId: string | null) {
 
     try {
       await navigator.clipboard.writeText(state.referralLink);
+      trackReferralCopy();
       return true;
     } catch (error) {
       console.error('Failed to copy:', error);
@@ -108,6 +110,7 @@ export function useReferral(userId: string | null) {
           text: t('shareText', getDefaultLanguage()),
           url: state.referralLink,
         });
+        trackReferralShare();
         return true;
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {

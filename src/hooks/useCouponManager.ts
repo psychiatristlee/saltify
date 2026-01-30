@@ -2,14 +2,15 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { Coupon, isCouponExpired } from '../models/Coupon';
 import { BreadType, BREAD_DATA, POINTS_PER_CRUSH, getAllBreadTypes } from '../models/BreadType';
 import { t, getDefaultLanguage } from '../lib/i18n';
+import { trackCouponEarned } from '../services/analytics';
 import {
-  createCouponForUser,
   subscribeToCoupons,
   useCouponInFirestore,
   createReferralCoupons,
   FirestoreCoupon,
-  saveBreadPointsToFirestore,
   loadBreadPointsFromFirestore,
+  savePointsAndIssueCoupons,
+  upgradeCoupons as upgradeCouponsService,
 } from '../services/coupon';
 
 // Points per bread type (initialized to 0 for each)
@@ -42,6 +43,8 @@ export interface CouponManagerState {
   showCouponAlert: boolean;
   newCouponMessage: string;
   newCouponBreadType: BreadType | null;
+  upgradeResult: { success: boolean; breadType?: BreadType } | null;
+  showUpgradeResult: boolean;
 }
 
 export function useCouponManager(userId: string | null = null) {
@@ -51,6 +54,8 @@ export function useCouponManager(userId: string | null = null) {
     showCouponAlert: false,
     newCouponMessage: '',
     newCouponBreadType: null,
+    upgradeResult: null,
+    showUpgradeResult: false,
   });
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const pointsLoadedRef = useRef(false);
@@ -97,10 +102,39 @@ export function useCouponManager(userId: string | null = null) {
     };
   }, [userId]);
 
-  // Save points to Firestore (called externally on level up / game over)
-  const savePointsToFirestore = useCallback(() => {
-    if (userId) {
-      saveBreadPointsToFirestore(userId, state.breadPoints);
+  // Save points to Firestore, issue coupons for thresholds, save remainder
+  const savePointsToFirestore = useCallback(async () => {
+    if (!userId) return;
+
+    const { issuedCoupons, remainderPoints } = await savePointsAndIssueCoupons(
+      userId,
+      state.breadPoints
+    );
+
+    // Update local state with remainder points (after coupon deduction)
+    const mergedRemainder = { ...createInitialBreadPoints() };
+    getAllBreadTypes().forEach((breadType) => {
+      const key = String(breadType);
+      if (remainderPoints[key] !== undefined) {
+        mergedRemainder[breadType] = remainderPoints[key];
+      }
+    });
+
+    setState((prev) => ({
+      ...prev,
+      breadPoints: mergedRemainder,
+    }));
+
+    // Show coupon alert if any coupons were issued
+    if (issuedCoupons.length > 0) {
+      const first = issuedCoupons[0];
+      issuedCoupons.forEach((c) => trackCouponEarned(String(c.breadType)));
+      setState((prev) => ({
+        ...prev,
+        showCouponAlert: true,
+        newCouponMessage: `🎉 ${BREAD_DATA[first.breadType].name}\n${t('congratsCoupon', getDefaultLanguage())}`,
+        newCouponBreadType: first.breadType,
+      }));
     }
   }, [userId, state.breadPoints]);
 
@@ -120,46 +154,19 @@ export function useCouponManager(userId: string | null = null) {
     return price - (points % price);
   }, [state.breadPoints]);
 
-  // Add points when breads are crushed (called with bread type and count)
+  // Add points when breads are crushed (local accumulation only, no coupon issuance)
   const addCrushedBread = useCallback((breadType: BreadType, count: number) => {
     if (!userId) return;
 
     const pointsToAdd = count * POINTS_PER_CRUSH;
 
-    setState((prev) => {
-      const currentPoints = prev.breadPoints[breadType];
-      const newPoints = currentPoints + pointsToAdd;
-      const price = BREAD_DATA[breadType].price;
-
-      const prevCouponCount = Math.floor(currentPoints / price);
-      const newCouponCount = Math.floor(newPoints / price);
-      const earnedCoupons = newCouponCount - prevCouponCount;
-
-      const newBreadPoints = {
+    setState((prev) => ({
+      ...prev,
+      breadPoints: {
         ...prev.breadPoints,
-        [breadType]: newPoints,
-      };
-
-      // Create coupons in Firestore for each earned
-      if (earnedCoupons > 0) {
-        for (let i = 0; i < earnedCoupons; i++) {
-          createCouponForUser(userId, breadType, 'game').catch(console.error);
-        }
-
-        return {
-          ...prev,
-          breadPoints: newBreadPoints,
-          showCouponAlert: true,
-          newCouponMessage: `🎉 ${BREAD_DATA[breadType].name}\n${t('congratsCoupon', getDefaultLanguage())}`,
-          newCouponBreadType: breadType,
-        };
-      }
-
-      return {
-        ...prev,
-        breadPoints: newBreadPoints,
-      };
-    });
+        [breadType]: prev.breadPoints[breadType] + pointsToAdd,
+      },
+    }));
   }, [userId]);
 
   // Add referral coupons for both referrer and referred user
@@ -196,8 +203,36 @@ export function useCouponManager(userId: string | null = null) {
   }, [state.coupons]);
 
   const dismissAlert = useCallback(() => {
-    setState((prev) => ({ ...prev, showCouponAlert: false }));
+    setState((prev) => ({ ...prev, showCouponAlert: false, showUpgradeResult: false, upgradeResult: null }));
   }, []);
+
+  // Upgrade 3 coupons into 1 upgraded coupon (3-month validity)
+  const attemptUpgrade = useCallback(async (couponIds: string[]): Promise<{ success: boolean; breadType?: BreadType }> => {
+    if (!userId) return { success: false };
+
+    try {
+      const result = await upgradeCouponsService(userId, couponIds);
+
+      if (result.success && result.newCoupon) {
+        setState((prev) => ({
+          ...prev,
+          upgradeResult: { success: true, breadType: result.newCoupon!.breadType },
+          showUpgradeResult: true,
+        }));
+        return { success: true, breadType: result.newCoupon.breadType };
+      } else {
+        setState((prev) => ({
+          ...prev,
+          upgradeResult: { success: false },
+          showUpgradeResult: true,
+        }));
+        return { success: false };
+      }
+    } catch (error) {
+      console.error('Error upgrading coupons:', error);
+      return { success: false };
+    }
+  }, [userId]);
 
   // Get total points across all breads
   const totalPoints = Object.values(state.breadPoints).reduce((a, b) => a + b, 0);
@@ -220,6 +255,7 @@ export function useCouponManager(userId: string | null = null) {
     showReferralCouponAlert,
     useCoupon,
     dismissAlert,
+    attemptUpgrade,
     savePointsToFirestore,
   };
 }

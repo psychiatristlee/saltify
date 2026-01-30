@@ -355,3 +355,61 @@ export function isAdjacent(a: Position, b: Position): boolean {
   const colDiff = Math.abs(a.col - b.col);
   return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
 }
+
+// Check if any valid move exists on the board
+export function hasPossibleMoves(cells: Board): boolean {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      // Try swap right
+      if (col < COLS - 1) {
+        const swapped = swapCells(cells, { row, col }, { row, col: col + 1 });
+        if (findMatches(swapped).length > 0) return true;
+      }
+      // Try swap down
+      if (row < ROWS - 1) {
+        const swapped = swapCells(cells, { row, col }, { row: row + 1, col });
+        if (findMatches(swapped).length > 0) return true;
+      }
+    }
+  }
+  return false;
+}
+
+// Shuffle the board while preserving special items
+export function shuffleBoard(cells: Board, maxAttempts = 10): Board {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const newCells = cloneBoard(cells);
+
+    // Collect all non-special bread types and their positions
+    const regularPositions: Position[] = [];
+    const breadTypes: BreadType[] = [];
+
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        if (!isSpecialItem(newCells[row][col])) {
+          regularPositions.push({ row, col });
+          breadTypes.push(newCells[row][col].breadType);
+        }
+      }
+    }
+
+    // Fisher-Yates shuffle
+    for (let i = breadTypes.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [breadTypes[i], breadTypes[j]] = [breadTypes[j], breadTypes[i]];
+    }
+
+    // Place shuffled types back
+    regularPositions.forEach((pos, idx) => {
+      newCells[pos.row][pos.col].breadType = breadTypes[idx];
+    });
+
+    // Check if shuffled board has possible moves and no existing matches
+    if (findMatches(newCells).length === 0 && hasPossibleMoves(newCells)) {
+      return newCells;
+    }
+  }
+
+  // Fallback: generate a completely new board
+  return fillBoardWithoutMatches();
+}

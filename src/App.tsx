@@ -8,6 +8,14 @@ import { firestoreScoreService } from './services/score';
 import { getReferrerFromUrl } from './services/referral';
 import { BREAD_DATA } from './models/BreadType';
 import { isNativeApp } from './lib/platform';
+import {
+  trackScreenView,
+  trackCouponViewOpen,
+  trackRankingViewOpen,
+  trackInviteBubbleClick,
+  trackLandingStart,
+  trackReferralComplete,
+} from './services/analytics';
 import LandingPage from './components/LandingPage';
 import LoginView from './components/LoginView';
 import GameBoardView from './components/GameBoardView';
@@ -47,6 +55,7 @@ export default function App() {
   const referralProcessed = useRef(false);
 
   const handleStartGame = () => {
+    trackLandingStart();
     localStorage.setItem('saltify_visited', 'true');
     setShowLanding(false);
   };
@@ -81,6 +90,7 @@ export default function App() {
           if (couponSuccess) {
             // Show alert for the current user
             couponManager.showReferralCouponAlert();
+            trackReferralComplete();
           }
         }
       });
@@ -91,6 +101,8 @@ export default function App() {
   useEffect(() => {
     if (game.showLevelUp && user) {
       couponManager.savePointsToFirestore();
+      setShowSaveToast(true);
+      setTimeout(() => setShowSaveToast(false), 2500);
     }
   }, [game.showLevelUp, user, couponManager.savePointsToFirestore]);
 
@@ -127,6 +139,18 @@ export default function App() {
     );
   }
 
+  // Track screen views
+  useEffect(() => {
+    if (isLoading) return;
+    if (showLanding) {
+      trackScreenView('landing');
+    } else if (!isAuthenticated) {
+      trackScreenView('login');
+    } else {
+      trackScreenView('game');
+    }
+  }, [isLoading, showLanding, isAuthenticated]);
+
   // Show landing page
   if (showLanding) {
     return (
@@ -155,7 +179,7 @@ export default function App() {
         <div className={styles.headerLeft}>
           <button
             className={styles.rankingButton}
-            onClick={() => setShowRankingView(true)}
+            onClick={() => { trackRankingViewOpen(); setShowRankingView(true); }}
           >
             🏆
           </button>
@@ -169,7 +193,7 @@ export default function App() {
         <div className={styles.headerRight}>
           <button
             className={styles.couponButton}
-            onClick={() => setShowCouponView(true)}
+            onClick={() => { trackCouponViewOpen(); setShowCouponView(true); }}
           >
             🎟️
             {couponManager.availableCoupons.length > 0 && (
@@ -191,6 +215,8 @@ export default function App() {
       <BreadProgressPanel
         level={game.level}
         moves={game.moves}
+        score={game.score}
+        targetScore={game.targetScore}
         getProgressForBread={couponManager.getProgressForBread}
         getCouponsForBread={couponManager.getCouponsForBread}
         onBreadClick={() => setShowCouponView(true)}
@@ -221,7 +247,7 @@ export default function App() {
 
       {/* Invite bubble */}
       {showInviteBubble && referral.referralLink && (
-        <div className={styles.inviteBubble} onClick={() => setShowInviteModal(true)}>
+        <div className={styles.inviteBubble} onClick={() => { trackInviteBubbleClick(); setShowInviteModal(true); }}>
           <img src="/breads/plain.png" alt="" className={styles.bubbleImage} />
           <span>{t('inviteBubble')}</span>
           <button
@@ -275,7 +301,7 @@ export default function App() {
         </div>
       )}
 
-      {game.showCombo && <ComboView key={game.comboCount} comboCount={game.comboCount} />}
+      {game.showCombo && <ComboView key={game.comboCount} comboCount={game.comboCount} totalPoints={couponManager.totalPoints} />}
 
       {game.gameState === 'gameOver' && (
         <GameOverView
@@ -345,8 +371,11 @@ export default function App() {
       )}
 
       {showSaveToast && (
-        <div className={styles.saveToast}>
-          ✓ {t('pointsSaved')}
+        <div className={styles.saveToastOverlay}>
+          <div className={styles.saveToastPaper}>
+            <div className={styles.saveToastIcon}>&#128221;</div>
+            <div className={styles.saveToastText}>{t('pointsSaved')}</div>
+          </div>
         </div>
       )}
     </div>

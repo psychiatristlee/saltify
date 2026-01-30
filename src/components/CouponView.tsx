@@ -5,6 +5,7 @@ import { BreadPoints } from '../hooks/useCouponManager';
 import { useNaverMap, openNaverMapPlace } from '../hooks/useNaverMap';
 import { validateBranchPassword } from '../services/admin';
 import { hasUsedCouponToday } from '../services/coupon';
+import { trackCouponUsed } from '../services/analytics';
 import { useLanguage } from '../contexts/LanguageContext';
 import { TranslationKey } from '../lib/i18n';
 import styles from './CouponView.module.css';
@@ -24,10 +25,14 @@ interface CouponManager {
   totalPoints: number;
   availableCoupons: Coupon[];
   userId: string | null;
+  upgradeResult: { success: boolean; breadType?: BreadType } | null;
+  showUpgradeResult: boolean;
   getProgressForBread: (breadType: BreadType) => number;
   getRemainingForBread: (breadType: BreadType) => number;
   getCouponsForBread: (breadType: BreadType) => Coupon[];
   useCoupon: (couponId: string, branchId?: string, branchName?: string) => Promise<boolean>;
+  attemptUpgrade: (couponIds: string[]) => Promise<{ success: boolean; breadType?: BreadType }>;
+  dismissAlert: () => void;
 }
 
 interface Props {
@@ -48,10 +53,36 @@ export default function CouponView({ couponManager, level, score, targetScore, o
   const [isCheckingDaily, setIsCheckingDaily] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [upgradeSelectedIds, setUpgradeSelectedIds] = useState<Set<string>>(new Set());
+  const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
 
   useNaverMap(mapRef);
+
+  const availableCouponsForUpgrade = couponManager.availableCoupons;
+  const canUpgrade = availableCouponsForUpgrade.length >= 3;
+
+  const toggleUpgradeSelect = (couponId: string) => {
+    setUpgradeSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(couponId)) {
+        next.delete(couponId);
+      } else if (next.size < 3) {
+        next.add(couponId);
+      }
+      return next;
+    });
+  };
+
+  const handleUpgrade = async () => {
+    setShowUpgradeConfirm(false);
+    setIsUpgrading(true);
+    await couponManager.attemptUpgrade(Array.from(upgradeSelectedIds));
+    setIsUpgrading(false);
+    setUpgradeSelectedIds(new Set());
+  };
 
   const handleUseCoupon = async (coupon: Coupon) => {
     if (!couponManager.userId) return;
@@ -82,6 +113,9 @@ export default function CouponView({ couponManager, level, score, targetScore, o
 
     const couponName = `${t(BREAD_I18N[selectedCoupon.breadType].name)} ${t('onePlusOneCoupon')}`;
     const success = await couponManager.useCoupon(selectedCoupon.id, branch.id, branch.name);
+    if (success) {
+      trackCouponUsed(String(selectedCoupon.breadType), branch.name);
+    }
     setSelectedCoupon(null);
     setPassword('');
     setPasswordError(false);
@@ -163,6 +197,69 @@ export default function CouponView({ couponManager, level, score, targetScore, o
             </div>
           </div>
 
+          {/* Upgrade (Gacha) Section */}
+          <div className={styles.upgradeSection}>
+            <div className={styles.upgradeHeader}>
+              <span className={styles.upgradeIcon}>⚗️</span>
+              <span className={styles.upgradeTitleText}>{t('upgradeTitle')}</span>
+            </div>
+            <p className={styles.upgradeDesc}>{t('upgradeDesc')}</p>
+            <p className={styles.upgradeChance}>{t('upgradeChance')}</p>
+
+            {!canUpgrade ? (
+              <p className={styles.upgradeNeedMore}>{t('upgradeNeedMore')}</p>
+            ) : (
+              <>
+                <div className={styles.upgradeSelectLabel}>
+                  <span>{t('upgradeSelectCoupons')}</span>
+                  <span className={styles.upgradeSelectCount}>
+                    {upgradeSelectedIds.size}/3{t('upgradeSelected')}
+                  </span>
+                </div>
+                <div className={styles.upgradeList}>
+                  {availableCouponsForUpgrade.map((coupon) => {
+                    const isSelected = upgradeSelectedIds.has(coupon.id);
+                    const couponBreadInfo = BREAD_DATA[coupon.breadType];
+                    const couponI18n = BREAD_I18N[coupon.breadType];
+                    const daysLeft = getDaysUntilExpiration(coupon);
+
+                    return (
+                      <div
+                        key={coupon.id}
+                        className={isSelected ? styles.upgradeCouponRowSelected : styles.upgradeCouponRow}
+                        onClick={() => toggleUpgradeSelect(coupon.id)}
+                      >
+                        <img
+                          src={couponBreadInfo.image}
+                          alt=""
+                          className={styles.upgradeCouponImage}
+                        />
+                        <div className={styles.upgradeCouponInfo}>
+                          <span className={styles.upgradeCouponName}>
+                            {t(couponI18n.name)} {t('onePlusOneCoupon')}
+                          </span>
+                          <span className={styles.upgradeCouponExpiry}>
+                            D-{daysLeft}
+                          </span>
+                        </div>
+                        <div className={isSelected ? styles.upgradeCheckSelected : styles.upgradeCheck}>
+                          {isSelected ? '✓' : ''}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button
+                  className={styles.upgradeButton}
+                  disabled={upgradeSelectedIds.size !== 3 || isUpgrading}
+                  onClick={() => setShowUpgradeConfirm(true)}
+                >
+                  {isUpgrading ? t('processing') : `⚗️ ${t('upgradeButton')}`}
+                </button>
+              </>
+            )}
+          </div>
+
           {/* Coupon history */}
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>{t('couponHistory')}</h3>
@@ -194,7 +291,7 @@ export default function CouponView({ couponManager, level, score, targetScore, o
                           {t(couponI18n.name)} {t('onePlusOneCoupon')}
                         </span>
                         <span className={styles.couponMeta}>
-                          {coupon.source === 'referral' ? t('referralReward') : t('gameEarned')}
+                          {coupon.source === 'referral' ? t('referralReward') : coupon.source === 'upgrade' ? t('upgradeSource') : t('gameEarned')}
                         </span>
                         <span className={isInactive ? styles.couponMeta : styles.couponExpiry}>
                           {t('expiryDate')}: {new Date(coupon.expiresAt).toLocaleDateString()}
@@ -317,6 +414,61 @@ export default function CouponView({ couponManager, level, score, targetScore, o
           <div className={styles.confirmOverlay}>
             <div className={styles.confirmBox}>
               <p>{t('loading')}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Upgrade confirm */}
+        {showUpgradeConfirm && (
+          <div className={styles.confirmOverlay}>
+            <div className={styles.confirmBox}>
+              <p>⚗️ {t('upgradeTitle')}</p>
+              <p className={styles.couponUsageNote}>{t('upgradeConfirm')}</p>
+              <div className={styles.confirmButtons}>
+                <button onClick={() => setShowUpgradeConfirm(false)}>{t('cancel')}</button>
+                <button
+                  className={styles.confirmOk}
+                  onClick={handleUpgrade}
+                  style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)' }}
+                >
+                  {t('upgradeButton')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Upgrade result */}
+        {couponManager.showUpgradeResult && couponManager.upgradeResult && (
+          <div className={styles.upgradeResultOverlay}>
+            <div className={styles.upgradeResultBox}>
+              <div className={styles.upgradeResultIcon}>
+                {couponManager.upgradeResult.success ? '✨' : '💨'}
+              </div>
+              <div className={couponManager.upgradeResult.success ? styles.upgradeResultTitleSuccess : styles.upgradeResultTitleFail}>
+                {couponManager.upgradeResult.success ? t('upgradeSuccess') : t('upgradeFail')}
+              </div>
+              <p className={styles.upgradeResultMsg}>
+                {couponManager.upgradeResult.success ? t('upgradeSuccessMsg') : t('upgradeFailMsg')}
+              </p>
+              {couponManager.upgradeResult.success && couponManager.upgradeResult.breadType !== undefined && (
+                <div className={styles.upgradeResultCoupon}>
+                  <img
+                    src={BREAD_DATA[couponManager.upgradeResult.breadType].image}
+                    alt=""
+                    className={styles.upgradeResultCouponImage}
+                  />
+                  <span className={styles.upgradeResultCouponName}>
+                    {t(BREAD_I18N[couponManager.upgradeResult.breadType].name)} {t('onePlusOneCoupon')}
+                  </span>
+                </div>
+              )}
+              <button
+                className={couponManager.upgradeResult.success ? styles.upgradeResultButtonSuccess : styles.upgradeResultButtonFail}
+                onClick={couponManager.dismissAlert}
+              >
+                {t('confirm')}
+              </button>
             </div>
           </div>
         )}

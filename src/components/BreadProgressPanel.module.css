@@ -52,6 +52,41 @@
   flex-shrink: 0;
 }
 
+.levelRadial {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+}
+
+.levelSvg {
+  transform: rotate(-90deg);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.levelProgressCircle {
+  transition: stroke-dashoffset 0.6s ease-out;
+}
+
+.levelInner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.levelNum {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #FF8C00;
+  line-height: 1;
+}
+
 .breadName {
   font-size: 9px;
   color: #666;

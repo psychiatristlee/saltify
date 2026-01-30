@@ -65,6 +65,13 @@
   color: #333;
 }
 
+.savedMessage {
+  font-size: 0.8125rem;
+  color: #4CAF50;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
 .restartButton {
   width: 100%;
   padding: 14px;

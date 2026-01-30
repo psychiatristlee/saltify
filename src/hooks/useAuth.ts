@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { authService, User } from '../services/auth';
 import { syncUserProfile, deleteUserData } from '../services/score';
 import { t, getDefaultLanguage } from '../lib/i18n';
+import { trackLogin, trackLogout, trackAccountDelete } from '../services/analytics';
 
 interface AuthState {
   user: User | null;
@@ -33,6 +34,7 @@ export function useAuth() {
     try {
       const user = await authService.signInWithGoogle();
       setState({ user, isLoading: false, error: null });
+      trackLogin('google');
       return user;
     } catch (error) {
       const message = error instanceof Error ? error.message : t('loginFailed', getDefaultLanguage());
@@ -46,6 +48,7 @@ export function useAuth() {
     try {
       const user = await authService.signInWithKakao();
       setState({ user, isLoading: false, error: null });
+      trackLogin('kakao');
       return user;
     } catch (error) {
       const message = error instanceof Error ? error.message : t('kakaoLoginFailed', getDefaultLanguage());
@@ -58,6 +61,7 @@ export function useAuth() {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
       await authService.signOut();
+      trackLogout();
       setState({ user: null, isLoading: false, error: null });
     } catch (error) {
       const message = error instanceof Error ? error.message : t('logoutFailed', getDefaultLanguage());
@@ -76,6 +80,7 @@ export function useAuth() {
       await deleteUserData(currentUser.id);
       // Then delete the Firebase Auth account
       await authService.deleteAccount();
+      trackAccountDelete();
       // Clear local storage
       localStorage.removeItem('breadPoints');
       localStorage.removeItem('saltify_visited');

@@ -16,6 +16,8 @@ const BREAD_I18N: Record<BreadType, { name: TranslationKey }> = {
 interface BreadProgressPanelProps {
   level: number;
   moves: number;
+  score: number;
+  targetScore: number;
   getProgressForBread: (breadType: BreadType) => number;
   getCouponsForBread: (breadType: BreadType) => { id: string }[];
   onBreadClick?: () => void;
@@ -24,19 +26,44 @@ interface BreadProgressPanelProps {
 export default function BreadProgressPanel({
   level,
   moves,
+  score,
+  targetScore,
   getProgressForBread,
   getCouponsForBread,
   onBreadClick,
 }: BreadProgressPanelProps) {
   const allBreadTypes = getAllBreadTypes();
   const { t } = useLanguage();
+  const levelProgress = Math.min(score / targetScore, 1);
+
+  // Radial progress for level
+  const lvlSize = 48;
+  const lvlStroke = 3.5;
+  const lvlRadius = (lvlSize - lvlStroke) / 2;
+  const lvlCircum = 2 * Math.PI * lvlRadius;
+  const lvlOffset = lvlCircum * (1 - levelProgress);
+  const lvlCenter = lvlSize / 2;
 
   return (
     <div className={styles.container}>
       <div className={styles.statsRow}>
-        <div className={styles.statBox}>
-          <span className={styles.statLabel}>{t('level')}</span>
-          <span className={styles.statValue}>{level}</span>
+        <div className={styles.levelRadial}>
+          <svg width={lvlSize} height={lvlSize} className={styles.levelSvg}>
+            <circle
+              cx={lvlCenter} cy={lvlCenter} r={lvlRadius}
+              fill="none" stroke="#e8d5b0" strokeWidth={lvlStroke}
+            />
+            <circle
+              cx={lvlCenter} cy={lvlCenter} r={lvlRadius}
+              fill="none" stroke="#FF8C00" strokeWidth={lvlStroke}
+              strokeDasharray={lvlCircum} strokeDashoffset={lvlOffset}
+              strokeLinecap="round"
+              className={styles.levelProgressCircle}
+            />
+          </svg>
+          <div className={styles.levelInner}>
+            <span className={styles.levelNum}>{level}</span>
+          </div>
         </div>
         <div className={styles.statBox}>
           <span className={styles.statLabel}>{t('remainingMoves')}</span>

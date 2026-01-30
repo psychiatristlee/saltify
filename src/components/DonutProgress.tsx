@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import styles from './DonutProgress.module.css';
 
 interface DonutProgressProps {
@@ -23,8 +24,24 @@ export default function DonutProgress({
   const center = size / 2;
   const imageSize = size - strokeWidth * 2 - 8;
 
+  const prevProgress = useRef(progress);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    if (progress > prevProgress.current) {
+      setAnimating(true);
+      const timer = setTimeout(() => setAnimating(false), 500);
+      prevProgress.current = progress;
+      return () => clearTimeout(timer);
+    }
+    prevProgress.current = progress;
+  }, [progress]);
+
   return (
-    <div className={styles.container} style={{ width: size, height: size }}>
+    <div
+      className={`${styles.container} ${animating ? styles.pulse : ''}`}
+      style={{ width: size, height: size }}
+    >
       <svg width={size} height={size} className={styles.svg}>
         {/* Background circle */}
         <circle
