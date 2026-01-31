@@ -4,7 +4,7 @@ import styles from './ComboView.module.css';
 
 interface Props {
   comboCount: number;
-  totalPoints: number;
+  comboScore: number;
 }
 
 // Generate random particles with pre-calculated positions
@@ -22,7 +22,7 @@ function generateParticles(count: number) {
   });
 }
 
-export default function ComboView({ comboCount, totalPoints }: Props) {
+export default function ComboView({ comboCount, comboScore }: Props) {
   const { t } = useLanguage();
   // More particles for higher combos
   const particleCount = Math.min(comboCount * 6, 30);
@@ -68,7 +68,9 @@ export default function ComboView({ comboCount, totalPoints }: Props) {
         <div className={styles.textShadow}>{comboCount}x</div>
         <div className={styles.text}>{comboCount}x</div>
         <div className={styles.subText}>{t('combo')}</div>
-        <div className={styles.pointsText}>{totalPoints.toLocaleString()}P</div>
+        {comboScore > 0 && (
+          <div className={styles.pointsText}>+{comboScore.toLocaleString()}P</div>
+        )}
       </div>
 
       {/* Ring explosion */}

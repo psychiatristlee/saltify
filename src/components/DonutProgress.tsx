@@ -8,6 +8,7 @@ interface DonutProgressProps {
   imageUrl: string;
   color: string;
   couponCount?: number;
+  nearCoupon?: boolean;
 }
 
 export default function DonutProgress({
@@ -17,6 +18,7 @@ export default function DonutProgress({
   imageUrl,
   color,
   couponCount = 0,
+  nearCoupon = false,
 }: DonutProgressProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -39,7 +41,7 @@ export default function DonutProgress({
 
   return (
     <div
-      className={`${styles.container} ${animating ? styles.pulse : ''}`}
+      className={`${styles.container}${animating ? ` ${styles.pulse}` : nearCoupon ? ` ${styles.nearCoupon}` : ''}`}
       style={{ width: size, height: size }}
     >
       <svg width={size} height={size} className={styles.svg}>

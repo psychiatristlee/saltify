@@ -8,12 +8,12 @@ interface Props {
   type: SpecialItemType;
 }
 
-function generateParticles(count: number) {
+function generateParticles(count: number, offset: number = 0) {
   return Array.from({ length: count }, (_, i) => {
     const angle = ((360 / count) * i + Math.random() * 20) * (Math.PI / 180);
     const distance = 40 + Math.random() * 80;
     return {
-      id: i,
+      id: offset + i,
       tx: Math.cos(angle) * distance,
       ty: Math.sin(angle) * distance,
       size: 6 + Math.random() * 10,
@@ -23,8 +23,9 @@ function generateParticles(count: number) {
 }
 
 export default function ExplosionEffect({ x, y, type }: Props) {
-  const particleCount = type === SpecialItemType.MilkTea ? 24 : type === SpecialItemType.Choco ? 16 : 12;
-  const particles = useMemo(() => generateParticles(particleCount), [particleCount]);
+  const baseCount = type === SpecialItemType.MilkTea ? 24 : type === SpecialItemType.Choco ? 16 : 12;
+  const particles = useMemo(() => generateParticles(baseCount), [baseCount]);
+  const secondaryParticles = useMemo(() => generateParticles(baseCount, 500), [baseCount]);
 
   const typeClass =
     type === SpecialItemType.MilkTea
@@ -41,7 +42,7 @@ export default function ExplosionEffect({ x, y, type }: Props) {
       {/* Central flash */}
       <div className={styles.flash} />
 
-      {/* Particles */}
+      {/* Primary wave particles */}
       {particles.map((p) => (
         <div
           key={p.id}
@@ -55,8 +56,28 @@ export default function ExplosionEffect({ x, y, type }: Props) {
         />
       ))}
 
-      {/* Ring */}
+      {/* Secondary wave particles (delayed) */}
+      {secondaryParticles.map((p) => (
+        <div
+          key={p.id}
+          className={`${styles.particle} ${styles.secondaryWave}`}
+          style={{
+            '--tx': `${p.tx * 1.3}px`,
+            '--ty': `${p.ty * 1.3}px`,
+            '--size': `${p.size * 0.8}px`,
+            '--delay': `${p.delay + 0.15}s`,
+          } as React.CSSProperties}
+        />
+      ))}
+
+      {/* Inner ring */}
       <div className={styles.ring} />
+
+      {/* Outer ring (larger, delayed) */}
+      <div className={styles.outerRing} />
+
+      {/* Screen flash overlay */}
+      <div className={styles.screenFlash} />
     </div>
   );
 }

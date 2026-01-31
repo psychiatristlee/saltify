@@ -375,6 +375,27 @@ export function hasPossibleMoves(cells: Board): boolean {
   return false;
 }
 
+// Find a possible swap (for hint feature)
+export function findPossibleSwap(cells: Board): { from: Position; to: Position } | null {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      if (col < COLS - 1) {
+        const swapped = swapCells(cells, { row, col }, { row, col: col + 1 });
+        if (findMatches(swapped).length > 0) {
+          return { from: { row, col }, to: { row, col: col + 1 } };
+        }
+      }
+      if (row < ROWS - 1) {
+        const swapped = swapCells(cells, { row, col }, { row: row + 1, col });
+        if (findMatches(swapped).length > 0) {
+          return { from: { row, col }, to: { row: row + 1, col } };
+        }
+      }
+    }
+  }
+  return null;
+}
+
 // Shuffle the board while preserving special items
 export function shuffleBoard(cells: Board, maxAttempts = 10): Board {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {

@@ -7,9 +7,33 @@
   <!-- Homepage / Landing -->
   <url>
     <loc>https://saltify-game.web.app/</loc>
-    <lastmod>2026-01-27</lastmod>
+    <lastmod>2026-01-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+
+  <!-- Menu Section -->
+  <url>
+    <loc>https://saltify-game.web.app/#menu</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Location / Map Section -->
+  <url>
+    <loc>https://saltify-game.web.app/#location</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Game Section -->
+  <url>
+    <loc>https://saltify-game.web.app/#game</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
 
 </urlset>

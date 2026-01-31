@@ -58,64 +58,7 @@ export default function LandingPage({ onStartGame, onAdminClick }: Props) {
       {/* Game CTA Section */}
       <section className={styles.ctaSection}>
         <div className={styles.ctaCard}>
-          <h2 className={styles.ctaTitle}>{t('puzzleTitle')}</h2>
           <p className={styles.ctaDesc}>{t('ctaDesc')}</p>
-          <div className={styles.howToPlay}>
-            <div className={styles.howToPlayItem}>
-              <span className={styles.howToPlayIcon}>🧩</span>
-              <span>{t('howToPlay1')}</span>
-            </div>
-            <div className={styles.howToPlayItem}>
-              <span className={styles.howToPlayIcon}>🎁</span>
-              <span>{t('howToPlay2')}</span>
-            </div>
-            <div className={styles.howToPlayItem}>
-              <span className={styles.howToPlayIcon}>✨</span>
-              <span>{t('howToPlay3')}</span>
-            </div>
-          </div>
-
-          <div className={styles.specialItemsSection}>
-            <div className={styles.specialItemsTitle}>{t('specialItemsGuide')}</div>
-            <div className={styles.specialItemsList}>
-              <div className={styles.specialItem}>
-                <img
-                  src="/brandings/cube-matcha-cream.png"
-                  alt={t('matchaCube')}
-                  className={styles.specialItemImage}
-                />
-                <div className={styles.specialItemInfo}>
-                  <span className={styles.specialItemName}>{t('matchaCube')}</span>
-                  <span className={styles.specialItemRule}>{t('matchaCubeRule')}</span>
-                  <span className={styles.specialItemEffect}>{t('matchaCubeEffect')}</span>
-                </div>
-              </div>
-              <div className={styles.specialItem}>
-                <img
-                  src="/brandings/cube-choco-cream.png"
-                  alt={t('chocoCream')}
-                  className={styles.specialItemImage}
-                />
-                <div className={styles.specialItemInfo}>
-                  <span className={styles.specialItemName}>{t('chocoCream')}</span>
-                  <span className={styles.specialItemRule}>{t('chocoCreamRule')}</span>
-                  <span className={styles.specialItemEffect}>{t('chocoCreamEffect')}</span>
-                </div>
-              </div>
-              <div className={styles.specialItem}>
-                <img
-                  src="/breads/milktea.png"
-                  alt={t('milkTea')}
-                  className={styles.specialItemImage}
-                />
-                <div className={styles.specialItemInfo}>
-                  <span className={styles.specialItemName}>{t('milkTea')}</span>
-                  <span className={styles.specialItemRule}>{t('milkTeaRule')}</span>
-                  <span className={styles.specialItemEffect}>{t('milkTeaEffect')}</span>
-                </div>
-              </div>
-            </div>
-          </div>
           <button className={styles.ctaButton} onClick={onStartGame}>
             {t('startGame')}
           </button>

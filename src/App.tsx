@@ -11,7 +11,6 @@ import { isNativeApp } from './lib/platform';
 import {
   trackScreenView,
   trackCouponViewOpen,
-  trackRankingViewOpen,
   trackInviteBubbleClick,
   trackLandingStart,
   trackReferralComplete,
@@ -24,10 +23,11 @@ import GameOverView from './components/GameOverView';
 import LevelUpView from './components/LevelUpView';
 import CouponView from './components/CouponView';
 import CouponCelebration from './components/CouponCelebration';
-import RankingView from './components/RankingView';
 import BreadProgressPanel from './components/BreadProgressPanel';
 import InviteButton from './components/InviteButton';
 import AdminView from './components/AdminView';
+import FriendsCharacterView from './components/FriendsCharacterView';
+import ProfileView from './components/ProfileView';
 import styles from './App.module.css';
 
 export default function App() {
@@ -37,12 +37,13 @@ export default function App() {
   const game = useGameViewModel(couponManager.addCrushedBread);
   const referral = useReferral(user?.id || null);
   const [showCouponView, setShowCouponView] = useState(false);
-  const [showRankingView, setShowRankingView] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showAdminView, setShowAdminView] = useState(false);
   const [showInviteBubble, setShowInviteBubble] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showSaveToast, setShowSaveToast] = useState(false);
+  const [showFriendsView, setShowFriendsView] = useState(false);
+  const [showProfileView, setShowProfileView] = useState(false);
+  const [savedPointsAmount, setSavedPointsAmount] = useState(0);
   const [showLanding, setShowLanding] = useState(() => {
     // Skip landing page on native apps
     if (isNativeApp()) return false;
@@ -60,13 +61,8 @@ export default function App() {
     setShowLanding(false);
   };
 
-  const handleLogout = () => {
-    setShowLogoutConfirm(true);
-  };
-
   const confirmLogout = async () => {
     await signOut();
-    setShowLogoutConfirm(false);
     setShowLanding(true);
   };
 
@@ -82,13 +78,11 @@ export default function App() {
       referralProcessed.current = true;
       referral.processPendingReferral().then(async (result) => {
         if (result.success && referral.pendingReferrerId) {
-          // Give coupon to both referrer and new user in Firestore
           const couponSuccess = await couponManager.addReferralCoupons(
             referral.pendingReferrerId,
             user.id
           );
           if (couponSuccess) {
-            // Show alert for the current user
             couponManager.showReferralCouponAlert();
             trackReferralComplete();
           }
@@ -100,44 +94,32 @@ export default function App() {
   // Save bread points to Firestore when level up
   useEffect(() => {
     if (game.showLevelUp && user) {
-      couponManager.savePointsToFirestore();
-      setShowSaveToast(true);
-      setTimeout(() => setShowSaveToast(false), 2500);
+      const earned = couponManager.levelEarnedRef.current;
+      couponManager.savePointsToFirestore().then(() => {
+        setSavedPointsAmount(earned);
+        setShowSaveToast(true);
+        setTimeout(() => setShowSaveToast(false), 2500);
+        couponManager.resetLevelEarned();
+      });
     }
-  }, [game.showLevelUp, user, couponManager.savePointsToFirestore]);
+  }, [game.showLevelUp, user, couponManager.savePointsToFirestore, couponManager.levelEarnedRef, couponManager.resetLevelEarned]);
 
   // Save score and points to Firestore when game ends
   useEffect(() => {
     if (game.gameState === 'gameOver' && user && !hasRecordedGameOver.current) {
       hasRecordedGameOver.current = true;
-      // Save bread points to Firestore
-      couponManager.savePointsToFirestore();
-      // Save game record
+      couponManager.savePointsToFirestore().then(() => couponManager.resetLevelEarned());
       firestoreScoreService.saveGameRecord({
         userId: user.id,
         score: game.score,
         level: game.level,
         saltBreadCrushed: couponManager.totalPoints,
-      }).then(() => {
-        // Show save toast
-        setShowSaveToast(true);
-        setTimeout(() => setShowSaveToast(false), 2000);
       }).catch(console.error);
     }
-    // Reset flag when game restarts
     if (game.gameState === 'idle' && hasRecordedGameOver.current) {
       hasRecordedGameOver.current = false;
     }
   }, [game.gameState, game.score, game.level, user, couponManager.totalPoints, couponManager.savePointsToFirestore]);
-
-  if (isLoading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <img src="/breads/plain.png" alt={t('loading')} className={styles.loadingIcon} />
-        <p>{t('loading')}</p>
-      </div>
-    );
-  }
 
   // Track screen views
   useEffect(() => {
@@ -151,7 +133,15 @@ export default function App() {
     }
   }, [isLoading, showLanding, isAuthenticated]);
 
-  // Show landing page
+  if (isLoading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <img src="/breads/plain.png" alt={t('loading')} className={styles.loadingIcon} />
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
+
   if (showLanding) {
     return (
       <>
@@ -179,9 +169,9 @@ export default function App() {
         <div className={styles.headerLeft}>
           <button
             className={styles.rankingButton}
-            onClick={() => { trackRankingViewOpen(); setShowRankingView(true); }}
+            onClick={() => setShowFriendsView(true)}
           >
-            🏆
+            👥
           </button>
         </div>
         <img
@@ -202,7 +192,7 @@ export default function App() {
               </span>
             )}
           </button>
-          <button className={styles.profileButton} onClick={handleLogout}>
+          <button className={styles.profileButton} onClick={() => setShowProfileView(true)}>
             {user?.photoURL ? (
               <img src={user.photoURL} alt="" className={styles.profileImg} />
             ) : (
@@ -228,6 +218,10 @@ export default function App() {
           selectedPosition={game.selectedPosition}
           matchedPositions={game.matchedPositions}
           isAnimating={game.isAnimating}
+          moves={game.moves}
+          feverActive={game.isFeverActive}
+          isBigMatch={game.isBigMatch}
+          comboCount={game.comboCount}
           onCellTap={game.selectCell}
           onSwap={game.trySwap}
         />
@@ -301,11 +295,31 @@ export default function App() {
         </div>
       )}
 
-      {game.showCombo && <ComboView key={game.comboCount} comboCount={game.comboCount} totalPoints={couponManager.totalPoints} />}
+      {/* Bonus moves float */}
+      {game.showBonusMoves && (
+        <div className={styles.bonusMovesFloat}>+{game.bonusMoves}</div>
+      )}
+
+      {/* Fever indicator */}
+      {game.isFeverActive && (
+        <div className={styles.feverIndicator}>
+          <span className={styles.feverEmoji}>🔥</span>
+          <span>{t('feverMode')} {t('feverScore')}</span>
+          <span className={styles.feverCount}>{game.feverMovesLeft}</span>
+        </div>
+      )}
+
+      {/* Fever start flash */}
+      {game.showFeverStart && (
+        <div className={styles.feverStartOverlay}>
+          <div className={styles.feverStartText}>🔥 {t('feverMode')} 🔥</div>
+        </div>
+      )}
+
+      {game.showCombo && <ComboView key={game.comboCount} comboCount={game.comboCount} comboScore={game.comboScore} />}
 
       {game.gameState === 'gameOver' && (
         <GameOverView
-          score={game.score}
           totalPoints={couponManager.totalPoints}
           availableCouponsCount={couponManager.availableCoupons.length}
           onRestart={game.startNewGame}
@@ -313,7 +327,7 @@ export default function App() {
       )}
 
       {game.showLevelUp && (
-        <LevelUpView level={game.level} score={game.score} />
+        <LevelUpView level={game.level} />
       )}
 
       {couponManager.showCouponAlert && couponManager.newCouponBreadType !== null && (
@@ -332,42 +346,32 @@ export default function App() {
           score={game.score}
           targetScore={game.targetScore}
           onClose={() => setShowCouponView(false)}
+        />
+      )}
+
+
+      {showFriendsView && user && (
+        <FriendsCharacterView
+          userId={user.id}
+          onClose={() => setShowFriendsView(false)}
+        />
+      )}
+
+      {showProfileView && user && (
+        <ProfileView
+          userName={user.displayName || ''}
+          photoURL={user.photoURL || null}
+          onLogout={() => {
+            setShowProfileView(false);
+            confirmLogout();
+          }}
           onDeleteAccount={async () => {
             await deleteAccount();
-            setShowCouponView(false);
+            setShowProfileView(false);
             setShowLanding(true);
           }}
+          onClose={() => setShowProfileView(false)}
         />
-      )}
-
-      {showRankingView && (
-        <RankingView
-          currentUserId={user?.id || null}
-          onClose={() => setShowRankingView(false)}
-        />
-      )}
-
-      {showLogoutConfirm && (
-        <div className={styles.alertOverlay}>
-          <div className={styles.alertBox}>
-            <h3>{t('logout')}</h3>
-            <p>{t('logoutConfirm')}</p>
-            <div className={styles.alertButtons}>
-              <button
-                className={styles.alertCancelButton}
-                onClick={() => setShowLogoutConfirm(false)}
-              >
-                {t('cancel')}
-              </button>
-              <button
-                className={styles.alertConfirmButton}
-                onClick={confirmLogout}
-              >
-                {t('logout')}
-              </button>
-            </div>
-          </div>
-        </div>
       )}
 
       {showSaveToast && (
@@ -375,6 +379,9 @@ export default function App() {
           <div className={styles.saveToastPaper}>
             <div className={styles.saveToastIcon}>&#128221;</div>
             <div className={styles.saveToastText}>{t('pointsSaved')}</div>
+            {savedPointsAmount > 0 && (
+              <div className={styles.saveToastPoints}>{savedPointsAmount.toLocaleString()}P</div>
+            )}
           </div>
         </div>
       )}

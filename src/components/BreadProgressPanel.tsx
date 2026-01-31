@@ -34,37 +34,36 @@ export default function BreadProgressPanel({
 }: BreadProgressPanelProps) {
   const allBreadTypes = getAllBreadTypes();
   const { t } = useLanguage();
-  const levelProgress = Math.min(score / targetScore, 1);
-
-  // Radial progress for level
-  const lvlSize = 48;
-  const lvlStroke = 3.5;
-  const lvlRadius = (lvlSize - lvlStroke) / 2;
-  const lvlCircum = 2 * Math.PI * lvlRadius;
-  const lvlOffset = lvlCircum * (1 - levelProgress);
-  const lvlCenter = lvlSize / 2;
 
   return (
     <div className={styles.container}>
       <div className={styles.statsRow}>
-        <div className={styles.levelRadial}>
-          <svg width={lvlSize} height={lvlSize} className={styles.levelSvg}>
-            <circle
-              cx={lvlCenter} cy={lvlCenter} r={lvlRadius}
-              fill="none" stroke="#e8d5b0" strokeWidth={lvlStroke}
-            />
-            <circle
-              cx={lvlCenter} cy={lvlCenter} r={lvlRadius}
-              fill="none" stroke="#FF8C00" strokeWidth={lvlStroke}
-              strokeDasharray={lvlCircum} strokeDashoffset={lvlOffset}
-              strokeLinecap="round"
-              className={styles.levelProgressCircle}
-            />
-          </svg>
-          <div className={styles.levelInner}>
-            <span className={styles.levelNum}>{level}</span>
-          </div>
-        </div>
+        {(() => {
+          const radius = 19;
+          const circumference = 2 * Math.PI * radius;
+          const progress = Math.min(score / targetScore, 1);
+          const dashOffset = circumference * (1 - progress);
+          return (
+            <div className={styles.levelRadial}>
+              <svg width={48} height={48} className={styles.levelSvg}>
+                <circle cx={24} cy={24} r={radius} fill="none" stroke="#ede0cc" strokeWidth={4} />
+                <circle
+                  cx={24} cy={24} r={radius}
+                  fill="none"
+                  stroke="#FF8C00"
+                  strokeWidth={4}
+                  strokeDasharray={circumference}
+                  strokeDashoffset={dashOffset}
+                  strokeLinecap="round"
+                  className={styles.levelProgressCircle}
+                />
+              </svg>
+              <div className={styles.levelInner}>
+                <span className={styles.levelNum}>{level}</span>
+              </div>
+            </div>
+          );
+        })()}
         <div className={styles.statBox}>
           <span className={styles.statLabel}>{t('remainingMoves')}</span>
           <span className={moves <= 5 ? styles.statValueLow : styles.statValue}>
@@ -92,6 +91,7 @@ export default function BreadProgressPanel({
                 imageUrl={breadInfo.image}
                 color={breadInfo.color}
                 couponCount={coupons.length}
+                nearCoupon={progress >= 0.8 && progress < 1.0}
               />
               <span className={styles.breadName}>{t(BREAD_I18N[breadType].name)}</span>
             </div>

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { fetchRankings, UserRanking } from '../services/ranking';
-import { BREAD_DATA } from '../models/BreadType';
 import { useLanguage } from '../contexts/LanguageContext';
 import styles from './RankingView.module.css';
 
@@ -75,16 +74,12 @@ export default function RankingView({ currentUserId, onClose }: Props) {
                   </div>
 
                   <div className={styles.breadCounts}>
-                    {user.breadCounts.map(({ breadType, count }) => (
-                      <div key={breadType} className={styles.breadCount}>
-                        <img
-                          src={BREAD_DATA[breadType].image}
-                          alt={BREAD_DATA[breadType].nameKo}
-                          className={styles.breadIcon}
-                        />
-                        <span className={styles.breadCountNum}>{count}</span>
-                      </div>
-                    ))}
+                    <div className={styles.breadCount}>
+                      <span className={styles.breadTotalIcon}>🥖</span>
+                      <span className={styles.breadCountNum}>
+                        {user.breadCounts.reduce((sum, { count }) => sum + count, 0)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}

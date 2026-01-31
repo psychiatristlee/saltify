@@ -1,13 +1,13 @@
 .container {
   width: 100%;
-  padding: 4px 12px 8px;
+  padding: 2px 12px 4px;
 }
 
 .statsRow {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 4px;
 }
 
 .statBox {

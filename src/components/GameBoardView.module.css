@@ -12,3 +12,60 @@
   display: flex;
   gap: 3px;
 }
+
+/* Screen shake on big matches */
+.boardShake {
+  animation: boardShake 0.25s ease-out;
+}
+
+@keyframes boardShake {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(-3px, -2px); }
+  30% { transform: translate(3px, 2px); }
+  45% { transform: translate(-2px, 1px); }
+  60% { transform: translate(2px, -1px); }
+  75% { transform: translate(-1px, 1px); }
+}
+
+/* Skill targeting mode */
+.skillTargeting {
+  cursor: crosshair;
+  border-color: #FF6B35;
+  box-shadow: 0 0 12px rgba(255, 107, 53, 0.4);
+}
+
+/* Feature 2: Low moves urgency */
+.urgentLow {
+  animation: urgentPulse 1.5s ease-in-out infinite;
+}
+
+.urgentCritical {
+  animation: urgentPulse 0.8s ease-in-out infinite;
+  box-shadow: 0 0 16px rgba(220, 53, 69, 0.4);
+}
+
+@keyframes urgentPulse {
+  0%, 100% {
+    border-color: rgba(139, 69, 19, 0.3);
+  }
+  50% {
+    border-color: rgba(220, 53, 69, 0.7);
+  }
+}
+
+/* Feature 3: Fever mode golden glow */
+.feverGlow {
+  animation: feverPulse 1s ease-in-out infinite;
+  border-color: #FFD700;
+}
+
+@keyframes feverPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+    border-color: #FFD700;
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    border-color: #FFA500;
+  }
+}

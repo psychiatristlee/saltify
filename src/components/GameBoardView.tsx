@@ -12,6 +12,10 @@ interface Props {
   selectedPosition: Position | null;
   matchedPositions: Position[];
   isAnimating: boolean;
+  moves: number;
+  feverActive: boolean;
+  isBigMatch?: boolean;
+  comboCount?: number;
   onCellTap: (row: number, col: number) => void;
   onSwap: (from: Position, to: Position) => void;
 }
@@ -43,6 +47,10 @@ export default function GameBoardView({
   selectedPosition,
   matchedPositions,
   isAnimating,
+  moves,
+  feverActive,
+  isBigMatch = false,
+  comboCount = 0,
   onCellTap,
   onSwap,
 }: Props) {
@@ -137,7 +145,7 @@ export default function GameBoardView({
 
     const timer = setTimeout(() => {
       setSpecialExplosions([]);
-    }, 600);
+    }, 800);
 
     return () => clearTimeout(timer);
   }, [specialExplosions]);
@@ -257,7 +265,7 @@ export default function GameBoardView({
     <>
       <div
         ref={boardRef}
-        className={styles.board}
+        className={`${styles.board}${isBigMatch ? ` ${styles.boardShake}` : ''}${feverActive ? ` ${styles.feverGlow}` : moves <= 3 ? ` ${styles.urgentCritical}` : moves <= 5 ? ` ${styles.urgentLow}` : ''}`}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
@@ -298,6 +306,7 @@ export default function GameBoardView({
           x={effect.x}
           y={effect.y}
           color={effect.color}
+          comboLevel={comboCount}
           onComplete={() => removePopEffect(effect.id)}
         />
       ))}

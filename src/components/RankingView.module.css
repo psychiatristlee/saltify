@@ -189,10 +189,9 @@
   border-radius: 8px;
 }
 
-.breadIcon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
+.breadTotalIcon {
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .breadCountNum {

@@ -18,23 +18,26 @@ interface Props {
   x: number;
   y: number;
   color?: string;
+  comboLevel?: number;
   onComplete?: () => void;
 }
 
 const BREAD_COLORS = ['#F5DEB3', '#DEB887', '#D2B48C', '#C4A87D', '#E8D4A8'];
 const FIREWORK_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
 
-export default function ParticleEffect({ type, x, y, color, onComplete }: Props) {
+export default function ParticleEffect({ type, x, y, color, comboLevel = 0, onComplete }: Props) {
   const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
     const newParticles: Particle[] = [];
+    const comboMultiplier = Math.min(1 + comboLevel * 0.3, 2.5);
 
     if (type === 'pop') {
-      // Bread crumb particles
-      for (let i = 0; i < 12; i++) {
-        const angle = (Math.PI * 2 * i) / 12 + Math.random() * 0.5;
-        const speed = 2 + Math.random() * 4;
+      // Bread crumb particles (scaled by combo)
+      const crumbCount = Math.round(16 * comboMultiplier);
+      for (let i = 0; i < crumbCount; i++) {
+        const angle = (Math.PI * 2 * i) / crumbCount + Math.random() * 0.5;
+        const speed = (2 + Math.random() * 4) * Math.min(comboMultiplier, 1.5);
         newParticles.push({
           id: i,
           x: 0,
@@ -47,10 +50,11 @@ export default function ParticleEffect({ type, x, y, color, onComplete }: Props)
           type: 'crumb',
         });
       }
-      // Sparkles
-      for (let i = 0; i < 6; i++) {
+      // Sparkles (scaled by combo)
+      const sparkleCount = Math.round(10 * comboMultiplier);
+      for (let i = 0; i < sparkleCount; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = 3 + Math.random() * 3;
+        const speed = (3 + Math.random() * 3) * Math.min(comboMultiplier, 1.5);
         newParticles.push({
           id: 100 + i,
           x: 0,
@@ -64,7 +68,6 @@ export default function ParticleEffect({ type, x, y, color, onComplete }: Props)
         });
       }
     } else if (type === 'firework') {
-      // Firework particles
       for (let i = 0; i < 30; i++) {
         const angle = (Math.PI * 2 * i) / 30 + Math.random() * 0.3;
         const speed = 4 + Math.random() * 6;
@@ -89,7 +92,7 @@ export default function ParticleEffect({ type, x, y, color, onComplete }: Props)
     }, type === 'pop' ? 600 : 1200);
 
     return () => clearTimeout(timeout);
-  }, [type, color, onComplete]);
+  }, [type, color, comboLevel, onComplete]);
 
   return (
     <div className={styles.container} style={{ left: x, top: y }}>
@@ -106,6 +109,7 @@ export default function ParticleEffect({ type, x, y, color, onComplete }: Props)
           } as React.CSSProperties}
         />
       ))}
+      {type === 'pop' && <div className={styles.shockwave} />}
     </div>
   );
 }

@@ -41,18 +41,15 @@ interface Props {
   score: number;
   targetScore: number;
   onClose: () => void;
-  onDeleteAccount: () => Promise<void>;
 }
 
-export default function CouponView({ couponManager, level, score, targetScore, onClose, onDeleteAccount }: Props) {
+export default function CouponView({ couponManager, level, score, targetScore, onClose }: Props) {
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
   const [usedMessage, setUsedMessage] = useState('');
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState(false);
   const [alreadyUsedToday, setAlreadyUsedToday] = useState(false);
   const [isCheckingDaily, setIsCheckingDaily] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [upgradeSelectedIds, setUpgradeSelectedIds] = useState<Set<string>>(new Set());
   const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
@@ -61,7 +58,7 @@ export default function CouponView({ couponManager, level, score, targetScore, o
 
   useNaverMap(mapRef);
 
-  const availableCouponsForUpgrade = couponManager.availableCoupons;
+  const availableCouponsForUpgrade = couponManager.availableCoupons.filter((c) => c.source !== 'upgrade');
   const canUpgrade = availableCouponsForUpgrade.length >= 3;
 
   const toggleUpgradeSelect = (couponId: string) => {
@@ -136,12 +133,12 @@ export default function CouponView({ couponManager, level, score, targetScore, o
         </header>
 
         <div className={styles.content}>
-          {/* 레벨 프로그레스 */}
+          {/* Level progress */}
           <div className={styles.levelSection}>
             <div className={styles.levelHeader}>
-              <span className={styles.levelBadge}>⭐ Lv.{level}</span>
+              <span className={styles.levelBadge}>{t('level')} {level}</span>
               <span className={styles.levelScore}>
-                {score.toLocaleString()} / {targetScore.toLocaleString()}
+                {score.toLocaleString()} / {targetScore.toLocaleString()}P
               </span>
             </div>
             <div className={styles.levelProgressBg}>
@@ -343,13 +340,6 @@ export default function CouponView({ couponManager, level, score, targetScore, o
             </button>
           </div>
 
-          {/* Delete account */}
-          <button
-            className={styles.deleteAccountLink}
-            onClick={() => setShowDeleteConfirm(true)}
-          >
-            {t('deleteAccount')}
-          </button>
         </div>
 
         {/* Confirm dialog */}
@@ -473,34 +463,6 @@ export default function CouponView({ couponManager, level, score, targetScore, o
           </div>
         )}
 
-        {/* Delete account confirm */}
-        {showDeleteConfirm && (
-          <div className={styles.confirmOverlay}>
-            <div className={styles.confirmBox}>
-              <p className={styles.deleteWarningTitle}>⚠️ {t('deleteAccount')}</p>
-              <p className={styles.deleteWarningText}>{t('deleteWarning')}</p>
-              <div className={styles.confirmButtons}>
-                <button onClick={() => setShowDeleteConfirm(false)}>{t('cancel')}</button>
-                <button
-                  className={styles.deleteConfirmButton}
-                  onClick={async () => {
-                    setIsDeleting(true);
-                    try {
-                      await onDeleteAccount();
-                    } catch {
-                      // Error handling
-                    }
-                    setIsDeleting(false);
-                    setShowDeleteConfirm(false);
-                  }}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? t('processing') : t('deleteConfirm')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

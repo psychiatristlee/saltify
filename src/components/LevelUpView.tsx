@@ -5,7 +5,6 @@ import styles from './LevelUpView.module.css';
 
 interface Props {
   level: number;
-  score: number;
 }
 
 interface Firework {
@@ -14,7 +13,7 @@ interface Firework {
   y: number;
 }
 
-export default function LevelUpView({ level, score }: Props) {
+export default function LevelUpView({ level }: Props) {
   const [fireworks, setFireworks] = useState<Firework[]>([]);
   const { t } = useLanguage();
 
@@ -52,7 +51,6 @@ export default function LevelUpView({ level, score }: Props) {
           <span className={styles.levelLabel}>LEVEL</span>
           <span className={styles.levelNumber}>{level}</span>
         </div>
-        <p className={styles.score}>{t('finalScoreLabel')} {score.toLocaleString()}</p>
         <p className={styles.nextLevel}>{t('level')} {level + 1} {t('nextLevelStart')}</p>
       </div>
 

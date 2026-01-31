@@ -40,6 +40,15 @@
   100% { transform: scale(1); }
 }
 
+.nearCoupon {
+  animation: nearCouponPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes nearCouponPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
 .couponBadge {
   position: absolute;
   top: -4px;

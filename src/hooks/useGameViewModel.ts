@@ -24,7 +24,6 @@ const CASCADE_DELAY = 300;
 const COMBO_DISPLAY_DURATION = 1200;
 const LEVEL_UP_DISPLAY_DURATION = 2000;
 
-// Candy Crush style: target score increases with each level
 function getTargetScore(level: number): number {
   return 1000 + (level - 1) * 500;
 }
@@ -41,9 +40,15 @@ interface State {
   comboCount: number;
   showCombo: boolean;
   showLevelUp: boolean;
+  bonusMoves: number;
+  showBonusMoves: boolean;
+  feverMovesLeft: number;
+  showFeverStart: boolean;
+  isBigMatch: boolean;
+  totalCrushCount: number;
+  comboScore: number;
 }
 
-// Callback type for when breads are crushed (called with bread type and count)
 type OnBreadCrushed = (breadType: BreadType, count: number) => void;
 
 export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
@@ -59,19 +64,40 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
     comboCount: 0,
     showCombo: false,
     showLevelUp: false,
+    bonusMoves: 0,
+    showBonusMoves: false,
+    feverMovesLeft: 0,
+    showFeverStart: false,
+    isBigMatch: false,
+    totalCrushCount: 0,
+    comboScore: 0,
   }));
 
   const onBreadCrushedRef = useRef(onBreadCrushed);
   onBreadCrushedRef.current = onBreadCrushed;
 
   const comboTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const feverMovesRef = useRef(0);
+  const bonusMovesTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Helper to notify all crushed breads (with combo multiplier)
-  const notifyCrushedBreads = useCallback((crushCounts: BreadCrushCounts, comboMultiplier: number = 1) => {
-    getAllBreadTypes().forEach((breadType) => {
+  const notifyCrushedBreads = useCallback((crushCounts: BreadCrushCounts, rawScore: number) => {
+    const totalCrushed = Object.values(crushCounts).reduce((a, b) => a + b, 0);
+    if (totalCrushed === 0) return;
+
+    const types = getAllBreadTypes().filter(bt => crushCounts[bt] > 0);
+    let distributed = 0;
+
+    types.forEach((breadType, index) => {
       const count = crushCounts[breadType];
-      if (count > 0) {
-        onBreadCrushedRef.current(breadType, count * comboMultiplier);
+      let points: number;
+      if (index === types.length - 1) {
+        points = rawScore - distributed;
+      } else {
+        points = Math.round(rawScore * count / totalCrushed);
+        distributed += points;
+      }
+      if (points > 0) {
+        onBreadCrushedRef.current(breadType, points);
       }
     });
   }, []);
@@ -98,8 +124,34 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
     const matches = matchResult.positions;
 
     if (matches.length === 0) {
-      // Check for level up or game over
-      const { shouldLevelUp, isGameOver } = checkLevelUp(currentScore, currentLevel, currentMoves);
+      let movesAfterBonus = currentMoves;
+      if (currentCombo >= 6) {
+        movesAfterBonus += 2;
+        if (bonusMovesTimeoutRef.current) clearTimeout(bonusMovesTimeoutRef.current);
+        setState((prev) => ({ ...prev, moves: movesAfterBonus, bonusMoves: 2, showBonusMoves: true }));
+        bonusMovesTimeoutRef.current = setTimeout(() => {
+          setState((prev) => ({ ...prev, showBonusMoves: false }));
+          bonusMovesTimeoutRef.current = null;
+        }, 1200);
+      } else if (currentCombo >= 4) {
+        movesAfterBonus += 1;
+        if (bonusMovesTimeoutRef.current) clearTimeout(bonusMovesTimeoutRef.current);
+        setState((prev) => ({ ...prev, moves: movesAfterBonus, bonusMoves: 1, showBonusMoves: true }));
+        bonusMovesTimeoutRef.current = setTimeout(() => {
+          setState((prev) => ({ ...prev, showBonusMoves: false }));
+          bonusMovesTimeoutRef.current = null;
+        }, 1200);
+      }
+
+      if (currentCombo >= 5 && feverMovesRef.current <= 0) {
+        feverMovesRef.current = 3;
+        setState((prev) => ({ ...prev, feverMovesLeft: 3, showFeverStart: true }));
+        setTimeout(() => {
+          setState((prev) => ({ ...prev, showFeverStart: false }));
+        }, 1200);
+      }
+
+      const { shouldLevelUp, isGameOver } = checkLevelUp(currentScore, currentLevel, movesAfterBonus);
 
       if (shouldLevelUp) {
         const bonusPoints = currentMoves * 20;
@@ -128,7 +180,6 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
             gameState: 'idle',
           }));
 
-          // Check for initial matches on new board
           setTimeout(() => {
             setState((prev) => {
               const initialResult = findMatchesWithInfo(prev.board);
@@ -148,7 +199,6 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
           gameState: 'gameOver',
         }));
       } else {
-        // Check for deadlock before returning to idle
         if (!hasPossibleMoves(currentBoard)) {
           const shuffled = shuffleBoard(currentBoard);
           setState((prev) => ({ ...prev, board: shuffled, gameState: 'animating' }));
@@ -167,21 +217,25 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
 
     const newCombo = currentCombo + 1;
 
+    const baseScore = matches.length * 10;
+    const comboBonus = newCombo > 1 ? (newCombo * 5) : 0;
+    const feverMultiplier = feverMovesRef.current > 0 ? 2 : 1;
+    const rawScore = (baseScore + comboBonus) * feverMultiplier;
+    const roundScore = Math.round(rawScore);
+    const newScore = currentScore + roundScore;
+
     if (newCombo > 1) {
-      // Clear previous combo timeout to reset timer for new combo
       if (comboTimeoutRef.current) {
         clearTimeout(comboTimeoutRef.current);
       }
-      setState((prev) => ({ ...prev, showCombo: true, comboCount: newCombo }));
+      setState((prev) => ({ ...prev, showCombo: true, comboCount: newCombo, comboScore: prev.comboScore + roundScore }));
       comboTimeoutRef.current = setTimeout(() => {
-        setState((prev) => ({ ...prev, showCombo: false }));
+        setState((prev) => ({ ...prev, showCombo: false, comboScore: 0 }));
         comboTimeoutRef.current = null;
       }, COMBO_DISPLAY_DURATION);
     }
 
-    const baseScore = matches.length * 10;
-    const comboBonus = newCombo > 1 ? newCombo * 5 : 0;
-    const newScore = currentScore + baseScore + comboBonus;
+    const isBigMatch = matches.length >= 4;
 
     const { board: boardAfterRemove, crushCounts } = removeMatches(
       currentBoard,
@@ -191,8 +245,9 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
       matchResult.specialSpawnBreadType
     );
 
-    // Notify each bread type that was crushed (multiplied by combo count)
-    notifyCrushedBreads(crushCounts, newCombo);
+    notifyCrushedBreads(crushCounts, Math.round(rawScore));
+
+    const crushTotal = Object.values(crushCounts).reduce((a, b) => a + b, 0);
 
     setState((prev) => ({
       ...prev,
@@ -201,6 +256,8 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
       matchedPositions: matches,
       comboCount: newCombo,
       gameState: 'animating',
+      isBigMatch,
+      totalCrushCount: prev.totalCrushCount + crushTotal,
     }));
 
     setTimeout(() => {
@@ -210,6 +267,7 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
         ...prev,
         board: boardAfterGravity,
         matchedPositions: [],
+        isBigMatch: false,
       }));
 
       setTimeout(() => {
@@ -243,6 +301,11 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
       } else {
         const newMoves = prev.moves - 1;
 
+        if (feverMovesRef.current > 0) {
+          feverMovesRef.current -= 1;
+        }
+        const newFeverMovesLeft = feverMovesRef.current;
+
         setTimeout(() => {
           processMatchesWithInfo(swappedBoard, prev.score, newMoves, 0, prev.level);
         }, 0);
@@ -254,6 +317,7 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
           selectedPosition: null,
           comboCount: 0,
           gameState: 'animating' as GameState,
+          feverMovesLeft: newFeverMovesLeft,
         };
       }
     });
@@ -281,6 +345,7 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
   const startNewGame = useCallback(() => {
     trackGameStart(1);
     const newBoard = fillBoardWithoutMatches();
+    feverMovesRef.current = 0;
     setState({
       board: newBoard,
       score: 0,
@@ -293,6 +358,13 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
       comboCount: 0,
       showCombo: false,
       showLevelUp: false,
+      bonusMoves: 0,
+      showBonusMoves: false,
+      feverMovesLeft: 0,
+      showFeverStart: false,
+      isBigMatch: false,
+      totalCrushCount: 0,
+      comboScore: 0,
     });
 
     setTimeout(() => {
@@ -303,6 +375,7 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
   return {
     ...state,
     isAnimating: state.gameState === 'animating' || state.gameState === 'levelUp',
+    isFeverActive: state.feverMovesLeft > 0,
     selectCell,
     trySwap,
     startNewGame,

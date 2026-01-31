@@ -59,6 +59,9 @@ export function useCouponManager(userId: string | null = null) {
   });
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const pointsLoadedRef = useRef(false);
+  const breadPointsRef = useRef(state.breadPoints);
+  breadPointsRef.current = state.breadPoints;
+  const levelEarnedRef = useRef(0);
 
   // Subscribe to coupons and load points from Firestore when user is logged in
   useEffect(() => {
@@ -103,12 +106,16 @@ export function useCouponManager(userId: string | null = null) {
   }, [userId]);
 
   // Save points to Firestore, issue coupons for thresholds, save remainder
-  const savePointsToFirestore = useCallback(async () => {
-    if (!userId) return;
+  const savePointsToFirestore = useCallback(async (): Promise<number> => {
+    if (!userId) return 0;
+
+    // Use ref to always get latest breadPoints (avoids stale closure)
+    const currentPoints = breadPointsRef.current;
+    const totalSaved = Object.values(currentPoints).reduce((a, b) => a + b, 0);
 
     const { issuedCoupons, remainderPoints } = await savePointsAndIssueCoupons(
       userId,
-      state.breadPoints
+      currentPoints
     );
 
     // Update local state with remainder points (after coupon deduction)
@@ -136,7 +143,9 @@ export function useCouponManager(userId: string | null = null) {
         newCouponBreadType: first.breadType,
       }));
     }
-  }, [userId, state.breadPoints]);
+
+    return totalSaved;
+  }, [userId]);
 
   const availableCoupons = state.coupons.filter((c) => !c.isUsed && !isCouponExpired(c));
 
@@ -159,6 +168,7 @@ export function useCouponManager(userId: string | null = null) {
     if (!userId) return;
 
     const pointsToAdd = count * POINTS_PER_CRUSH;
+    levelEarnedRef.current += pointsToAdd;
 
     setState((prev) => ({
       ...prev,
@@ -168,6 +178,10 @@ export function useCouponManager(userId: string | null = null) {
       },
     }));
   }, [userId]);
+
+  const resetLevelEarned = useCallback(() => {
+    levelEarnedRef.current = 0;
+  }, []);
 
   // Add referral coupons for both referrer and referred user
   const addReferralCoupons = useCallback(async (referrerId: string, referredUserId: string): Promise<boolean> => {
@@ -246,6 +260,8 @@ export function useCouponManager(userId: string | null = null) {
     ...state,
     userId,
     totalPoints,
+    levelEarnedRef,
+    resetLevelEarned,
     availableCoupons,
     getProgressForBread,
     getRemainingForBread,

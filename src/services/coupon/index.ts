@@ -5,6 +5,7 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  deleteDoc,
   query,
   where,
   serverTimestamp,
@@ -96,11 +97,44 @@ export async function loadUserCoupons(userId: string): Promise<FirestoreCoupon[]
   return coupons;
 }
 
+// Delete used coupons that were used more than 1 day ago
+async function cleanupUsedCoupons(userId: string): Promise<void> {
+  try {
+    const q = query(
+      collection(db, COUPONS_COLLECTION),
+      where('userId', '==', userId),
+      where('isUsed', '==', true)
+    );
+    const snapshot = await getDocs(q);
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+
+    const deletePromises: Promise<void>[] = [];
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (data.usedAt) {
+        const usedDate = data.usedAt.toDate ? data.usedAt.toDate() : new Date(data.usedAt);
+        if (usedDate.getTime() < oneDayAgo) {
+          deletePromises.push(deleteDoc(doc(db, COUPONS_COLLECTION, docSnap.id)));
+        }
+      }
+    });
+
+    if (deletePromises.length > 0) {
+      await Promise.all(deletePromises);
+    }
+  } catch (error) {
+    console.error('Error cleaning up used coupons:', error);
+  }
+}
+
 // Subscribe to coupon changes for a user (real-time updates)
 export function subscribeToCoupons(
   userId: string,
   onCouponsChange: (coupons: FirestoreCoupon[]) => void
 ): Unsubscribe {
+  // Run cleanup on subscribe (fire-and-forget)
+  cleanupUsedCoupons(userId);
+
   const q = query(
     collection(db, COUPONS_COLLECTION),
     where('userId', '==', userId)
@@ -381,7 +415,7 @@ export async function loadBreadPointsFromFirestore(
 
 // Upgrade 3 coupons into 1 upgraded coupon (3-month validity, random bread type)
 // 50% success rate. On failure, all 3 coupons are destroyed.
-const UPGRADE_VALIDITY_DAYS = 90;
+const UPGRADE_VALIDITY_DAYS = 60;
 
 export interface UpgradeResult {
   success: boolean;
