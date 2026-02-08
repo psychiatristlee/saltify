@@ -55,25 +55,14 @@ function hasInitialMatch(cells: Board, row: number, col: number, type: BreadType
   return false;
 }
 
-// Determine special item type based on match length (with chance-based spawning)
-// 3 match → 25% chance for Matcha
-// 4 match → Matcha (30% chance upgrade to Choco)
-// 5 match → Choco (30% chance upgrade to MilkTea)
+// Determine special item type based on match length
+// 4 match → Matcha
+// 5 match → Choco
 // 6+ match → MilkTea
 function getSpecialItemTypeForMatchLength(matchLength: number): SpecialItemType {
   if (matchLength >= 6) return SpecialItemType.MilkTea;
-  if (matchLength >= 5) {
-    // 30% chance to upgrade to MilkTea
-    return Math.random() < 0.3 ? SpecialItemType.MilkTea : SpecialItemType.Choco;
-  }
-  if (matchLength >= 4) {
-    // 30% chance to upgrade to Choco
-    return Math.random() < 0.3 ? SpecialItemType.Choco : SpecialItemType.Matcha;
-  }
-  if (matchLength >= 3) {
-    // 25% chance for Matcha on 3-match
-    return Math.random() < 0.25 ? SpecialItemType.Matcha : SpecialItemType.None;
-  }
+  if (matchLength >= 5) return SpecialItemType.Choco;
+  if (matchLength >= 4) return SpecialItemType.Matcha;
   return SpecialItemType.None;
 }
 

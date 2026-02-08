@@ -28,6 +28,7 @@ export interface FirestoreCoupon {
   createdAt: string;
   expiresAt: string;
   isUsed: boolean;
+  usedFor?: 'upgrade';
   source: 'game' | 'referral' | 'upgrade';
 }
 
@@ -90,6 +91,7 @@ export async function loadUserCoupons(userId: string): Promise<FirestoreCoupon[]
       createdAt: data.createdAt,
       expiresAt: getExpiresAt(data.createdAt, data.expiresAt),
       isUsed: data.isUsed,
+      usedFor: data.usedFor,
       source: data.source,
     });
   });
@@ -195,6 +197,8 @@ export async function hasUsedCouponToday(userId: string): Promise<boolean> {
   let usedToday = false;
   snapshot.forEach((doc) => {
     const data = doc.data();
+    // Exclude coupons consumed for upgrade
+    if (data.usedFor === 'upgrade') return;
     if (data.usedAt) {
       const usedDate = data.usedAt.toDate ? data.usedAt.toDate() : new Date(data.usedAt);
       usedDate.setHours(0, 0, 0, 0);

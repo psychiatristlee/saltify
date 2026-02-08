@@ -88,6 +88,7 @@ export async function fetchRankings(currentUserId?: string | null): Promise<User
     const odwnerId = data.userId as string;
     const breadType = data.breadType as BreadType;
     const isUsed = data.isUsed as boolean;
+    const usedFor = data.usedFor as string | undefined;
 
     // Filter by network if logged in
     if (networkFilter && !networkFilter.has(odwnerId)) {
@@ -104,7 +105,7 @@ export async function fetchRankings(currentUserId?: string | null): Promise<User
 
     const stats = userStats.get(odwnerId)!;
     stats.totalIssued++;
-    if (isUsed) {
+    if (isUsed && usedFor !== 'upgrade') {
       stats.totalUsed++;
     }
     stats.breadCounts.set(breadType, (stats.breadCounts.get(breadType) || 0) + 1);

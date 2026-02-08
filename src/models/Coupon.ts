@@ -10,6 +10,7 @@ export interface Coupon {
   createdAt: string;
   expiresAt: string;
   isUsed: boolean;
+  usedFor?: 'upgrade';
   source: 'game' | 'referral' | 'upgrade';
 }
 

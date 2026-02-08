@@ -1138,6 +1138,13 @@ export const translations = {
     'zh-TW': '強化獲得',
     ja: '強化獲得',
   },
+  usedForUpgrade: {
+    ko: '강화 소모',
+    en: 'Used for upgrade',
+    'zh-CN': '强化消耗',
+    'zh-TW': '強化消耗',
+    ja: '強化消費',
+  },
 
   // ComboView
   combo: {

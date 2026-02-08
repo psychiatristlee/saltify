@@ -33,6 +33,7 @@ function toLocalCoupon(fc: FirestoreCoupon): Coupon {
     createdAt: fc.createdAt,
     expiresAt: fc.expiresAt,
     isUsed: fc.isUsed,
+    usedFor: fc.usedFor,
     source: fc.source,
   };
 }
@@ -209,10 +210,14 @@ export function useCouponManager(userId: string | null = null) {
     branchId?: string,
     branchName?: string
   ): Promise<boolean> => {
+    console.log('[useCoupon] looking for couponId:', couponId, 'in', state.coupons.length, 'coupons');
+    console.log('[useCoupon] all coupons:', state.coupons.map(c => ({ id: c.id, isUsed: c.isUsed, source: c.source })));
     const coupon = state.coupons.find((c) => c.id === couponId && !c.isUsed);
-    if (!coupon) return false;
+    if (!coupon) { console.log('[useCoupon] coupon not found or already used'); return false; }
 
+    console.log('[useCoupon] found coupon, calling useCouponInFirestore');
     const success = await useCouponInFirestore(couponId, branchId, branchName);
+    console.log('[useCoupon] firestore result:', success);
     return success;
   }, [state.coupons]);
 

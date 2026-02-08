@@ -38,9 +38,9 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Branches collection (admin only)
+    // Branches collection (authenticated users can read for password validation)
     match /branches/{branchId} {
-      allow read: if isAdmin();
+      allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
 

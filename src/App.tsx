@@ -26,7 +26,7 @@ import CouponCelebration from './components/CouponCelebration';
 import BreadProgressPanel from './components/BreadProgressPanel';
 import InviteButton from './components/InviteButton';
 import AdminView from './components/AdminView';
-import FriendsCharacterView from './components/FriendsCharacterView';
+import RankingView from './components/RankingView';
 import ProfileView from './components/ProfileView';
 import styles from './App.module.css';
 
@@ -351,8 +351,8 @@ export default function App() {
 
 
       {showFriendsView && user && (
-        <FriendsCharacterView
-          userId={user.id}
+        <RankingView
+          currentUserId={user.id}
           onClose={() => setShowFriendsView(false)}
         />
       )}

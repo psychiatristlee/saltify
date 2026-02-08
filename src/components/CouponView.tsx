@@ -82,13 +82,16 @@ export default function CouponView({ couponManager, level, score, targetScore, o
   };
 
   const handleUseCoupon = async (coupon: Coupon) => {
-    if (!couponManager.userId) return;
+    console.log('[handleUseCoupon] coupon:', coupon.id, 'isUsed:', coupon.isUsed, 'source:', coupon.source, 'userId:', couponManager.userId);
+    if (!couponManager.userId) { console.log('[handleUseCoupon] no userId, returning'); return; }
 
     setIsCheckingDaily(true);
     const usedToday = await hasUsedCouponToday(couponManager.userId);
+    console.log('[handleUseCoupon] usedToday:', usedToday);
     setIsCheckingDaily(false);
 
     if (usedToday) {
+      console.log('[handleUseCoupon] blocked: already used today');
       setAlreadyUsedToday(true);
       return;
     }
@@ -99,17 +102,22 @@ export default function CouponView({ couponManager, level, score, targetScore, o
   };
 
   const confirmUse = async () => {
-    if (!selectedCoupon) return;
+    console.log('[confirmUse] selectedCoupon:', selectedCoupon?.id, 'password:', password);
+    if (!selectedCoupon) { console.log('[confirmUse] no selectedCoupon'); return; }
 
     // Validate password against branches
     const branch = await validateBranchPassword(password);
+    console.log('[confirmUse] branch:', branch);
     if (!branch) {
+      console.log('[confirmUse] password validation failed');
       setPasswordError(true);
       return;
     }
 
+    console.log('[confirmUse] calling useCoupon with id:', selectedCoupon.id, 'branch:', branch.id, branch.name);
     const couponName = `${t(BREAD_I18N[selectedCoupon.breadType].name)} ${t('onePlusOneCoupon')}`;
     const success = await couponManager.useCoupon(selectedCoupon.id, branch.id, branch.name);
+    console.log('[confirmUse] useCoupon result:', success);
     if (success) {
       trackCouponUsed(String(selectedCoupon.breadType), branch.name);
     }
@@ -296,7 +304,7 @@ export default function CouponView({ couponManager, level, score, targetScore, o
                         </span>
                       </div>
                       <span className={styles.couponStatus}>
-                        {coupon.isUsed ? t('used') : expired ? t('expired') : t('use')}
+                        {coupon.isUsed ? (coupon.usedFor === 'upgrade' ? t('usedForUpgrade') : t('used')) : expired ? t('expired') : t('use')}
                       </span>
                     </div>
                   );
