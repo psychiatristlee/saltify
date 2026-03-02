@@ -1,12 +1,11 @@
-// Apps-in-Toss 배포 시 사용되는 설정 파일
-// 로컬 개발 시에는 Vite 단독으로 동작하며, 배포 시 granite CLI가 이 설정을 참조합니다.
-export default {
-  appName: 'saltify',
+import { defineConfig } from '@apps-in-toss/web-framework/config';
+
+export default defineConfig({
+  appName: 'saltbbang',
   brand: {
-    displayName: '소금, 빵',
-    primaryColor: '#D4A574',
-    icon: '',
-    bridgeColorMode: 'basic',
+    displayName: '솔트빵',
+    primaryColor: '#FF8C00',
+    icon: '/brandings/thumbnail.png',
   },
   web: {
     host: 'localhost',
@@ -22,4 +21,4 @@ export default {
     type: 'game',
     overScrollMode: 'never',
   },
-};
+});

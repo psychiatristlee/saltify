@@ -3,6 +3,7 @@ import { Coupon, getDaysUntilExpiration, isCouponExpired } from '../models/Coupo
 import { BreadType, getAllBreadTypes, BREAD_DATA } from '../models/BreadType';
 import { BreadPoints } from '../hooks/useCouponManager';
 import { useNaverMap, openNaverMapPlace } from '../hooks/useNaverMap';
+import { isNativeApp } from '../lib/platform';
 import { validateBranchPassword } from '../services/admin';
 import { hasUsedCouponToday } from '../services/coupon';
 import { trackCouponUsed } from '../services/analytics';
@@ -55,8 +56,9 @@ export default function CouponView({ couponManager, level, score, targetScore, o
   const [isUpgrading, setIsUpgrading] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
+  const nativeApp = isNativeApp();
 
-  useNaverMap(mapRef);
+  useNaverMap(nativeApp ? { current: null } : mapRef);
 
   const availableCouponsForUpgrade = couponManager.availableCoupons.filter((c) => c.source !== 'upgrade');
   const canUpgrade = availableCouponsForUpgrade.length >= 3;
@@ -135,12 +137,14 @@ export default function CouponView({ couponManager, level, score, targetScore, o
   return (
     <div className={styles.overlay}>
       <div className={styles.container}>
-        <header className={styles.header}>
-          <h2 className={styles.title}>{t('myCoupons')}</h2>
-          <button className={styles.closeButton} onClick={onClose}>✕</button>
+        <header className={styles.header} style={nativeApp ? { paddingTop: 54 } : undefined}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button className={styles.closeButton} onClick={onClose}>✕</button>
+            <h2 className={styles.title}>{t('myCoupons')}</h2>
+          </div>
         </header>
 
-        <div className={styles.content}>
+        <div className={styles.content} style={nativeApp ? { paddingBottom: 48 } : undefined}>
           {/* Level progress */}
           <div className={styles.levelSection}>
             <div className={styles.levelHeader}>
@@ -337,7 +341,18 @@ export default function CouponView({ couponManager, level, score, targetScore, o
           {/* Map section */}
           <div className={styles.mapSection}>
             <h3 className={styles.sectionTitle}>{t('findUs')}</h3>
-            <div ref={mapRef} className={styles.mapContainer} />
+            {nativeApp ? (
+              <div className={styles.mapContainer}>
+                <iframe
+                  src="https://maps.google.com/maps?q=37.5621326,126.9237369&z=17&output=embed"
+                  allowFullScreen
+                  loading="lazy"
+                  title="Store location"
+                />
+              </div>
+            ) : (
+              <div ref={mapRef} className={styles.mapContainer} />
+            )}
             <div className={styles.storeInfo}>
               <span className={styles.storeName}>{t('storeName')}</span>
               <span className={styles.storeAddress}>{t('storeAddress')}</span>

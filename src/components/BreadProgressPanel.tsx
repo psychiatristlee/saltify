@@ -21,6 +21,7 @@ interface BreadProgressPanelProps {
   getProgressForBread: (breadType: BreadType) => number;
   getCouponsForBread: (breadType: BreadType) => { id: string }[];
   onBreadClick?: () => void;
+  rightActions?: React.ReactNode;
 }
 
 export default function BreadProgressPanel({
@@ -31,6 +32,7 @@ export default function BreadProgressPanel({
   getProgressForBread,
   getCouponsForBread,
   onBreadClick,
+  rightActions,
 }: BreadProgressPanelProps) {
   const allBreadTypes = getAllBreadTypes();
   const { t } = useLanguage();
@@ -70,6 +72,7 @@ export default function BreadProgressPanel({
             {moves}
           </span>
         </div>
+        {rightActions}
       </div>
       <div className={styles.panel}>
         {allBreadTypes.map((breadType) => {

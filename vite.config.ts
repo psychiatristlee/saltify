@@ -8,4 +8,7 @@ export default defineConfig({
       localsConvention: 'camelCase',
     },
   },
+  define: {
+    __TOSS_BUILD__: process.env.VITE_TOSS_BUILD === 'true',
+  },
 });

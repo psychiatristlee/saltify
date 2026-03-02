@@ -22,7 +22,7 @@ export interface UserRanking {
   breadCounts: BreadCouponCount[];
 }
 
-// Get the referral network for a user (referrer + referred users + self)
+// Get the referral network for a user (referrer + referred users + friends + self)
 async function getReferralNetwork(userId: string): Promise<Set<string>> {
   const network = new Set<string>();
   network.add(userId); // Include self
@@ -43,9 +43,14 @@ async function getReferralNetwork(userId: string): Promise<Set<string>> {
       if (data.referredUsers && Array.isArray(data.referredUsers)) {
         data.referredUsers.forEach((id: string) => network.add(id));
       }
+
+      // Add friends (existing users who clicked referral link)
+      if (data.friends && Array.isArray(data.friends)) {
+        data.friends.forEach((id: string) => network.add(id));
+      }
     }
 
-    // Also check if the current user is in someone else's referredUsers
+    // Also check if the current user is in someone else's referredUsers or friends
     // (in case their own referral doc doesn't have referredBy set)
     const allReferralsSnapshot = await getDocs(collection(db, REFERRALS_COLLECTION));
     allReferralsSnapshot.forEach((docSnap) => {
@@ -56,6 +61,10 @@ async function getReferralNetwork(userId: string): Promise<Set<string>> {
       }
       // If this doc was referred by current user, add them
       if (data.referredBy === userId) {
+        network.add(docSnap.id);
+      }
+      // If this doc's friends contains current user, add them
+      if (data.friends?.includes(userId)) {
         network.add(docSnap.id);
       }
     });

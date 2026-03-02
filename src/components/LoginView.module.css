@@ -13,6 +13,7 @@
 .header {
   width: 100%;
   padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top, 16px));
   display: flex;
   justify-content: center;
   background: transparent;
@@ -153,6 +154,84 @@
   height: 20px;
 }
 
+.appleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 24px;
+  background: #000000;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 12px;
+}
+
+.appleButton:hover:not(:disabled) {
+  background: #1a1a1a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.appleButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.appleButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.appleIcon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Terms agreement checkboxes */
+.termsCheckboxes {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.termsLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: #555;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.termsCheckbox {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: #0064FF;
+  cursor: pointer;
+}
+
+.termsLink {
+  color: #0064FF;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.termsAllAgree {
+  font-weight: 700;
+  color: #333;
+}
+
 .error {
   margin-top: 16px;
   font-size: 0.875rem;
@@ -201,4 +280,82 @@
 
 .openBrowserButton:active {
   transform: translateY(0);
+}
+
+/* Webview warning modal */
+.webviewOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.webviewModal {
+  background: white;
+  border-radius: 20px;
+  padding: 28px 24px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.webviewTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 12px;
+}
+
+.webviewDesc {
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.webviewUrl {
+  font-size: 0.75rem;
+  color: #888;
+  background: #f5f5f5;
+  padding: 10px 12px;
+  border-radius: 8px;
+  word-break: break-all;
+  margin-bottom: 16px;
+}
+
+.webviewCopyButton {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.webviewCopyButton:active {
+  opacity: 0.9;
+}
+
+.webviewCloseButton {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  color: #666;
+  cursor: pointer;
+}
+
+.webviewCloseButton:active {
+  background: #f5f5f5;
 }

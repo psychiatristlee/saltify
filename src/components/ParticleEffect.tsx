@@ -30,14 +30,14 @@ export default function ParticleEffect({ type, x, y, color, comboLevel = 0, onCo
 
   useEffect(() => {
     const newParticles: Particle[] = [];
-    const comboMultiplier = Math.min(1 + comboLevel * 0.3, 2.5);
+    const comboMultiplier = Math.min(1 + comboLevel * 0.15, 1.5);
 
     if (type === 'pop') {
-      // Bread crumb particles (scaled by combo)
-      const crumbCount = Math.round(16 * comboMultiplier);
+      // Bread crumb particles (reduced for performance)
+      const crumbCount = Math.round(6 * comboMultiplier);
       for (let i = 0; i < crumbCount; i++) {
         const angle = (Math.PI * 2 * i) / crumbCount + Math.random() * 0.5;
-        const speed = (2 + Math.random() * 4) * Math.min(comboMultiplier, 1.5);
+        const speed = (2 + Math.random() * 4) * Math.min(comboMultiplier, 1.3);
         newParticles.push({
           id: i,
           x: 0,
@@ -50,11 +50,11 @@ export default function ParticleEffect({ type, x, y, color, comboLevel = 0, onCo
           type: 'crumb',
         });
       }
-      // Sparkles (scaled by combo)
-      const sparkleCount = Math.round(10 * comboMultiplier);
+      // Sparkles (reduced for performance)
+      const sparkleCount = Math.round(4 * comboMultiplier);
       for (let i = 0; i < sparkleCount; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = (3 + Math.random() * 3) * Math.min(comboMultiplier, 1.5);
+        const speed = (3 + Math.random() * 3) * Math.min(comboMultiplier, 1.3);
         newParticles.push({
           id: 100 + i,
           x: 0,
@@ -68,8 +68,8 @@ export default function ParticleEffect({ type, x, y, color, comboLevel = 0, onCo
         });
       }
     } else if (type === 'firework') {
-      for (let i = 0; i < 30; i++) {
-        const angle = (Math.PI * 2 * i) / 30 + Math.random() * 0.3;
+      for (let i = 0; i < 12; i++) {
+        const angle = (Math.PI * 2 * i) / 12 + Math.random() * 0.3;
         const speed = 4 + Math.random() * 6;
         newParticles.push({
           id: i,

@@ -21,3 +21,16 @@ body {
   height: 100dvh;
   overflow: hidden;
 }
+
+/* Critical CSS for game board - ensures layout works even if CSS modules load late */
+/* These are fallback styles that will be overridden by CSS modules when they load */
+[class*="board_"] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px;
+}
+
+[class*="row_"] {
+  display: flex !important;
+  gap: 3px;
+}

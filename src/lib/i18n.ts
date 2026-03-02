@@ -98,6 +98,13 @@ export const translations = {
     'zh-TW': '使用Kakao登錄',
     ja: 'Kakaoで続ける',
   },
+  loginWithApple: {
+    ko: 'Apple로 시작하기',
+    en: 'Continue with Apple',
+    'zh-CN': '使用Apple登录',
+    'zh-TW': '使用Apple登錄',
+    ja: 'Appleで続ける',
+  },
   loggingIn: {
     ko: '로그인 중...',
     en: 'Logging in...',
@@ -413,6 +420,15 @@ export const translations = {
     'zh-CN': '获得优惠券！',
     'zh-TW': '獲得優惠券！',
     ja: 'クーポン獲得！',
+  },
+
+  // App Download
+  downloadApp: {
+    ko: '앱 다운로드',
+    en: 'Download App',
+    'zh-CN': '下载应用',
+    'zh-TW': '下載應用',
+    ja: 'アプリをダウンロード',
   },
 
   // Map
@@ -1029,6 +1045,27 @@ export const translations = {
     'zh-CN': '处理邀请时发生错误。',
     'zh-TW': '處理邀請時發生錯誤。',
     ja: '招待処理中にエラーが発生しました。',
+  },
+  existingUserNoReward: {
+    ko: '이미 가입된 사용자입니다. 친구로 추가되었어요!',
+    en: 'Already registered. Added as friend!',
+    'zh-CN': '已注册用户。已添加为好友！',
+    'zh-TW': '已註冊用戶。已添加為好友！',
+    ja: '既に登録済みのユーザーです。友達として追加されました！',
+  },
+  friendAdded: {
+    ko: '친구가 추가되었습니다!',
+    en: 'Friend added!',
+    'zh-CN': '已添加好友！',
+    'zh-TW': '已添加好友！',
+    ja: '友達が追加されました！',
+  },
+  viewFriendRanking: {
+    ko: '친구 순위 보기',
+    en: 'View Friend Ranking',
+    'zh-CN': '查看好友排名',
+    'zh-TW': '查看好友排名',
+    ja: '友達ランキングを見る',
   },
 
   // Admin/Service fallbacks

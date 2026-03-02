@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { useGameViewModel } from './hooks/useGameViewModel';
 import { useCouponManager } from './hooks/useCouponManager';
@@ -7,7 +8,7 @@ import { useLanguage } from './contexts/LanguageContext';
 import { firestoreScoreService } from './services/score';
 import { getReferrerFromUrl } from './services/referral';
 import { BREAD_DATA } from './models/BreadType';
-import { isNativeApp } from './lib/platform';
+import { isEmbeddedApp, isTossApp } from './lib/platform';
 import {
   trackScreenView,
   trackCouponViewOpen,
@@ -25,19 +26,35 @@ import CouponView from './components/CouponView';
 import CouponCelebration from './components/CouponCelebration';
 import BreadProgressPanel from './components/BreadProgressPanel';
 import InviteButton from './components/InviteButton';
-import AdminView from './components/AdminView';
+import AdminPage from './components/AdminPage';
 import RankingView from './components/RankingView';
 import ProfileView from './components/ProfileView';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
+import AccountDeletion from './components/AccountDeletion';
 import styles from './App.module.css';
 
 export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/account-deletion" element={<AccountDeletion />} />
+        <Route path="*" element={<MainApp />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+function MainApp() {
   const { user, isLoading, isAuthenticated, signOut, deleteAccount } = useAuth();
   const { t } = useLanguage();
   const couponManager = useCouponManager(user?.id || null);
   const game = useGameViewModel(couponManager.addCrushedBread);
   const referral = useReferral(user?.id || null);
   const [showCouponView, setShowCouponView] = useState(false);
-  const [showAdminView, setShowAdminView] = useState(false);
   const [showInviteBubble, setShowInviteBubble] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showSaveToast, setShowSaveToast] = useState(false);
@@ -45,8 +62,8 @@ export default function App() {
   const [showProfileView, setShowProfileView] = useState(false);
   const [savedPointsAmount, setSavedPointsAmount] = useState(0);
   const [showLanding, setShowLanding] = useState(() => {
-    // Skip landing page on native apps
-    if (isNativeApp()) return false;
+    // Skip landing page on native apps and Toss mini app
+    if (isEmbeddedApp()) return false;
     // Skip landing page if accessing via referral link - go directly to login
     if (getReferrerFromUrl()) return false;
     // Show landing for web first-time visitors
@@ -63,8 +80,17 @@ export default function App() {
 
   const confirmLogout = async () => {
     await signOut();
-    setShowLanding(true);
+    if (!isEmbeddedApp()) setShowLanding(true);
   };
+
+  // Submit score to Toss Game Center leaderboard
+  useEffect(() => {
+    if (game.gameState === 'gameOver' && isTossApp()) {
+      import('@apps-in-toss/web-framework').then(({ submitGameCenterLeaderBoardScore }) => {
+        submitGameCenterLeaderBoardScore({ score: String(game.score) }).catch(console.error);
+      });
+    }
+  }, [game.gameState, game.score]);
 
   // Process referral when user signs in
   useEffect(() => {
@@ -78,6 +104,7 @@ export default function App() {
       referralProcessed.current = true;
       referral.processPendingReferral().then(async (result) => {
         if (result.success && referral.pendingReferrerId) {
+          // New user - give referral coupons
           const couponSuccess = await couponManager.addReferralCoupons(
             referral.pendingReferrerId,
             user.id
@@ -86,6 +113,9 @@ export default function App() {
             couponManager.showReferralCouponAlert();
             trackReferralComplete();
           }
+        } else if (result.isExistingUser) {
+          // Existing user - show friend ranking view
+          setShowFriendsView(true);
         }
       });
     }
@@ -135,8 +165,23 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className={styles.loadingContainer}>
-        <img src="/breads/plain.png" alt={t('loading')} className={styles.loadingIcon} />
+      <div
+        className={styles.loadingContainer}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100dvh',
+          background: 'linear-gradient(to bottom, #FFF6E0, #FFEAD0)',
+        }}
+      >
+        <img
+          src="/breads/plain.png"
+          alt={t('loading')}
+          className={styles.loadingIcon}
+          style={{ width: 80, height: 80 }}
+        />
         <p>{t('loading')}</p>
       </div>
     );
@@ -144,27 +189,26 @@ export default function App() {
 
   if (showLanding) {
     return (
-      <>
-        <LandingPage
-          onStartGame={handleStartGame}
-          onAdminClick={() => setShowAdminView(true)}
-        />
-        {showAdminView && (
-          <AdminView
-            userId={user?.id || null}
-            onClose={() => setShowAdminView(false)}
-          />
-        )}
-      </>
+      <LandingPage onStartGame={handleStartGame} />
     );
   }
 
   if (!isAuthenticated) {
-    return <LoginView onBackToLanding={() => setShowLanding(true)} />;
+    return <LoginView onBackToLanding={() => { if (!isEmbeddedApp()) setShowLanding(true); }} />;
   }
 
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100dvh',
+        background: 'linear-gradient(to bottom, #FFF6E0, #FFEAD0)',
+        maxWidth: 430,
+        margin: '0 auto',
+      }}
+    >
       <header className={styles.header}>
         <div className={styles.headerLeft}>
           <button
@@ -178,28 +222,30 @@ export default function App() {
           src="/brandings/header.png"
           alt={t('storeName')}
           className={styles.logoImage}
-          onClick={() => setShowLanding(true)}
+          onClick={() => { if (!isEmbeddedApp()) setShowLanding(true); }}
         />
-        <div className={styles.headerRight}>
-          <button
-            className={styles.couponButton}
-            onClick={() => { trackCouponViewOpen(); setShowCouponView(true); }}
-          >
-            🎟️
-            {couponManager.availableCoupons.length > 0 && (
-              <span className={styles.couponBadge}>
-                {couponManager.availableCoupons.length}
-              </span>
-            )}
-          </button>
-          <button className={styles.profileButton} onClick={() => setShowProfileView(true)}>
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt="" className={styles.profileImg} />
-            ) : (
-              <span>👤</span>
-            )}
-          </button>
-        </div>
+        {!isTossApp() && (
+          <div className={styles.headerRight}>
+            <button
+              className={styles.couponButton}
+              onClick={() => { trackCouponViewOpen(); setShowCouponView(true); }}
+            >
+              🎟️
+              {couponManager.availableCoupons.length > 0 && (
+                <span className={styles.couponBadge}>
+                  {couponManager.availableCoupons.length}
+                </span>
+              )}
+            </button>
+            <button className={styles.profileButton} onClick={() => setShowProfileView(true)}>
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="" className={styles.profileImg} referrerPolicy="no-referrer" />
+              ) : (
+                <span>👤</span>
+              )}
+            </button>
+          </div>
+        )}
       </header>
 
       <BreadProgressPanel
@@ -210,9 +256,41 @@ export default function App() {
         getProgressForBread={couponManager.getProgressForBread}
         getCouponsForBread={couponManager.getCouponsForBread}
         onBreadClick={() => setShowCouponView(true)}
+        rightActions={isTossApp() ? (
+          <div className={styles.headerRight}>
+            <button
+              className={styles.couponButton}
+              onClick={() => { trackCouponViewOpen(); setShowCouponView(true); }}
+            >
+              🎟️
+              {couponManager.availableCoupons.length > 0 && (
+                <span className={styles.couponBadge}>
+                  {couponManager.availableCoupons.length}
+                </span>
+              )}
+            </button>
+            <button className={styles.profileButton} onClick={() => setShowProfileView(true)}>
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="" className={styles.profileImg} referrerPolicy="no-referrer" />
+              ) : (
+                <span>👤</span>
+              )}
+            </button>
+          </div>
+        ) : undefined}
       />
 
-      <div className={styles.boardArea}>
+      <div
+        className={styles.boardArea}
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'center',
+          padding: '12px 8px 0',
+          minHeight: 0,
+        }}
+      >
         <GameBoardView
           board={game.board}
           selectedPosition={game.selectedPosition}
@@ -227,7 +305,7 @@ export default function App() {
         />
       </div>
 
-      <div className={styles.actionButtons}>
+      <div className={styles.actionButtons} style={isEmbeddedApp() ? { paddingBottom: 48 } : undefined}>
         <button className={styles.newGameButton} onClick={game.startNewGame}>
           ↻ {t('newGame')}
         </button>
@@ -266,6 +344,9 @@ export default function App() {
             <div className={styles.inviteIcon}>🎁</div>
             <h3 className={styles.inviteTitle}>{t('inviteTitle')}</h3>
             <p className={styles.inviteDesc}>{t('inviteDesc')}</p>
+            <button className={styles.shareButton} onClick={referral.shareReferralLink}>
+              📤 {t('share')}
+            </button>
             <div className={styles.linkBox}>
               <input
                 type="text"
@@ -283,9 +364,6 @@ export default function App() {
                 {t('copy')}
               </button>
             </div>
-            <button className={styles.shareButton} onClick={referral.shareReferralLink}>
-              📤 {t('share')}
-            </button>
             {referral.referredCount > 0 && (
               <div className={styles.inviteStats}>
                 <span>👥 {t('invitedFriends')}: {referral.referredCount}</span>
@@ -368,7 +446,7 @@ export default function App() {
           onDeleteAccount={async () => {
             await deleteAccount();
             setShowProfileView(false);
-            setShowLanding(true);
+            if (!isEmbeddedApp()) setShowLanding(true);
           }}
           onClose={() => setShowProfileView(false)}
         />

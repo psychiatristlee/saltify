@@ -66,6 +66,11 @@ export default memo(function BreadCellView({
     width: cellSize,
     height: cellSize,
     backgroundColor: isSpecial && specialInfo ? specialInfo.color : breadInfo.color,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    flexShrink: 0,
   };
 
   if (isDragging && dragOffset) {
@@ -87,7 +92,7 @@ export default memo(function BreadCellView({
         src={imageSrc}
         alt={imageAlt}
         className={styles.icon}
-        style={{ width: cellSize * 0.85, height: cellSize * 0.85 }}
+        style={{ width: cellSize * 0.85, height: cellSize * 0.85, objectFit: 'contain' }}
         draggable={false}
       />
     </div>

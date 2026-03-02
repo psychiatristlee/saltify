@@ -24,8 +24,8 @@ function generateParticles(count: number) {
 
 export default function ComboView({ comboCount, comboScore }: Props) {
   const { t } = useLanguage();
-  // More particles for higher combos
-  const particleCount = Math.min(comboCount * 6, 30);
+  // Particles scaled for performance (reduced count)
+  const particleCount = Math.min(comboCount * 2, 10);
   const particles = useMemo(() => generateParticles(particleCount), [particleCount]);
 
   // Different intensity based on combo count
@@ -38,11 +38,11 @@ export default function ComboView({ comboCount, comboScore }: Props) {
 
       {/* Radial burst lines */}
       <div className={styles.burstContainer}>
-        {Array.from({ length: 12 }).map((_, i) => (
+        {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
             className={styles.burstLine}
-            style={{ transform: `rotate(${i * 30}deg)` }}
+            style={{ transform: `rotate(${i * 60}deg)` }}
           />
         ))}
       </div>

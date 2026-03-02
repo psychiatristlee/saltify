@@ -1,0 +1,14 @@
+# Robots.txt for 솔트빵 (Saltify)
+# https://saltify-game.web.app
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://saltify-game.web.app/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Disallow admin or private paths (if any)
+Disallow: /api/

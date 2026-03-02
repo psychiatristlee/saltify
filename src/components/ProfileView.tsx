@@ -33,7 +33,7 @@ export default function ProfileView({
           <div className={styles.profileCard}>
             <div className={styles.profileAvatar}>
               {photoURL ? (
-                <img src={photoURL} alt="" className={styles.profilePhoto} />
+                <img src={photoURL} alt="" className={styles.profilePhoto} referrerPolicy="no-referrer" />
               ) : (
                 <div className={styles.profilePhotoPlaceholder}>👤</div>
               )}

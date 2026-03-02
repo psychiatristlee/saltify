@@ -9,17 +9,23 @@
     "preview": "vite preview",
     "cap:sync": "npm run build && npx cap sync",
     "cap:ios": "npm run build && npx cap sync ios && npx cap open ios",
-    "cap:android": "npm run build && npx cap sync android && npx cap open android"
+    "cap:android": "npm run build && npx cap sync android && npx cap open android",
+    "toss:dev": "granite dev",
+    "toss:build": "granite build"
   },
   "dependencies": {
+    "@apps-in-toss/web-framework": "^1.11.2",
+    "@capacitor-firebase/authentication": "^8.0.1",
     "@capacitor/android": "^8.0.1",
     "@capacitor/cli": "^8.0.1",
     "@capacitor/core": "^8.0.1",
     "@capacitor/ios": "^8.0.1",
+    "@capacitor/share": "^8.0.1",
     "@google/generative-ai": "^0.24.1",
     "firebase": "^12.8.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.13.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",

@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { Position } from '../models/BreadCell';
 import { BreadType, getAllBreadTypes } from '../models/BreadType';
 import { trackGameStart, trackGameOver, trackLevelUp } from '../services/analytics';
+
 import {
   Board,
   BreadCrushCounts,
@@ -246,6 +247,7 @@ export function useGameViewModel(onBreadCrushed: OnBreadCrushed) {
     );
 
     notifyCrushedBreads(crushCounts, Math.round(rawScore));
+
 
     const crushTotal = Object.values(crushCounts).reduce((a, b) => a + b, 0);
 

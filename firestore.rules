@@ -35,7 +35,7 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated();
       allow update: if isAuthenticated();
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
     }
 
     // Branches collection (authenticated users can read for password validation)
@@ -56,5 +56,6 @@ service cloud.firestore {
       allow read: if isOwner(userId);
       allow write: if isOwner(userId);
     }
+
   }
 }

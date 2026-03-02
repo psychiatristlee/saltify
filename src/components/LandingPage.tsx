@@ -21,24 +21,23 @@ const LANDING_ONLY_BREADS = [
     id: 'cube-choco',
     nameKey: 'landingCubeChocoName' as TranslationKey,
     descKey: 'landingCubeChocoDesc' as TranslationKey,
-    price: 4800,
+    price: 5000,
     image: '/brandings/cube-choco-cream.png',
   },
   {
     id: 'cube-matcha',
     nameKey: 'landingCubeMatchaName' as TranslationKey,
     descKey: 'landingCubeMatchaDesc' as TranslationKey,
-    price: 4800,
+    price: 5000,
     image: '/brandings/cube-matcha-cream.png',
   },
 ];
 
 interface Props {
   onStartGame: () => void;
-  onAdminClick?: () => void;
 }
 
-export default function LandingPage({ onStartGame, onAdminClick }: Props) {
+export default function LandingPage({ onStartGame }: Props) {
   const allBreadTypes = getAllBreadTypes();
   const mapRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
@@ -62,6 +61,45 @@ export default function LandingPage({ onStartGame, onAdminClick }: Props) {
           <button className={styles.ctaButton} onClick={onStartGame}>
             {t('startGame')}
           </button>
+        </div>
+      </section>
+
+      {/* App Download Section */}
+      <section className={styles.downloadSection}>
+        <h2 className={styles.sectionTitle}>{t('downloadApp')}</h2>
+        <div className={styles.downloadButtons}>
+          <a
+            href="https://apps.apple.com/us/app/%EC%86%94%ED%8A%B8%EB%B9%B5/id6758907825"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.downloadButton}
+          >
+            <svg className={styles.downloadIcon} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+            </svg>
+            <div className={styles.downloadText}>
+              <span className={styles.downloadLabel}>Download on the</span>
+              <span className={styles.downloadStore}>App Store</span>
+            </div>
+          </a>
+          <a
+            href="https://play.google.com/store/apps/details?id=com.saltbbang"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.downloadButton}
+          >
+            <svg className={styles.downloadIcon} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3.18 23.49c-.36-.17-.56-.48-.6-.85L1.06 12.32c-.04-.37.1-.72.38-.95L12 2.5l10.56 8.87c.28.23.42.58.38.95l-1.52 10.32c-.04.37-.24.68-.6.85L12 27.5 3.18 23.49z" opacity="0"/>
+              <path d="M1 2.87L1 21.13C1 21.58 1.15 21.98 1.4 22.27L12.39 11.5L1.4 1.73C1.15 2.02 1 2.42 1 2.87Z" fill="#4285F4"/>
+              <path d="M17.44 15.28L12.39 11.5L17.44 7.72L23.29 11.08C23.72 11.32 24 11.64 24 12C24 12.36 23.72 12.68 23.29 12.92L17.44 15.28Z" fill="#FBBC04"/>
+              <path d="M1.4 22.27C1.72 22.63 2.2 22.82 2.74 22.63L17.44 15.28L12.39 11.5L1.4 22.27Z" fill="#EA4335"/>
+              <path d="M1.4 1.73L12.39 11.5L17.44 7.72L2.74 1.37C2.2 1.18 1.72 1.37 1.4 1.73Z" fill="#34A853"/>
+            </svg>
+            <div className={styles.downloadText}>
+              <span className={styles.downloadLabel}>GET IT ON</span>
+              <span className={styles.downloadStore}>Google Play</span>
+            </div>
+          </a>
         </div>
       </section>
 
@@ -135,12 +173,12 @@ export default function LandingPage({ onStartGame, onAdminClick }: Props) {
         </a>
         <p className={styles.footerText}>
           © 2026{' '}
-          <span
+          <a
             className={styles.adminTrigger}
-            onClick={onAdminClick}
+            href="/admin"
           >
             Saltify
-          </span>
+          </a>
           {t('allRightsReserved')}
         </p>
       </footer>

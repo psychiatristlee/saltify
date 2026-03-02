@@ -1,0 +1,69 @@
+<ko-KR>
+솔트, 빵 v1.0 첫 출시!
+
+맛있는 빵을 모아 쿠폰을 받는 퍼즐 게임!
+
+주요 기능:
+- 빵 매칭 퍼즐 게임플레이
+- 캐릭터 성장 시스템 (경험치 & 레벨업)
+- 빵 포인트로 쿠폰 교환
+- 친구 초대 및 네트워크 랭킹
+- Google, Kakao, Apple 소셜 로그인
+- 다국어 지원 (한국어, 영어, 일본어, 중국어)
+</ko-KR>
+
+<en-US>
+Salt Bread v1.0 - First Release!
+
+Collect delicious bread and earn coupons in this fun puzzle game!
+
+Key Features:
+- Bread matching puzzle gameplay
+- Character progression system (XP & leveling)
+- Exchange bread points for coupons
+- Friend referral and network ranking
+- Google, Kakao, Apple social login
+- Multi-language support (Korean, English, Japanese, Chinese)
+</en-US>
+
+<ja-JP>
+ソルトパン v1.0 初リリース！
+
+おいしいパンを集めてクーポンをもらえるパズルゲーム！
+
+主な機能：
+- パンマッチングパズルゲームプレイ
+- キャラクター成長システム（経験値＆レベルアップ）
+- パンポイントでクーポン交換
+- 友達招待＆ネットワークランキング
+- Google、Kakao、Appleソーシャルログイン
+- 多言語対応（韓国語、英語、日本語、中国語）
+</ja-JP>
+
+<zh-CN>
+盐面包 v1.0 首次发布！
+
+收集美味面包，赢取优惠券的趣味拼图游戏！
+
+主要功能：
+- 面包匹配拼图玩法
+- 角色成长系统（经验值和升级）
+- 用面包积分兑换优惠券
+- 好友邀请和网络排名
+- Google、Kakao、Apple社交登录
+- 多语言支持（韩语、英语、日语、中文）
+</zh-CN>
+
+<zh-TW>
+鹽麵包 v1.0 首次發布！
+
+收集美味麵包，贏取優惠券的趣味拼圖遊戲！
+
+主要功能：
+- 麵包配對拼圖玩法
+- 角色成長系統（經驗值和升級）
+- 用麵包積分兌換優惠券
+- 好友邀請和網路排名
+- Google、Kakao、Apple社群登入
+- 多語言支援（韓語、英語、日語、中文）
+</zh-TW>

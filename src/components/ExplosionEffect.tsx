@@ -23,9 +23,8 @@ function generateParticles(count: number, offset: number = 0) {
 }
 
 export default function ExplosionEffect({ x, y, type }: Props) {
-  const baseCount = type === SpecialItemType.MilkTea ? 24 : type === SpecialItemType.Choco ? 16 : 12;
+  const baseCount = type === SpecialItemType.MilkTea ? 10 : type === SpecialItemType.Choco ? 8 : 6;
   const particles = useMemo(() => generateParticles(baseCount), [baseCount]);
-  const secondaryParticles = useMemo(() => generateParticles(baseCount, 500), [baseCount]);
 
   const typeClass =
     type === SpecialItemType.MilkTea
@@ -52,20 +51,6 @@ export default function ExplosionEffect({ x, y, type }: Props) {
             '--ty': `${p.ty}px`,
             '--size': `${p.size}px`,
             '--delay': `${p.delay}s`,
-          } as React.CSSProperties}
-        />
-      ))}
-
-      {/* Secondary wave particles (delayed) */}
-      {secondaryParticles.map((p) => (
-        <div
-          key={p.id}
-          className={`${styles.particle} ${styles.secondaryWave}`}
-          style={{
-            '--tx': `${p.tx * 1.3}px`,
-            '--ty': `${p.ty * 1.3}px`,
-            '--size': `${p.size * 0.8}px`,
-            '--delay': `${p.delay + 0.15}s`,
           } as React.CSSProperties}
         />
       ))}

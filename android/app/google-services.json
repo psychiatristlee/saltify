@@ -1,0 +1,70 @@
+{
+  "project_info": {
+    "project_number": "586425648216",
+    "project_id": "saltify-game",
+    "storage_bucket": "saltify-game.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:586425648216:android:697005086b7d8d840af62d",
+        "android_client_info": {
+          "package_name": "com.saltbbang"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "586425648216-33evb7d2q4ujcobgobbi58jr1oc2isgb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.saltbbang",
+            "certificate_hash": "b842a6f4e4da515a7b0e818872701731e156f7ba"
+          }
+        },
+        {
+          "client_id": "586425648216-8rus2ft6l7sv14ick1r2vd2i4tmisjot.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.saltbbang",
+            "certificate_hash": "5aa524c2d12e90df72163160dd1767a4226da547"
+          }
+        },
+        {
+          "client_id": "586425648216-h83ni2v8gakl71mu8t672jdh0f54n0g8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.saltbbang",
+            "certificate_hash": "9061840a8f6823ca533701c4898520615855f60e"
+          }
+        },
+        {
+          "client_id": "586425648216-uu4e6pve5ncb64kge86bv88jt1hgpmal.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmTXVdpjwMbMftZv4SeudBs8zyJ9KqObA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "586425648216-uu4e6pve5ncb64kge86bv88jt1hgpmal.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "586425648216-d5td90jgb737c6mlqe5jh67i51s75n8o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.salt-bbang"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

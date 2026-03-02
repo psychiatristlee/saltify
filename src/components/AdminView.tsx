@@ -365,6 +365,7 @@ export default function AdminView({ userId, onClose }: Props) {
                             src={admin.photoURL}
                             alt=""
                             className={styles.adminAvatar}
+                            referrerPolicy="no-referrer"
                           />
                         ) : (
                           <div className={styles.adminAvatarPlaceholder}>👤</div>
@@ -420,6 +421,7 @@ export default function AdminView({ userId, onClose }: Props) {
                               src={user.photoURL}
                               alt=""
                               className={styles.adminAvatar}
+                              referrerPolicy="no-referrer"
                             />
                           ) : (
                             <div className={styles.adminAvatarPlaceholder}>👤</div>

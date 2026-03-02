@@ -52,7 +52,7 @@ export default function RankingView({ currentUserId, onClose }: Props) {
 
                   <div className={styles.userInfo}>
                     {user.photoURL ? (
-                      <img src={user.photoURL} alt="" className={styles.userPhoto} />
+                      <img src={user.photoURL} alt="" className={styles.userPhoto} referrerPolicy="no-referrer" />
                     ) : (
                       <div className={styles.userPhotoPlaceholder}>👤</div>
                     )}
@@ -75,7 +75,7 @@ export default function RankingView({ currentUserId, onClose }: Props) {
 
                   <div className={styles.breadCounts}>
                     <div className={styles.breadCount}>
-                      <span className={styles.breadTotalIcon}>🥖</span>
+                      <span className={styles.breadTotalIcon}>🎟️</span>
                       <span className={styles.breadCountNum}>
                         {user.breadCounts.reduce((sum, { count }) => sum + count, 0)}
                       </span>

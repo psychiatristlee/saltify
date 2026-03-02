@@ -41,7 +41,6 @@
 
 .urgentCritical {
   animation: urgentPulse 0.8s ease-in-out infinite;
-  box-shadow: 0 0 16px rgba(220, 53, 69, 0.4);
 }
 
 @keyframes urgentPulse {
@@ -61,11 +60,9 @@
 
 @keyframes feverPulse {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
     border-color: #FFD700;
   }
   50% {
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
     border-color: #FFA500;
   }
 }

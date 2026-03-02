@@ -1,13 +1,11 @@
 import {
   doc,
   getDoc,
-  setDoc,
-  updateDoc,
-  serverTimestamp,
-  arrayUnion,
 } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions } from '../../lib/firebase';
 import { t, getDefaultLanguage } from '../../lib/i18n';
+import { isTossApp } from '../../lib/platform';
 
 const REFERRALS_COLLECTION = 'referrals';
 
@@ -19,7 +17,10 @@ export interface ReferralInfo {
 
 // Generate referral link for a user
 export function generateReferralLink(userId: string): string {
-  const baseUrl = window.location.origin;
+  if (isTossApp()) {
+    return `intoss://salt-bbang?ref=${userId}`;
+  }
+  const baseUrl = 'https://salt-bbang.com';
   return `${baseUrl}?ref=${userId}`;
 }
 
@@ -36,64 +37,19 @@ export function clearReferralFromUrl(): void {
   window.history.replaceState({}, '', url.toString());
 }
 
-// Process referral when a new user signs up
+// Process referral securely via Cloud Function
 export async function processReferral(
-  newUserId: string,
+  _newUserId: string, // Not used - server uses auth.uid
   referrerId: string
-): Promise<{ success: boolean; message: string }> {
-  // Don't allow self-referral
-  if (newUserId === referrerId) {
-    return { success: false, message: t('selfInviteError', getDefaultLanguage()) };
-  }
-
+): Promise<{ success: boolean; message: string; isExistingUser?: boolean }> {
   try {
-    // Check if this user was already referred
-    const newUserRef = doc(db, REFERRALS_COLLECTION, newUserId);
-    const newUserDoc = await getDoc(newUserRef);
+    const processReferralSecure = httpsCallable<
+      { referrerId: string },
+      { success: boolean; message: string; isExistingUser: boolean }
+    >(functions, 'processReferralSecure');
 
-    if (newUserDoc.exists() && newUserDoc.data().referredBy) {
-      return { success: false, message: t('alreadyReferred', getDefaultLanguage()) };
-    }
-
-    // Check if referrer exists (check both users collection and referrals collection)
-    const referrerUserRef = doc(db, 'users', referrerId);
-    const referrerUserDoc = await getDoc(referrerUserRef);
-    const referrerReferralCheckRef = doc(db, REFERRALS_COLLECTION, referrerId);
-    const referrerReferralCheckDoc = await getDoc(referrerReferralCheckRef);
-
-    // Referrer is valid if they exist in either collection (they have used the app)
-    if (!referrerUserDoc.exists() && !referrerReferralCheckDoc.exists()) {
-      // Try to create a minimal referrer entry if the referrer ID looks valid
-      if (referrerId.length > 10) {
-        // Assume valid referrer - they just haven't been recorded yet
-        console.log('Referrer not found in DB, but ID looks valid:', referrerId);
-      } else {
-        return { success: false, message: t('invalidReferralCode', getDefaultLanguage()) };
-      }
-    }
-
-    // Mark new user as referred
-    await setDoc(newUserRef, {
-      referredBy: referrerId,
-      referredAt: serverTimestamp(),
-    }, { merge: true });
-
-    // Add new user to referrer's list
-    const referrerReferralRef = doc(db, REFERRALS_COLLECTION, referrerId);
-    const referrerReferralDoc = await getDoc(referrerReferralRef);
-
-    if (referrerReferralDoc.exists()) {
-      await updateDoc(referrerReferralRef, {
-        referredUsers: arrayUnion(newUserId),
-      });
-    } else {
-      await setDoc(referrerReferralRef, {
-        referredUsers: [newUserId],
-        createdAt: serverTimestamp(),
-      });
-    }
-
-    return { success: true, message: t('referralComplete', getDefaultLanguage()) };
+    const result = await processReferralSecure({ referrerId });
+    return result.data;
   } catch (error) {
     console.error('Referral processing error:', error);
     return { success: false, message: t('referralProcessError', getDefaultLanguage()) };

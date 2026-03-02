@@ -47,19 +47,19 @@
 }
 
 .overlay.low .flash {
-  background: radial-gradient(circle, rgba(255, 200, 100, 0.3) 0%, transparent 70%);
+  background: rgba(255, 200, 100, 0.15);
 }
 
 .overlay.medium .flash {
-  background: radial-gradient(circle, rgba(255, 150, 50, 0.4) 0%, transparent 70%);
+  background: rgba(255, 150, 50, 0.2);
 }
 
 .overlay.high .flash {
-  background: radial-gradient(circle, rgba(255, 100, 50, 0.5) 0%, transparent 70%);
+  background: rgba(255, 100, 50, 0.25);
 }
 
 .overlay.extreme .flash {
-  background: radial-gradient(circle, rgba(255, 50, 50, 0.6) 0%, transparent 70%);
+  background: rgba(255, 50, 50, 0.3);
 }
 
 @keyframes flashAnim {
@@ -119,16 +119,14 @@
   width: var(--size);
   height: var(--size);
   border-radius: 50%;
-  background: linear-gradient(135deg, #FFD700, #FF8C00);
-  box-shadow: 0 0 10px rgba(255, 200, 0, 0.8);
+  background: #FFB347;
   animation: particleExplode 0.8s ease-out forwards;
   animation-delay: var(--delay);
 }
 
 .overlay.high .particle,
 .overlay.extreme .particle {
-  background: linear-gradient(135deg, #FF6B6B, #FFE66D);
-  box-shadow: 0 0 15px rgba(255, 100, 100, 0.8);
+  background: #FF6B6B;
 }
 
 @keyframes particleExplode {

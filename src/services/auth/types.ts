@@ -10,6 +10,7 @@ export interface AuthService {
   getCurrentUser(): User | null;
   signInWithGoogle(): Promise<User>;
   signInWithKakao(): Promise<User>;
+  signInWithApple(): Promise<User>;
   signOut(): Promise<void>;
   deleteAccount(): Promise<void>;
   onAuthStateChanged(callback: (user: User | null) => void): () => void;

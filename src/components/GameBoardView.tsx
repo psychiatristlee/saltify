@@ -266,12 +266,20 @@ export default function GameBoardView({
       <div
         ref={boardRef}
         className={`${styles.board}${isBigMatch ? ` ${styles.boardShake}` : ''}${feverActive ? ` ${styles.feverGlow}` : moves <= 3 ? ` ${styles.urgentCritical}` : moves <= 5 ? ` ${styles.urgentLow}` : ''}`}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '3px',
+          padding: '6px',
+          background: 'rgba(139, 69, 19, 0.15)',
+          borderRadius: '16px',
+        }}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
       >
         {Array.from({ length: ROWS }, (_, row) => (
-          <div key={row} className={styles.row}>
+          <div key={row} className={styles.row} style={{ display: 'flex', gap: '3px' }}>
             {Array.from({ length: COLS }, (_, col) => {
               const cell = board[row][col];
               const isSelected =

@@ -27,15 +27,19 @@ export default function InviteButton({
     }
   };
 
-  const handleShare = async () => {
-    await onShare();
+  const handleInvite = async () => {
+    // Try native share first, fall back to modal
+    const shared = await onShare();
+    if (!shared) {
+      setShowModal(true);
+    }
   };
 
   if (!referralLink) return null;
 
   return (
     <>
-      <button className={styles.inviteButton} onClick={() => setShowModal(true)}>
+      <button className={styles.inviteButton} onClick={handleInvite}>
         👥 {t('inviteFriend')}
       </button>
 
@@ -61,10 +65,6 @@ export default function InviteButton({
                 {copied ? t('copied') : t('copy')}
               </button>
             </div>
-
-            <button className={styles.shareButton} onClick={handleShare}>
-              📤 {t('share')}
-            </button>
 
             {referredCount > 0 && (
               <div className={styles.stats}>

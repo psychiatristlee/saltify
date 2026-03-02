@@ -1,9 +1,12 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.saltify.game',
-  appName: 'Saltify',
+  appId: 'com.saltbbang',
+  appName: 'salt-bbang',
   webDir: 'dist',
+  server: {
+    iosScheme: 'http',
+  },
   ios: {
     contentInset: 'automatic',
   },
@@ -15,6 +18,10 @@ const config: CapacitorConfig = {
       launchShowDuration: 2000,
       backgroundColor: '#fff8e7',
       showSpinner: false,
+    },
+    FirebaseAuthentication: {
+      skipNativeAuth: true,
+      providers: ['google.com', 'apple.com'],
     },
   },
 };

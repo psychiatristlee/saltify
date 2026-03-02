@@ -19,13 +19,11 @@
 
 .sparkle {
   border-radius: 50%;
-  box-shadow: 0 0 4px var(--color), 0 0 8px var(--color);
   animation: sparkleFly 0.5s ease-out forwards;
 }
 
 .firework {
   border-radius: 50%;
-  box-shadow: 0 0 6px var(--color), 0 0 12px var(--color);
   animation: fireworkFly 1.2s ease-out forwards;
 }
 

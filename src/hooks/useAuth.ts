@@ -10,6 +10,16 @@ interface AuthState {
   error: string | null;
 }
 
+// Format error message with technical details for debugging
+function formatErrorMessage(error: unknown, fallback: string): string {
+  if (!(error instanceof Error)) return `${fallback} [${String(error)}]`;
+  const code = (error as { code?: string }).code;
+  const parts = [fallback];
+  if (code) parts.push(`[${code}]`);
+  parts.push(error.message);
+  return parts.join('\n');
+}
+
 export function useAuth() {
   const [state, setState] = useState<AuthState>({
     user: authService.getCurrentUser(),
@@ -26,7 +36,18 @@ export function useAuth() {
       }
     });
 
-    return unsubscribe;
+    // Timeout fallback: if auth never resolves in native app, stop loading after 5s
+    const timeout = setTimeout(() => {
+      setState(prev => {
+        if (prev.isLoading) return { ...prev, isLoading: false };
+        return prev;
+      });
+    }, 5000);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
@@ -37,7 +58,7 @@ export function useAuth() {
       trackLogin('google');
       return user;
     } catch (error) {
-      const message = error instanceof Error ? error.message : t('loginFailed', getDefaultLanguage());
+      const message = formatErrorMessage(error, t('loginFailed', getDefaultLanguage()));
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       throw error;
     }
@@ -51,7 +72,21 @@ export function useAuth() {
       trackLogin('kakao');
       return user;
     } catch (error) {
-      const message = error instanceof Error ? error.message : t('kakaoLoginFailed', getDefaultLanguage());
+      const message = formatErrorMessage(error, t('kakaoLoginFailed', getDefaultLanguage()));
+      setState((prev) => ({ ...prev, isLoading: false, error: message }));
+      throw error;
+    }
+  }, []);
+
+  const signInWithApple = useCallback(async () => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    try {
+      const user = await authService.signInWithApple();
+      setState({ user, isLoading: false, error: null });
+      trackLogin('apple');
+      return user;
+    } catch (error) {
+      const message = formatErrorMessage(error, t('loginFailed', getDefaultLanguage()));
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       throw error;
     }
@@ -99,6 +134,7 @@ export function useAuth() {
     error: state.error,
     signInWithGoogle,
     signInWithKakao,
+    signInWithApple,
     signOut,
     deleteAccount,
   };

@@ -54,7 +54,7 @@ export default function FriendsCharacterView({ userId, onClose }: Props) {
                 return (
                   <div key={friend.userId} className={styles.friendCard}>
                     {friend.photoURL ? (
-                      <img src={friend.photoURL} alt="" className={styles.friendPhoto} />
+                      <img src={friend.photoURL} alt="" className={styles.friendPhoto} referrerPolicy="no-referrer" />
                     ) : (
                       <div className={styles.friendPhotoPlaceholder}>👤</div>
                     )}

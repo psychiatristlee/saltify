@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>586425648216-d5td90jgb737c6mlqe5jh67i51s75n8o.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.586425648216-d5td90jgb737c6mlqe5jh67i51s75n8o</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCMfMXp0AshgW7Wda_1_cxfvaCyllAAYnI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>586425648216</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.salt-bbang</string>
+	<key>PROJECT_ID</key>
+	<string>saltify-game</string>
+	<key>STORAGE_BUCKET</key>
+	<string>saltify-game.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:586425648216:ios:6e51298289f21ebc0af62d</string>
+</dict>
+</plist>

@@ -8,12 +8,14 @@ import {
 } from '../services/referral';
 import { t, getDefaultLanguage } from '../lib/i18n';
 import { trackReferralCopy, trackReferralShare } from '../services/analytics';
+import { isTossApp, isNativeApp } from '../lib/platform';
 
 interface ReferralState {
   referralLink: string | null;
   referredCount: number;
   pendingReferrerId: string | null;
   isProcessing: boolean;
+  existingUserConnected: boolean; // True if existing user was connected as friend
 }
 
 export function useReferral(userId: string | null) {
@@ -22,6 +24,7 @@ export function useReferral(userId: string | null) {
     referredCount: 0,
     pendingReferrerId: null,
     isProcessing: false,
+    existingUserConnected: false,
   });
   const initialized = useRef(false);
   const processedRef = useRef(false);
@@ -54,6 +57,7 @@ export function useReferral(userId: string | null) {
   const processPendingReferral = useCallback(async (): Promise<{
     success: boolean;
     message: string;
+    isExistingUser?: boolean;
   }> => {
     if (!userId || !state.pendingReferrerId || processedRef.current) {
       return { success: false, message: '' };
@@ -71,6 +75,16 @@ export function useReferral(userId: string | null) {
           ...prev,
           pendingReferrerId: null,
           isProcessing: false,
+          existingUserConnected: false,
+        }));
+      } else if (result.isExistingUser) {
+        // Existing user connected as friend - mark as success for UI purposes
+        clearReferralFromUrl();
+        setState((prev) => ({
+          ...prev,
+          pendingReferrerId: null,
+          isProcessing: false,
+          existingUserConnected: true,
         }));
       } else {
         setState((prev) => ({ ...prev, isProcessing: false }));
@@ -99,10 +113,43 @@ export function useReferral(userId: string | null) {
     }
   }, [state.referralLink]);
 
-  // Share referral link
+  // Share referral link using native share sheet
   const shareReferralLink = useCallback(async (): Promise<boolean> => {
     if (!state.referralLink) return false;
 
+    // Use Toss share SDK when running in Toss
+    if (isTossApp()) {
+      try {
+        const { share, getTossShareLink } = await import('@apps-in-toss/web-framework');
+        const tossLink = await getTossShareLink(state.referralLink);
+        await share({ message: `${t('shareText', getDefaultLanguage())} ${tossLink}` });
+        trackReferralShare();
+        return true;
+      } catch (error) {
+        console.error('Toss share failed:', error);
+        return false;
+      }
+    }
+
+    // Use Capacitor Share plugin on native apps
+    if (isNativeApp()) {
+      try {
+        const { Share } = await import('@capacitor/share');
+        await Share.share({
+          title: t('shareTitle', getDefaultLanguage()),
+          text: t('shareText', getDefaultLanguage()),
+          url: state.referralLink,
+          dialogTitle: t('inviteTitle', getDefaultLanguage()),
+        });
+        trackReferralShare();
+        return true;
+      } catch (error) {
+        console.error('Native share failed:', error);
+        return false;
+      }
+    }
+
+    // Use Web Share API on supported browsers
     if (navigator.share) {
       try {
         await navigator.share({
@@ -118,10 +165,16 @@ export function useReferral(userId: string | null) {
         }
         return false;
       }
-    } else {
-      return copyReferralLink();
     }
+
+    // Fallback: copy to clipboard
+    return copyReferralLink();
   }, [state.referralLink, copyReferralLink]);
+
+  // Reset existing user connected state
+  const resetExistingUserConnected = useCallback(() => {
+    setState((prev) => ({ ...prev, existingUserConnected: false }));
+  }, []);
 
   return {
     ...state,
@@ -129,5 +182,6 @@ export function useReferral(userId: string | null) {
     copyReferralLink,
     shareReferralLink,
     hasPendingReferral: !!state.pendingReferrerId,
+    resetExistingUserConnected,
   };
 }
