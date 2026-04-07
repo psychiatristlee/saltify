@@ -1,0 +1,9 @@
+# Robots.txt for 솔트빵 (Saltify)
+# https://salt-bbang.com
+
+User-agent: *
+Allow: /
+
+Sitemap: https://salt-bbang.com/sitemap.xml
+
+Crawl-delay: 1

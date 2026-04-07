@@ -1,9 +1,9 @@
 {
   "firestore": {
-    "rules": "game/firestore.rules"
+    "rules": "firestore.rules"
   },
   "hosting": {
-    "public": "game/dist",
+    "public": "dist",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -12,10 +12,10 @@
     "redirects": [
       {
         "source": "**",
-        "destination": "https://game.salt-bbang.com/:splat",
+        "destination": "https://salt-bbang.com/:splat",
         "type": 301,
         "regex": false,
-        "host": "www.game.salt-bbang.com"
+        "host": "www.salt-bbang.com"
       }
     ],
     "rewrites": [
@@ -27,7 +27,7 @@
   },
   "functions": [
     {
-      "source": "game/functions",
+      "source": "functions",
       "codebase": "default",
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
