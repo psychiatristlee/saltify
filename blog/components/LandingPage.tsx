@@ -6,6 +6,7 @@ import { LANGUAGES } from '@/lib/i18n';
 import { useLanguage } from '@/lib/LanguageContext';
 import { MENU_BREADS } from '@/lib/breadData';
 import NaverMap, { openNaverMapPlace } from './NaverMap';
+import BlogList from './BlogList';
 import styles from './LandingPage.module.css';
 
 const GAME_URL = 'https://game.salt-bbang.com';
@@ -118,6 +119,9 @@ export default function LandingPage() {
           </Link>
         )}
       </section>
+
+      {/* Blog Section */}
+      <BlogList />
 
       {/* Map Section */}
       <section className={styles.mapSection}>

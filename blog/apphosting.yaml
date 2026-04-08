@@ -6,3 +6,5 @@ runConfig:
 env:
   - variable: NEXT_PUBLIC_SITE_URL
     value: https://salt-bbang.com
+  - variable: NEXT_PUBLIC_GEMINI_API_KEY
+    secret: GEMINI_API_KEY
