@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { LanguageProvider } from '@/lib/LanguageContext';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -65,7 +66,9 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <meta name="theme-color" content="#FF8C00" />
       </head>
-      <body>{children}</body>
+      <body>
+          <LanguageProvider>{children}</LanguageProvider>
+      </body>
     </html>
   );
 }

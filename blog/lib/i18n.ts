@@ -199,6 +199,13 @@ const translations = {
     'zh-TW': '四面酥脆的可愛方塊鹽麵包，內含滿滿的濃郁抹茶奶油',
     ja: '4面がサクサクのかわいいキューブ塩パンの中に濃厚抹茶クリームがたっぷり',
   },
+  viewFullMenu: {
+    ko: '전체 메뉴 보기',
+    en: 'View Full Menu',
+    'zh-CN': '查看完整菜单',
+    'zh-TW': '查看完整菜單',
+    ja: 'メニュー全体を見る (PDF)',
+  },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

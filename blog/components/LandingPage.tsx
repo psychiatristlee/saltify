@@ -1,7 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { t } from '@/lib/i18n';
+import Link from 'next/link';
+import { LANGUAGES } from '@/lib/i18n';
+import { useLanguage } from '@/lib/LanguageContext';
 import { MENU_BREADS } from '@/lib/breadData';
 import NaverMap, { openNaverMapPlace } from './NaverMap';
 import styles from './LandingPage.module.css';
@@ -9,10 +11,25 @@ import styles from './LandingPage.module.css';
 const GAME_URL = 'https://game.salt-bbang.com';
 
 export default function LandingPage() {
+  const { language, setLanguage, t } = useLanguage();
+
   return (
     <div className={styles.container}>
       {/* Hero Header */}
       <header className={styles.heroHeader}>
+        <div className={styles.languageSelector}>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as typeof language)}
+            className={styles.langSelect}
+          >
+            {LANGUAGES.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.flag} {lang.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <Image
           src="/brandings/horizontal-thumbnail.png"
           alt={t('storeName')}
@@ -93,6 +110,13 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+
+        {/* Japanese PDF Menu Link */}
+        {language === 'ja' && (
+          <Link href="/menu/jp" className={styles.pdfMenuLink}>
+            📄 {t('viewFullMenu')}
+          </Link>
+        )}
       </section>
 
       {/* Map Section */}
