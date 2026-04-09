@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { LANGUAGES } from '@/lib/i18n';
 import { useLanguage } from '@/lib/LanguageContext';
+import LanguageSelector from './LanguageSelector';
 import { MENU_BREADS } from '@/lib/breadData';
 import NaverMap, { openNaverMapPlace } from './NaverMap';
 import BlogList from './BlogList';
@@ -18,19 +18,7 @@ export default function LandingPage() {
     <div className={styles.container}>
       {/* Hero Header */}
       <header className={styles.heroHeader}>
-        <div className={styles.languageSelector}>
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value as typeof language)}
-            className={styles.langSelect}
-          >
-            {LANGUAGES.map((lang) => (
-              <option key={lang.code} value={lang.code}>
-                {lang.flag} {lang.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <LanguageSelector />
         <Image
           src="/brandings/horizontal-thumbnail.png"
           alt={t('storeName')}

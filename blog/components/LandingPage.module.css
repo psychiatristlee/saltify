@@ -20,25 +20,6 @@
   position: relative;
 }
 
-/* Language Selector */
-.languageSelector {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 10;
-}
-
-.langSelect {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 140, 0, 0.3);
-  background: rgba(255, 255, 255, 0.9);
-  font-size: 0.8125rem;
-  color: #333;
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-}
-
 .heroHeaderImage {
   width: 100%;
   height: auto;
