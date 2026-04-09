@@ -9,6 +9,7 @@ import { firestoreScoreService } from './services/score';
 import { getReferrerFromUrl } from './services/referral';
 import { BREAD_DATA } from './models/BreadType';
 import { isEmbeddedApp, isTossApp } from './lib/platform';
+import { isUserAdmin } from './services/admin';
 import {
   trackScreenView,
   trackCouponViewOpen,
@@ -69,6 +70,7 @@ function MainApp() {
     // Show landing for web first-time visitors
     return !localStorage.getItem('saltify_visited');
   });
+  const [isAdmin, setIsAdmin] = useState(false);
   const hasRecordedGameOver = useRef(false);
   const referralProcessed = useRef(false);
 
@@ -150,6 +152,15 @@ function MainApp() {
       hasRecordedGameOver.current = false;
     }
   }, [game.gameState, game.score, game.level, user, couponManager.totalPoints, couponManager.savePointsToFirestore]);
+
+  // Check admin status
+  useEffect(() => {
+    if (user) {
+      isUserAdmin(user.id).then(setIsAdmin);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   // Track screen views
   useEffect(() => {
@@ -439,6 +450,7 @@ function MainApp() {
         <ProfileView
           userName={user.displayName || ''}
           photoURL={user.photoURL || null}
+          isAdmin={isAdmin}
           onLogout={() => {
             setShowProfileView(false);
             confirmLogout();

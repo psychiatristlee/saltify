@@ -5,6 +5,7 @@ import styles from './ProfileView.module.css';
 interface Props {
   userName: string;
   photoURL: string | null;
+  isAdmin?: boolean;
   onLogout: () => void;
   onDeleteAccount: () => void;
   onClose: () => void;
@@ -13,6 +14,7 @@ interface Props {
 export default function ProfileView({
   userName,
   photoURL,
+  isAdmin,
   onLogout,
   onDeleteAccount,
   onClose,
@@ -100,6 +102,24 @@ export default function ProfileView({
               </div>
             </div>
           </section>
+
+          {/* Admin Menu */}
+          {isAdmin && (
+            <section className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <span className={styles.sectionIcon}>📝</span>
+                <h3 className={styles.sectionTitle}>관리자</h3>
+              </div>
+              <a
+                href="https://salt-bbang.com/admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.blogButton}
+              >
+                ✍️ 블로그 작성
+              </a>
+            </section>
+          )}
 
           {/* Account */}
           <section className={styles.section}>
