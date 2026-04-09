@@ -347,3 +347,10 @@
   font-size: 0.75rem;
   color: #999;
 }
+
+.adminLink {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+}

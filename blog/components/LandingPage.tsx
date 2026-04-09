@@ -141,7 +141,7 @@ export default function LandingPage() {
           <span>@salt_bread_official</span>
         </a>
         <p className={styles.footerText}>
-          &copy; 2026 Saltify{t('allRightsReserved')}
+          &copy; 2026 <a href="/admin" className={styles.adminLink}>Saltify</a>{t('allRightsReserved')}
         </p>
       </footer>
     </div>
