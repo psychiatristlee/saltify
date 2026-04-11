@@ -233,6 +233,45 @@
   padding: 40px;
 }
 
+/* Rankings */
+.rankList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rankItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.rankInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.rankInfo h3 {
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.rankMeta {
+  font-size: 11px;
+  color: #999;
+}
+
+.rankDisplay {
+  font-size: 22px;
+  font-weight: 800;
+  min-width: 70px;
+  text-align: center;
+}
+
 /* Editor */
 .editorHeader {
   display: flex;

@@ -7,9 +7,12 @@ import { auth, db } from '@/lib/firebase';
 import { uploadMedia, listMedia, deleteMedia, MediaItem } from '@/lib/services/mediaService';
 import { createPost, getAllPosts, updatePost, deletePost, BlogPost } from '@/lib/services/blogService';
 import { generateBlogPost } from '@/lib/services/aiService';
+import {
+  listKeywords, addKeyword, deleteKeyword, updateKeywordRank, TrackedKeyword,
+} from '@/lib/services/keywordService';
 import styles from './page.module.css';
 
-type Tab = 'media' | 'posts';
+type Tab = 'media' | 'posts' | 'rankings';
 type EditorMode = { type: 'idle' } | { type: 'edit'; post: BlogPost } | { type: 'generating' };
 
 export default function AdminPage() {
@@ -26,6 +29,12 @@ export default function AdminPage() {
 
   // Posts state
   const [posts, setPosts] = useState<BlogPost[]>([]);
+
+  // Rankings state
+  const [keywords, setKeywords] = useState<TrackedKeyword[]>([]);
+  const [newKeyword, setNewKeyword] = useState('');
+  const [checkingId, setCheckingId] = useState<string | null>(null);
+  const [checkingAll, setCheckingAll] = useState(false);
 
   // Editor state
   const [editor, setEditor] = useState<EditorMode>({ type: 'idle' });
@@ -68,12 +77,62 @@ export default function AdminPage() {
     setPosts(items);
   }, []);
 
+  const loadKeywords = useCallback(async () => {
+    const items = await listKeywords();
+    setKeywords(items);
+  }, []);
+
   useEffect(() => {
     if (isAdmin) {
       loadMedia();
       loadPosts();
+      loadKeywords();
     }
-  }, [isAdmin, loadMedia, loadPosts]);
+  }, [isAdmin, loadMedia, loadPosts, loadKeywords]);
+
+  // ----- Rankings handlers -----
+  const handleAddKeyword = async () => {
+    if (!newKeyword.trim()) return;
+    await addKeyword(newKeyword);
+    setNewKeyword('');
+    await loadKeywords();
+  };
+
+  const checkKeyword = async (kw: TrackedKeyword) => {
+    setCheckingId(kw.id);
+    try {
+      const res = await fetch(`/api/naver-rank?keyword=${encodeURIComponent(kw.keyword)}`);
+      const data = await res.json();
+      await updateKeywordRank(kw.id, data.rank ?? null);
+      await loadKeywords();
+    } catch (e) {
+      console.error(e);
+      alert('순위 조회 실패');
+    } finally {
+      setCheckingId(null);
+    }
+  };
+
+  const checkAllKeywords = async () => {
+    setCheckingAll(true);
+    for (const kw of keywords) {
+      try {
+        const res = await fetch(`/api/naver-rank?keyword=${encodeURIComponent(kw.keyword)}`);
+        const data = await res.json();
+        await updateKeywordRank(kw.id, data.rank ?? null);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    await loadKeywords();
+    setCheckingAll(false);
+  };
+
+  const handleDeleteKeyword = async (id: string) => {
+    if (!confirm('이 키워드를 삭제하시겠습니까?')) return;
+    await deleteKeyword(id);
+    await loadKeywords();
+  };
 
   const handleLogin = async () => {
     await signInWithPopup(auth, new GoogleAuthProvider());
@@ -246,6 +305,7 @@ export default function AdminPage() {
         <div className={styles.tabs}>
           <button onClick={() => setTab('media')} className={tab === 'media' ? styles.activeTab : styles.tab}>미디어</button>
           <button onClick={() => setTab('posts')} className={tab === 'posts' ? styles.activeTab : styles.tab}>포스트</button>
+          <button onClick={() => setTab('rankings')} className={tab === 'rankings' ? styles.activeTab : styles.tab}>순위</button>
         </div>
       </div>
 
@@ -312,6 +372,85 @@ export default function AdminPage() {
             </div>
           ))}
           {posts.length === 0 && <p className={styles.empty}>아직 포스트가 없습니다</p>}
+        </div>
+      )}
+
+      {tab === 'rankings' && (
+        <div>
+          <div className={styles.toolbar}>
+            <input
+              value={newKeyword}
+              onChange={(e) => setNewKeyword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddKeyword()}
+              placeholder="키워드 입력 (예: 홍대 소금빵)"
+              className={styles.input}
+              style={{ flex: 1, minWidth: 200 }}
+            />
+            <button onClick={handleAddKeyword} className={styles.uploadBtn}>+ 추가</button>
+            {keywords.length > 0 && (
+              <button
+                onClick={checkAllKeywords}
+                disabled={checkingAll}
+                className={styles.generateBtn}
+              >
+                {checkingAll ? '조회 중...' : '🔄 전체 갱신'}
+              </button>
+            )}
+          </div>
+
+          <div className={styles.rankList}>
+            {keywords.map((kw) => {
+              const isChecking = checkingId === kw.id;
+              const rankDisplay =
+                kw.lastRank === null
+                  ? kw.lastCheckedAt ? '100위 밖' : '미확인'
+                  : `${kw.lastRank}위`;
+              const rankColor =
+                kw.lastRank === null
+                  ? '#999'
+                  : kw.lastRank <= 3
+                  ? '#4CAF50'
+                  : kw.lastRank <= 10
+                  ? '#FF8C00'
+                  : '#888';
+
+              return (
+                <div key={kw.id} className={styles.rankItem}>
+                  <div className={styles.rankInfo}>
+                    <h3>{kw.keyword}</h3>
+                    <p className={styles.rankMeta}>
+                      {kw.lastCheckedAt
+                        ? `마지막 조회: ${kw.lastCheckedAt.toDate().toLocaleString('ko-KR')}`
+                        : '아직 조회되지 않음'}
+                    </p>
+                  </div>
+                  <div className={styles.rankDisplay} style={{ color: rankColor }}>
+                    {isChecking ? '...' : rankDisplay}
+                  </div>
+                  <div className={styles.postActions}>
+                    <button
+                      onClick={() => checkKeyword(kw)}
+                      disabled={isChecking}
+                      className={styles.editBtn}
+                    >
+                      {isChecking ? '...' : '조회'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteKeyword(kw.id)}
+                      className={styles.deleteBtnSmall}
+                    >
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+            {keywords.length === 0 && (
+              <p className={styles.empty}>
+                추적할 키워드를 추가하세요. (예: &quot;홍대 소금빵&quot;, &quot;연남동 베이커리&quot;)
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>
