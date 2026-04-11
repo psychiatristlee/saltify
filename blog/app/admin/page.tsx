@@ -260,6 +260,16 @@ export default function AdminPage() {
         <div className={styles.editorHeader}>
           <button onClick={() => setEditor({ type: 'idle' })} className={styles.backBtn}>← 목록</button>
           <h2>{editId ? '포스트 수정' : '새 포스트'}</h2>
+          {editId && editSlug && (
+            <a
+              href={`/blog/${editSlug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.openLink}
+            >
+              🔗 열기
+            </a>
+          )}
         </div>
         <div className={styles.editorForm}>
           <label>제목</label>
@@ -363,7 +373,14 @@ export default function AdminPage() {
                   {post.status === 'published' ? '공개' : '드래프트'}
                 </span>
                 <h3>{post.title}</h3>
-                <p className={styles.postMeta}>/blog/{post.slug}</p>
+                <a
+                  href={`/blog/${post.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.postMeta}
+                >
+                  🔗 /blog/{post.slug}
+                </a>
               </div>
               <div className={styles.postActions}>
                 <button onClick={() => openEditor(post)} className={styles.editBtn}>수정</button>
