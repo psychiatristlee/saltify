@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/LanguageContext';
 import LanguageSelector from './LanguageSelector';
-import { MENU_BREADS } from '@/lib/breadData';
+import { MENU_BREADS, MENU_DRINKS } from '@/lib/breadData';
 import NaverMap, { openNaverMapPlace } from './NaverMap';
 import BlogList from './BlogList';
 import styles from './LandingPage.module.css';
@@ -106,6 +106,22 @@ export default function LandingPage() {
             📄 {t('viewFullMenu')}
           </Link>
         )}
+      </section>
+
+      {/* Drinks Section */}
+      <section className={styles.menuSection}>
+        <h2 className={styles.sectionTitle}>{t('drinks')}</h2>
+        <div className={styles.menuGrid}>
+          {MENU_DRINKS.map((drink) => (
+            <div key={drink.id} className={styles.menuCard}>
+              <h3 className={styles.menuName}>{t(drink.nameKey)}</h3>
+              <p className={styles.menuDesc}>{t(drink.descKey)}</p>
+              <span className={styles.menuPrice}>
+                {drink.price.toLocaleString()}{t('currencyUnit')}
+              </span>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Blog Section */}
