@@ -4,9 +4,13 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import { uploadMedia, listMedia, deleteMedia, MediaItem } from '@/lib/services/mediaService';
+import {
+  uploadMediaRaw, createMediaDoc, listMedia, deleteMedia, updateMediaTags, MediaItem,
+} from '@/lib/services/mediaService';
 import { createPost, getAllPosts, updatePost, deletePost, BlogPost } from '@/lib/services/blogService';
-import { generateBlogPost } from '@/lib/services/aiService';
+import { generateBlogPost, analyzePhotoForMenuTags } from '@/lib/services/aiService';
+import { MENU_BREADS, MENU_DRINKS } from '@/lib/breadData';
+import { t as translate } from '@/lib/i18n';
 import {
   listKeywords, addKeyword, deleteKeyword, updateKeywordRank, TrackedKeyword,
 } from '@/lib/services/keywordService';
@@ -143,7 +147,19 @@ export default function AdminPage() {
     if (!files?.length) return;
     setUploading(true);
     for (const file of Array.from(files)) {
-      await uploadMedia(file);
+      // 1) Storage 업로드
+      const uploaded = await uploadMediaRaw(file);
+      // 2) AI로 메뉴 자동 태깅 (이미지만, 실패해도 무시)
+      let tags: string[] = [];
+      if (uploaded.type === 'image') {
+        try {
+          tags = await analyzePhotoForMenuTags(file);
+        } catch (err) {
+          console.error('auto-tag failed', err);
+        }
+      }
+      // 3) Firestore 메타데이터 저장
+      await createMediaDoc({ ...uploaded, name: file.name, tags });
     }
     await loadMedia();
     setUploading(false);
@@ -160,8 +176,19 @@ export default function AdminPage() {
 
   const handleDeleteMedia = async (item: MediaItem) => {
     if (!confirm(`${item.name} 삭제?`)) return;
-    await deleteMedia(item.path);
+    await deleteMedia(item);
     setSelected((prev) => { const n = new Set(prev); n.delete(item.url); return n; });
+    await loadMedia();
+  };
+
+  // 태그 편집 상태
+  const [taggingId, setTaggingId] = useState<string | null>(null);
+
+  const toggleTag = async (item: MediaItem, menuId: string) => {
+    const next = item.tags.includes(menuId)
+      ? item.tags.filter((t) => t !== menuId)
+      : [...item.tags, menuId];
+    await updateMediaTags(item.id, next);
     await loadMedia();
   };
 
@@ -342,25 +369,85 @@ export default function AdminPage() {
           </div>
 
           <div className={styles.mediaGrid}>
-            {media.map((item) => (
-              <div
-                key={item.path}
-                className={`${styles.mediaItem} ${selected.has(item.url) ? styles.mediaSelected : ''}`}
-                onClick={() => toggleSelect(item.url)}
-              >
-                {item.type === 'video' ? (
-                  <video src={item.url} className={styles.mediaThumbnail} muted />
-                ) : (
-                  <img src={item.url} alt={item.name} className={styles.mediaThumbnail} />
-                )}
-                {selected.has(item.url) && <div className={styles.checkmark}>✓</div>}
-                <button
-                  className={styles.deleteMediaBtn}
-                  onClick={(e) => { e.stopPropagation(); handleDeleteMedia(item); }}
-                >×</button>
-              </div>
-            ))}
+            {media.map((item) => {
+              const allMenus = [...MENU_BREADS, ...MENU_DRINKS];
+              const tagLabels = item.tags
+                .map((id) => {
+                  const m = allMenus.find((x) => x.id === id);
+                  return m ? translate(m.nameKey, 'ko') : null;
+                })
+                .filter(Boolean);
+
+              return (
+                <div
+                  key={item.id}
+                  className={`${styles.mediaItem} ${selected.has(item.url) ? styles.mediaSelected : ''}`}
+                  onClick={() => toggleSelect(item.url)}
+                >
+                  {item.type === 'video' ? (
+                    <video src={item.url} className={styles.mediaThumbnail} muted />
+                  ) : (
+                    <img src={item.url} alt={item.name} className={styles.mediaThumbnail} />
+                  )}
+                  {selected.has(item.url) && <div className={styles.checkmark}>✓</div>}
+                  <button
+                    className={styles.deleteMediaBtn}
+                    onClick={(e) => { e.stopPropagation(); handleDeleteMedia(item); }}
+                  >×</button>
+                  <button
+                    className={styles.tagMediaBtn}
+                    onClick={(e) => { e.stopPropagation(); setTaggingId(item.id); }}
+                    title="태그 편집"
+                  >🏷️</button>
+                  {tagLabels.length > 0 && (
+                    <div className={styles.tagOverlay}>
+                      {tagLabels.slice(0, 3).map((label, i) => (
+                        <span key={i} className={styles.tagChip}>{label}</span>
+                      ))}
+                      {tagLabels.length > 3 && (
+                        <span className={styles.tagChip}>+{tagLabels.length - 3}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
+
+          {/* Tag Editor Modal */}
+          {taggingId && (() => {
+            const item = media.find((m) => m.id === taggingId);
+            if (!item) return null;
+            const allMenus = [...MENU_BREADS, ...MENU_DRINKS];
+            return (
+              <div className={styles.tagModalOverlay} onClick={() => setTaggingId(null)}>
+                <div className={styles.tagModal} onClick={(e) => e.stopPropagation()}>
+                  <div className={styles.tagModalHeader}>
+                    <h3>메뉴 태그</h3>
+                    <button onClick={() => setTaggingId(null)} className={styles.backBtn}>✕</button>
+                  </div>
+                  <img src={item.url} alt="" className={styles.tagModalImage} />
+                  <p className={styles.tagModalHint}>
+                    사진에 나오는 메뉴를 모두 선택하세요 (복수 선택 가능)
+                  </p>
+                  <div className={styles.tagMenuGrid}>
+                    {allMenus.map((menu) => {
+                      const active = item.tags.includes(menu.id);
+                      return (
+                        <button
+                          key={menu.id}
+                          onClick={() => toggleTag(item, menu.id)}
+                          className={`${styles.tagMenuItem} ${active ? styles.tagMenuActive : ''}`}
+                        >
+                          {translate(menu.nameKey, 'ko')}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 

@@ -158,6 +158,128 @@
   justify-content: center;
 }
 
+.tagMediaBtn {
+  position: absolute;
+  top: 4px;
+  right: 30px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: rgba(255, 140, 0, 0.85);
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tagOverlay {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.tagChip {
+  background: rgba(255, 140, 0, 0.9);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Tag Editor Modal */
+.tagModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.tagModal {
+  background: white;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tagModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.tagModalHeader h3 {
+  font-size: 16px;
+  color: #333;
+  margin: 0;
+}
+
+.tagModalImage {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+.tagModalHint {
+  padding: 12px 16px 4px;
+  font-size: 12px;
+  color: #888;
+}
+
+.tagMenuGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 12px 16px 16px;
+  overflow-y: auto;
+}
+
+.tagMenuItem {
+  padding: 10px 12px;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+
+.tagMenuItem:hover {
+  border-color: #FF8C00;
+}
+
+.tagMenuActive {
+  border-color: #FF8C00;
+  background: linear-gradient(135deg, #FF8C00, #FFB347);
+  color: white;
+  font-weight: 700;
+}
+
 /* Post List */
 .postList {
   display: flex;

@@ -1,7 +1,73 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { MENU_BREADS, MENU_DRINKS } from '../breadData';
+import { t } from '../i18n';
 
 // Client-side Gemini - API key will be set from environment
 const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+
+/**
+ * Convert File (from upload) to base64 for Gemini
+ */
+async function fileToGeminiPart(file: File) {
+  const buffer = await file.arrayBuffer();
+  const base64 = btoa(
+    new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+  );
+  return {
+    inlineData: {
+      data: base64,
+      mimeType: file.type || 'image/jpeg',
+    },
+  };
+}
+
+/**
+ * 사진을 분석해서 솔트빵 메뉴들 중 해당하는 것을 자동 태그한다.
+ * 메뉴가 전혀 보이지 않으면 빈 배열 반환.
+ */
+export async function analyzePhotoForMenuTags(file: File): Promise<string[]> {
+  if (!file.type.startsWith('image/')) return [];
+
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+  const menuList = [...MENU_BREADS, ...MENU_DRINKS]
+    .map((m) => `- ${m.id}: ${t(m.nameKey, 'ko')} — ${t(m.descKey, 'ko')}`)
+    .join('\n');
+
+  const prompt = `당신은 솔트빵(Salt,0) 베이커리의 사진 분류 전문가입니다.
+
+## 솔트빵 메뉴 목록
+${menuList}
+
+## 임무
+첨부된 사진을 보고, 사진에 나타나는 메뉴의 id들을 JSON 배열로만 응답하세요.
+
+## 규칙
+- 사진에 보이는 메뉴가 위 목록의 어떤 id에 해당하는지 판단
+- 여러 메뉴가 함께 찍힌 경우 모두 포함
+- 확신이 높은 메뉴만 포함 (추측은 제외)
+- 메뉴가 전혀 안 보이면 빈 배열 []
+- 반드시 id만 사용 (예: "plain", "choco-cream")
+- 마크다운 없이 순수 JSON 배열만 출력
+
+예시 응답: ["plain", "everything"]`;
+
+  try {
+    const imagePart = await fileToGeminiPart(file);
+    const result = await model.generateContent([prompt, imagePart]);
+    const text = result.response.text().trim();
+    const jsonStr = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+    const tags = JSON.parse(jsonStr);
+    if (!Array.isArray(tags)) return [];
+    // 유효한 id만 필터
+    const validIds = new Set([...MENU_BREADS, ...MENU_DRINKS].map((m) => m.id));
+    return tags.filter((t: unknown): t is string => typeof t === 'string' && validIds.has(t));
+  } catch (err) {
+    console.error('analyzePhotoForMenuTags failed:', err);
+    return [];
+  }
+}
 
 interface GeneratedPost {
   title: string;
