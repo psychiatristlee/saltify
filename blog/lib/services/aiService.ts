@@ -21,9 +21,36 @@ async function fileToGeminiPart(file: File) {
   };
 }
 
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+/**
+ * Gemini 호출을 재시도 + 지수 백오프로 감싼다. 429/503 같은 rate-limit에 대응.
+ */
+async function callGeminiWithRetry<T>(
+  fn: () => Promise<T>,
+  { maxRetries = 3, baseDelayMs = 2000 } = {}
+): Promise<T> {
+  let lastErr: unknown;
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      const msg = String(err instanceof Error ? err.message : err);
+      const isRateLimit = /429|resource exhausted|rate.?limit|quota/i.test(msg);
+      const isRetryable = isRateLimit || /503|temporarily|unavailable/i.test(msg);
+      if (!isRetryable || i === maxRetries) break;
+      const delay = baseDelayMs * Math.pow(2, i);
+      console.warn(`Gemini rate limited, retrying in ${delay}ms (attempt ${i + 1}/${maxRetries})`);
+      await sleep(delay);
+    }
+  }
+  throw lastErr;
+}
+
 /**
  * 사진을 분석해서 솔트빵 메뉴들 중 해당하는 것을 자동 태그한다.
- * 메뉴가 전혀 보이지 않으면 빈 배열 반환.
+ * 메뉴가 전혀 보이지 않거나 API 실패 시 빈 배열 반환.
  */
 export async function analyzePhotoForMenuTags(file: File): Promise<string[]> {
   if (!file.type.startsWith('image/')) return [];
@@ -55,12 +82,13 @@ ${menuList}
 
   try {
     const imagePart = await fileToGeminiPart(file);
-    const result = await model.generateContent([prompt, imagePart]);
+    const result = await callGeminiWithRetry(() =>
+      model.generateContent([prompt, imagePart])
+    );
     const text = result.response.text().trim();
     const jsonStr = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
     const tags = JSON.parse(jsonStr);
     if (!Array.isArray(tags)) return [];
-    // 유효한 id만 필터
     const validIds = new Set([...MENU_BREADS, ...MENU_DRINKS].map((m) => m.id));
     return tags.filter((t: unknown): t is string => typeof t === 'string' && validIds.has(t));
   } catch (err) {
@@ -69,7 +97,7 @@ ${menuList}
   }
 }
 
-interface GeneratedPost {
+export interface GeneratedPost {
   title: string;
   slug: string;
   description: string;
@@ -77,12 +105,14 @@ interface GeneratedPost {
   tags: string[];
 }
 
-export async function generateBlogPost(imageUrls: string[]): Promise<GeneratedPost> {
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+const STORE_INFO = `## 매장 정보 (필요시 자연스럽게 포함)
+- 매장명: 솔트빵 (Salt,0)
+- 위치: 서울 마포구 동교로 39길 10 1층 (연남동, 홍대입구역 도보 5분)
+- 영업시간: 11:00 - 19:30 (일요일 휴무, 소진시 마감)
+- Instagram: @salt_bread_official`;
 
-  // Fetch images and convert to base64
-  const imageParts = await Promise.all(
+async function urlsToImageParts(imageUrls: string[]) {
+  return Promise.all(
     imageUrls.slice(0, 8).map(async (url) => {
       const res = await fetch(url);
       const blob = await res.blob();
@@ -91,13 +121,34 @@ export async function generateBlogPost(imageUrls: string[]): Promise<GeneratedPo
         new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
       );
       return {
-        inlineData: {
-          data: base64,
-          mimeType: blob.type || 'image/jpeg',
-        },
+        inlineData: { data: base64, mimeType: blob.type || 'image/jpeg' },
       };
     })
   );
+}
+
+function parseGeneratedPost(text: string, fallback?: GeneratedPost): GeneratedPost {
+  const jsonStr = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+  try {
+    return JSON.parse(jsonStr) as GeneratedPost;
+  } catch {
+    return (
+      fallback || {
+        title: '새 블로그 포스트',
+        slug: `post-${Date.now().toString(36)}`,
+        description: '솔트빵의 새로운 소식',
+        content: `<p>${text}</p>`,
+        tags: ['솔트빵', '소금빵'],
+      }
+    );
+  }
+}
+
+export async function generateBlogPost(imageUrls: string[]): Promise<GeneratedPost> {
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+  const imageParts = await urlsToImageParts(imageUrls);
 
   const prompt = `당신은 서울 홍대/연남동에 위치한 수제 소금빵 전문 베이커리 "솔트빵(Salt,0)"의 블로그 에디터입니다.
 
@@ -111,11 +162,7 @@ export async function generateBlogPost(imageUrls: string[]): Promise<GeneratedPo
 - SEO에 최적화된 제목과 설명문 작성
 - 한국어로 작성
 
-## 매장 정보 (필요시 자연스럽게 포함)
-- 매장명: 솔트빵 (Salt,0)
-- 위치: 서울 마포구 동교로 39길 10 1층 (연남동, 홍대입구역 도보 5분)
-- 영업시간: 11:00-21:00 (일요일 휴무)
-- Instagram: @salt_bread_official
+${STORE_INFO}
 
 ## 응답 형식 (반드시 이 JSON 형식으로)
 {
@@ -130,22 +177,55 @@ export async function generateBlogPost(imageUrls: string[]): Promise<GeneratedPo
 
 중요: 반드시 유효한 JSON만 응답하세요. 마크다운 코드블록 없이 순수 JSON만 출력하세요.`;
 
-  const result = await model.generateContent([prompt, ...imageParts]);
-  const text = result.response.text().trim();
+  const result = await callGeminiWithRetry(() =>
+    model.generateContent([prompt, ...imageParts])
+  );
+  return parseGeneratedPost(result.response.text());
+}
 
-  // Strip markdown code fences if present
-  const jsonStr = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+/**
+ * 사용자 피드백을 받아 현재 draft를 수정한다. 인터랙티브 리파인먼트용.
+ */
+export async function refineBlogPost(
+  current: GeneratedPost,
+  userFeedback: string,
+  imageUrls: string[]
+): Promise<GeneratedPost> {
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-  try {
-    return JSON.parse(jsonStr) as GeneratedPost;
-  } catch {
-    // Fallback if parsing fails
-    return {
-      title: '새 블로그 포스트',
-      slug: `post-${Date.now().toString(36)}`,
-      description: '솔트빵의 새로운 소식',
-      content: `<p>${text}</p>`,
-      tags: ['솔트빵', '소금빵'],
-    };
-  }
+  const imageParts = await urlsToImageParts(imageUrls);
+
+  const prompt = `당신은 솔트빵(Salt,0) 베이커리의 블로그 에디터입니다.
+
+## 현재 블로그 초안 (JSON)
+${JSON.stringify(current, null, 2)}
+
+## 사용자의 수정 요청
+${userFeedback}
+
+## 임무
+위 수정 요청을 반영하여 블로그 포스트를 개선하세요.
+- 사용자가 구체적으로 요청하지 않은 부분은 그대로 유지
+- SEO 최적화 유지 (제목 60자 이내, 설명 155자 이내)
+- HTML 본문 구조 유지 (h2, h3, p, img)
+- 한국어로 작성
+
+${STORE_INFO}
+
+## 응답 형식 (반드시 이 JSON 형식으로, 순수 JSON만)
+{
+  "title": "...",
+  "slug": "...",
+  "description": "...",
+  "content": "<h2>...</h2>...",
+  "tags": [...]
+}
+
+중요: 마크다운 없이 순수 JSON만 출력.`;
+
+  const result = await callGeminiWithRetry(() =>
+    model.generateContent([prompt, ...imageParts])
+  );
+  return parseGeneratedPost(result.response.text(), current);
 }

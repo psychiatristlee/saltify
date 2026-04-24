@@ -8,7 +8,7 @@ import {
   uploadMediaRaw, createMediaDoc, listMedia, deleteMedia, updateMediaTags, MediaItem,
 } from '@/lib/services/mediaService';
 import { createPost, getAllPosts, updatePost, deletePost, BlogPost } from '@/lib/services/blogService';
-import { generateBlogPost, analyzePhotoForMenuTags } from '@/lib/services/aiService';
+import { generateBlogPost, refineBlogPost, analyzePhotoForMenuTags, GeneratedPost } from '@/lib/services/aiService';
 import { MENU_BREADS, MENU_DRINKS } from '@/lib/breadData';
 import { t as translate } from '@/lib/i18n';
 import {
@@ -50,6 +50,8 @@ export default function AdminPage() {
   const [editCover, setEditCover] = useState('');
   const [editImages, setEditImages] = useState<string[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
+  const [refineFeedback, setRefineFeedback] = useState('');
+  const [refining, setRefining] = useState(false);
 
   // Check admin
   useEffect(() => {
@@ -146,7 +148,9 @@ export default function AdminPage() {
     const files = e.target.files;
     if (!files?.length) return;
     setUploading(true);
-    for (const file of Array.from(files)) {
+    const fileArr = Array.from(files);
+    for (let i = 0; i < fileArr.length; i++) {
+      const file = fileArr[i];
       // 1) Storage 업로드
       const uploaded = await uploadMediaRaw(file);
       // 2) AI로 메뉴 자동 태깅 (이미지만, 실패해도 무시)
@@ -160,6 +164,10 @@ export default function AdminPage() {
       }
       // 3) Firestore 메타데이터 저장
       await createMediaDoc({ ...uploaded, name: file.name, tags });
+      // 4) 다음 파일 전 짧은 지연 (Gemini free tier rate limit 회피)
+      if (i < fileArr.length - 1 && uploaded.type === 'image') {
+        await new Promise((r) => setTimeout(r, 4000));
+      }
     }
     await loadMedia();
     setUploading(false);
@@ -192,6 +200,16 @@ export default function AdminPage() {
     await loadMedia();
   };
 
+  const applyGenerated = (result: GeneratedPost, urls: string[]) => {
+    setEditTitle(result.title);
+    setEditSlug(result.slug);
+    setEditDesc(result.description);
+    setEditContent(result.content);
+    setEditTags(result.tags.join(', '));
+    setEditCover(urls[0] || result.content.match(/src="([^"]+)"/)?.[1] || '');
+    setEditImages(urls);
+  };
+
   const handleGenerate = async () => {
     const urls = Array.from(selected);
     if (!urls.length) return alert('사진을 선택해주세요');
@@ -199,19 +217,36 @@ export default function AdminPage() {
     setTab('posts');
     try {
       const result = await generateBlogPost(urls);
-      setEditTitle(result.title);
-      setEditSlug(result.slug);
-      setEditDesc(result.description);
-      setEditContent(result.content);
-      setEditTags(result.tags.join(', '));
-      setEditCover(urls[0]);
-      setEditImages(urls);
+      applyGenerated(result, urls);
       setEditId(null);
+      setRefineFeedback('');
       setEditor({ type: 'edit', post: {} as BlogPost });
     } catch (err) {
       console.error(err);
-      alert('AI 생성 실패');
+      alert('AI 생성 실패: ' + (err instanceof Error ? err.message : 'unknown'));
       setEditor({ type: 'idle' });
+    }
+  };
+
+  const handleRefine = async () => {
+    if (!refineFeedback.trim()) return;
+    setRefining(true);
+    try {
+      const current: GeneratedPost = {
+        title: editTitle,
+        slug: editSlug,
+        description: editDesc,
+        content: editContent,
+        tags: editTags.split(',').map((s) => s.trim()).filter(Boolean),
+      };
+      const refined = await refineBlogPost(current, refineFeedback, editImages);
+      applyGenerated(refined, editImages);
+      setRefineFeedback('');
+    } catch (err) {
+      console.error(err);
+      alert('수정 실패: ' + (err instanceof Error ? err.message : 'unknown'));
+    } finally {
+      setRefining(false);
     }
   };
 
@@ -299,6 +334,30 @@ export default function AdminPage() {
           )}
         </div>
         <div className={styles.editorForm}>
+          {/* AI Refinement Box (only show for new AI-generated posts) */}
+          {editImages.length > 0 && (
+            <div className={styles.refineBox}>
+              <label className={styles.refineLabel}>
+                ✨ AI에게 수정 요청 <span className={styles.refineHint}>(직접 편집해도 됩니다)</span>
+              </label>
+              <textarea
+                value={refineFeedback}
+                onChange={(e) => setRefineFeedback(e.target.value)}
+                placeholder="예: 제목을 더 재치있게 바꿔줘, 본문에 추천 페어링 음료 추가해줘, 톤을 더 캐주얼하게..."
+                className={styles.textarea}
+                rows={2}
+                disabled={refining}
+              />
+              <button
+                onClick={handleRefine}
+                disabled={refining || !refineFeedback.trim()}
+                className={styles.refineBtn}
+              >
+                {refining ? '수정 중...' : '🔁 AI로 다시 쓰기'}
+              </button>
+            </div>
+          )}
+
           <label>제목</label>
           <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className={styles.input} />
 
@@ -326,8 +385,8 @@ export default function AdminPage() {
           </div>
 
           <div className={styles.editorActions}>
-            <button onClick={() => handleSave('draft')} className={styles.draftBtn}>드래프트 저장</button>
-            <button onClick={() => handleSave('published')} className={styles.publishBtn}>퍼블리시</button>
+            <button onClick={() => handleSave('draft')} className={styles.draftBtn}>💾 드래프트로 저장</button>
+            <button onClick={() => handleSave('published')} className={styles.publishBtn}>✅ 최종 승인 & 퍼블리시</button>
           </div>
         </div>
       </div>
