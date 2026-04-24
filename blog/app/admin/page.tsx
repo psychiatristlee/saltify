@@ -29,6 +29,7 @@ export default function AdminPage() {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [uploading, setUploading] = useState(false);
+  const [filterTag, setFilterTag] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Posts state
@@ -427,8 +428,40 @@ export default function AdminPage() {
             )}
           </div>
 
+          {/* Menu Filter Badges */}
+          {media.length > 0 && (() => {
+            const allMenus = [...MENU_BREADS, ...MENU_DRINKS];
+            // 태그별 사진 개수 계산
+            const tagCounts = new Map<string, number>();
+            media.forEach((item) => {
+              item.tags.forEach((t) => tagCounts.set(t, (tagCounts.get(t) || 0) + 1));
+            });
+            const usedMenus = allMenus.filter((m) => tagCounts.has(m.id));
+            return (
+              <div className={styles.filterBadges}>
+                <button
+                  className={`${styles.filterBadge} ${!filterTag ? styles.filterActive : ''}`}
+                  onClick={() => setFilterTag(null)}
+                >
+                  전체 ({media.length})
+                </button>
+                {usedMenus.map((m) => (
+                  <button
+                    key={m.id}
+                    className={`${styles.filterBadge} ${filterTag === m.id ? styles.filterActive : ''}`}
+                    onClick={() => setFilterTag(filterTag === m.id ? null : m.id)}
+                  >
+                    {translate(m.nameKey, 'ko')} ({tagCounts.get(m.id)})
+                  </button>
+                ))}
+              </div>
+            );
+          })()}
+
           <div className={styles.mediaGrid}>
-            {media.map((item) => {
+            {media
+              .filter((item) => !filterTag || item.tags.includes(filterTag))
+              .map((item) => {
               const allMenus = [...MENU_BREADS, ...MENU_DRINKS];
               const tagLabels = item.tags
                 .map((id) => {

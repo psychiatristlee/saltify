@@ -62,23 +62,37 @@ export async function analyzePhotoForMenuTags(file: File): Promise<string[]> {
     .map((m) => `- ${m.id}: ${t(m.nameKey, 'ko')} — ${t(m.descKey, 'ko')}`)
     .join('\n');
 
-  const prompt = `당신은 솔트빵(Salt,0) 베이커리의 사진 분류 전문가입니다.
+  const prompt = `당신은 솔트빵(Salt,0) 베이커리의 사진 분류 AI입니다.
 
-## 솔트빵 메뉴 목록
+## 솔트빵 전체 메뉴
 ${menuList}
 
 ## 임무
-첨부된 사진을 보고, 사진에 나타나는 메뉴의 id들을 JSON 배열로만 응답하세요.
+첨부된 사진에 보이는 메뉴들을 식별하여 id만 JSON 배열로 응답하세요.
 
-## 규칙
-- 사진에 보이는 메뉴가 위 목록의 어떤 id에 해당하는지 판단
-- 여러 메뉴가 함께 찍힌 경우 모두 포함
-- 확신이 높은 메뉴만 포함 (추측은 제외)
-- 메뉴가 전혀 안 보이면 빈 배열 []
-- 반드시 id만 사용 (예: "plain", "choco-cream")
-- 마크다운 없이 순수 JSON 배열만 출력
+## 판단 기준
+- 사진에 메뉴가 명확히 보이면 해당 id 포함
+- 여러 메뉴가 함께 있으면 모두 포함 (최대 5개)
+- 빵의 종류를 구분하기 어려우면 가장 비슷한 메뉴를 합리적으로 추정
+- 상세히 판단이 불가능한 경우(실루엣, 배경 등)에만 빈 배열 []
 
-예시 응답: ["plain", "everything"]`;
+## 빵 식별 힌트
+- plain: 토핑 없는 길쭉한 소금빵
+- everything: 표면에 검은깨/참깨/양파 등 여러 토핑
+- olive-cheese: 올리브(검은색)와 치즈가 보임
+- basil-tomato: 녹색 바질과 붉은 토마토
+- garlic-butter: 마늘/버터가 덧발린 모양, 광택있는 표면
+- seed-hotteok: 땅콩/견과가 토핑
+- chive-cream-cheese: 가운데 크림치즈, 쪽파(초록) 토핑
+- salt-butter-tteok: 정사각형 떡(여러개), 굵은 소금
+- choco-cream: 큐브형태, 초콜릿색 크림
+- matcha-cream: 큐브형태, 녹색 크림
+- cold-brew / cold-brew-latte / milk-tea: 컵에 담긴 음료
+
+## 출력 형식
+순수 JSON 배열만. 마크다운 없이.
+예: ["plain","everything"]
+빈 결과: []`;
 
   try {
     const imagePart = await fileToGeminiPart(file);
@@ -86,11 +100,14 @@ ${menuList}
       model.generateContent([prompt, imagePart])
     );
     const text = result.response.text().trim();
-    const jsonStr = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+    console.log('[auto-tag] Gemini response:', text);
+    const jsonStr = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
     const tags = JSON.parse(jsonStr);
     if (!Array.isArray(tags)) return [];
     const validIds = new Set([...MENU_BREADS, ...MENU_DRINKS].map((m) => m.id));
-    return tags.filter((t: unknown): t is string => typeof t === 'string' && validIds.has(t));
+    const filtered = tags.filter((t: unknown): t is string => typeof t === 'string' && validIds.has(t));
+    console.log('[auto-tag] filtered tags:', filtered);
+    return filtered;
   } catch (err) {
     console.error('analyzePhotoForMenuTags failed:', err);
     return [];
