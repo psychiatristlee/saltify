@@ -57,5 +57,27 @@ service cloud.firestore {
       allow write: if isOwner(userId);
     }
 
+    // Admins collection (fallback admin check by uid)
+    match /admins/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Blog posts - public read (published posts rendered on website), admin write
+    match /blogPosts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Media items metadata - admin-only
+    match /mediaItems/{itemId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Tracked keywords for Naver rank - admin-only
+    match /trackedKeywords/{keywordId} {
+      allow read, write: if isAdmin();
+    }
+
   }
 }

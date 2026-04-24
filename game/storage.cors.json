@@ -1,0 +1,24 @@
+[
+  {
+    "origin": [
+      "https://salt-bbang.com",
+      "https://www.salt-bbang.com",
+      "https://game.salt-bbang.com",
+      "https://saltify--saltify-game.us-east4.hosted.app",
+      "https://saltify-game.web.app",
+      "http://localhost:3000"
+    ],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": [
+      "Content-Type",
+      "Content-Length",
+      "Content-Disposition",
+      "Authorization",
+      "X-Goog-Upload-Protocol",
+      "X-Firebase-Storage-Version",
+      "X-Goog-Upload-*",
+      "x-firebase-storage-metadata"
+    ]
+  }
+]
