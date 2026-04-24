@@ -2,6 +2,9 @@
   "firestore": {
     "rules": "game/firestore.rules"
   },
+  "storage": {
+    "rules": "game/storage.rules"
+  },
   "hosting": {
     "public": "game/dist",
     "ignore": [
