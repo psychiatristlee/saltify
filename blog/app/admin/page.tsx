@@ -9,7 +9,8 @@ import {
 } from '@/lib/services/mediaService';
 import { createPost, getAllPosts, updatePost, deletePost, BlogPost } from '@/lib/services/blogService';
 import {
-  generateBlogPost, refineBlogPost, analyzePhotoForMenuTags, GeneratedPost, RateLimitError,
+  generateBlogPost, refineBlogPost, analyzePhotoForMenuTags, generateMetaForContent,
+  GeneratedPost, RateLimitError,
 } from '@/lib/services/aiService';
 import { MENU_BREADS, MENU_DRINKS } from '@/lib/breadData';
 import { t as translate } from '@/lib/i18n';
@@ -17,6 +18,7 @@ import {
   listKeywords, addKeyword, deleteKeyword, updateKeywordRank, TrackedKeyword,
 } from '@/lib/services/keywordService';
 import { useToast } from '@/components/Toast';
+import RichEditor from '@/components/RichEditor';
 import styles from './page.module.css';
 
 type Tab = 'media' | 'posts' | 'rankings';
@@ -353,6 +355,68 @@ export default function AdminPage() {
     await loadPosts();
   };
 
+  const [savingMeta, setSavingMeta] = useState(false);
+
+  // Auto-generate metadata if missing, then save.
+  const handleSaveAuto = async (status: 'draft' | 'published') => {
+    if (!editContent.trim()) {
+      toast('본문이 비어있습니다', { kind: 'warn' });
+      return;
+    }
+    setSavingMeta(true);
+    let title = editTitle.trim();
+    let slug = editSlug.trim();
+    let desc = editDesc.trim();
+    let tagsArr = editTags.split(',').map((s) => s.trim()).filter(Boolean);
+    let cover = editCover.trim();
+
+    // If any meta is missing, ask AI to fill them
+    if (!title || !slug || !desc || tagsArr.length === 0) {
+      try {
+        toast('AI가 SEO 메타데이터 생성 중...', { kind: 'info', durationMs: 3000 });
+        const meta = await generateMetaForContent(editContent);
+        if (!title) title = meta.title;
+        if (!slug) slug = meta.slug;
+        if (!desc) desc = meta.description;
+        if (tagsArr.length === 0) tagsArr = meta.tags;
+        setEditTitle(title);
+        setEditSlug(slug);
+        setEditDesc(desc);
+        setEditTags(tagsArr.join(', '));
+      } catch (err) {
+        console.error('[generate-meta] failed', err);
+        if (!title) title = '솔트빵 새 포스트';
+        if (!slug) slug = `post-${Date.now().toString(36)}`;
+        if (!desc) desc = editContent.replace(/<[^>]+>/g, ' ').slice(0, 150);
+        if (tagsArr.length === 0) tagsArr = ['솔트빵', '소금빵', '홍대맛집'];
+      }
+    }
+
+    // Auto-derive cover from first <img> in content if absent
+    if (!cover) {
+      const m = editContent.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (m) cover = m[1];
+      else if (editImages.length > 0) cover = editImages[0];
+    }
+
+    try {
+      const data = {
+        title, slug, description: desc, content: editContent,
+        coverImage: cover, images: editImages, tags: tagsArr, status,
+      };
+      if (editId) await updatePost(editId, data);
+      else await createPost(data);
+      setEditor({ type: 'idle' });
+      setSelected(new Set());
+      await loadPosts();
+      toast(status === 'published' ? '포스트가 게시되었습니다' : '드래프트가 저장되었습니다', { kind: 'success' });
+    } catch (err) {
+      toast('저장 실패: ' + (err instanceof Error ? err.message : 'unknown'), { kind: 'error' });
+    } finally {
+      setSavingMeta(false);
+    }
+  };
+
   if (loading) return <div className={styles.loading}>로딩 중...</div>;
 
   if (!user) {
@@ -422,35 +486,36 @@ export default function AdminPage() {
             </div>
           )}
 
-          <label>제목</label>
-          <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className={styles.input} />
+          <label>본문</label>
+          <RichEditor
+            value={editContent}
+            onChange={setEditContent}
+            imageUrls={editImages.length > 0 ? editImages : media.map((m) => m.url)}
+          />
 
-          <label>슬러그 (URL)</label>
-          <input value={editSlug} onChange={(e) => setEditSlug(e.target.value)} className={styles.input} />
-
-          <label>SEO 설명문</label>
-          <textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} className={styles.textarea} rows={3} />
-
-          <label>태그 (쉼표 구분)</label>
-          <input value={editTags} onChange={(e) => setEditTags(e.target.value)} className={styles.input} />
-
-          <label>커버 이미지 URL</label>
-          <input value={editCover} onChange={(e) => setEditCover(e.target.value)} className={styles.input} />
-          {editCover && (
-            <img src={editCover} alt="cover" className={styles.coverPreview} />
-          )}
-
-          <label>본문 (HTML)</label>
-          <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className={styles.textarea} rows={20} />
-
-          <div className={styles.previewSection}>
-            <h3>미리보기</h3>
-            <div className={styles.preview} dangerouslySetInnerHTML={{ __html: editContent }} />
-          </div>
+          <details className={styles.metaDetails}>
+            <summary>SEO 메타데이터 (제목/슬러그/설명/태그) — 자동 생성됨</summary>
+            <div className={styles.metaInner}>
+              <label>제목</label>
+              <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className={styles.input} />
+              <label>슬러그 (URL)</label>
+              <input value={editSlug} onChange={(e) => setEditSlug(e.target.value)} className={styles.input} />
+              <label>SEO 설명문</label>
+              <textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} className={styles.textarea} rows={2} />
+              <label>태그 (쉼표 구분)</label>
+              <input value={editTags} onChange={(e) => setEditTags(e.target.value)} className={styles.input} />
+              <label>커버 이미지 URL</label>
+              <input value={editCover} onChange={(e) => setEditCover(e.target.value)} className={styles.input} />
+            </div>
+          </details>
 
           <div className={styles.editorActions}>
-            <button onClick={() => handleSave('draft')} className={styles.draftBtn}>💾 드래프트로 저장</button>
-            <button onClick={() => handleSave('published')} className={styles.publishBtn}>✅ 최종 승인 & 퍼블리시</button>
+            <button onClick={() => handleSaveAuto('draft')} className={styles.draftBtn} disabled={savingMeta}>
+              {savingMeta ? '저장 중...' : '💾 드래프트로 저장'}
+            </button>
+            <button onClick={() => handleSaveAuto('published')} className={styles.publishBtn} disabled={savingMeta}>
+              {savingMeta ? '게시 중...' : '✅ 최종 승인 & 퍼블리시'}
+            </button>
           </div>
         </div>
       </div>
@@ -525,53 +590,66 @@ export default function AdminPage() {
             );
           })()}
 
-          <div className={styles.mediaGrid}>
-            {media
-              .filter((item) => !filterTag || item.tags.includes(filterTag))
-              .map((item) => {
-              const allMenus = [...MENU_BREADS, ...MENU_DRINKS];
-              const tagLabels = item.tags
-                .map((id) => {
-                  const m = allMenus.find((x) => x.id === id);
-                  return m ? translate(m.nameKey, 'ko') : null;
-                })
-                .filter(Boolean);
-
-              return (
-                <div
-                  key={item.id}
-                  className={`${styles.mediaItem} ${selected.has(item.url) ? styles.mediaSelected : ''}`}
-                  onClick={() => toggleSelect(item.url)}
-                >
-                  {item.type === 'video' ? (
-                    <video src={item.url} className={styles.mediaThumbnail} muted />
-                  ) : (
-                    <img src={item.url} alt={item.name} className={styles.mediaThumbnail} />
-                  )}
-                  {selected.has(item.url) && <div className={styles.checkmark}>✓</div>}
-                  <button
-                    className={styles.deleteMediaBtn}
-                    onClick={(e) => { e.stopPropagation(); handleDeleteMedia(item); }}
-                  >×</button>
-                  <button
-                    className={styles.tagMediaBtn}
-                    onClick={(e) => { e.stopPropagation(); setTaggingId(item.id); }}
-                    title="태그 편집"
-                  >🏷️</button>
-                  {tagLabels.length > 0 && (
-                    <div className={styles.tagOverlay}>
-                      {tagLabels.slice(0, 3).map((label, i) => (
-                        <span key={i} className={styles.tagChip}>{label}</span>
-                      ))}
-                      {tagLabels.length > 3 && (
-                        <span className={styles.tagChip}>+{tagLabels.length - 3}</span>
-                      )}
-                    </div>
-                  )}
+          {(() => {
+            // Group media by upload date (yyyy-mm-dd)
+            const filtered = media.filter((item) => !filterTag || item.tags.includes(filterTag));
+            const groups = new Map<string, MediaItem[]>();
+            filtered.forEach((item) => {
+              const d = item.createdAt?.toDate ? item.createdAt.toDate() : new Date();
+              const key = d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+              if (!groups.has(key)) groups.set(key, []);
+              groups.get(key)!.push(item);
+            });
+            const allMenus = [...MENU_BREADS, ...MENU_DRINKS];
+            return Array.from(groups.entries()).map(([dateLabel, items]) => (
+              <div key={dateLabel} className={styles.dateGroup}>
+                <div className={styles.dateLabel}>📅 {dateLabel} · {items.length}장</div>
+                <div className={styles.mediaGrid}>
+                  {items.map((item) => {
+                    const tagLabels = item.tags
+                      .map((id) => {
+                        const m = allMenus.find((x) => x.id === id);
+                        return m ? translate(m.nameKey, 'ko') : null;
+                      })
+                      .filter(Boolean);
+                    return (
+                      <div
+                        key={item.id}
+                        className={`${styles.mediaItem} ${selected.has(item.url) ? styles.mediaSelected : ''}`}
+                        onClick={() => toggleSelect(item.url)}
+                      >
+                        {item.type === 'video' ? (
+                          <video src={item.url} className={styles.mediaThumbnail} muted />
+                        ) : (
+                          <img src={item.url} alt={item.name} className={styles.mediaThumbnail} />
+                        )}
+                        {selected.has(item.url) && <div className={styles.checkmark}>✓</div>}
+                        <button
+                          className={styles.deleteMediaBtn}
+                          onClick={(e) => { e.stopPropagation(); handleDeleteMedia(item); }}
+                        >×</button>
+                        <button
+                          className={styles.tagMediaBtn}
+                          onClick={(e) => { e.stopPropagation(); setTaggingId(item.id); }}
+                          title="태그 편집"
+                        >🏷️</button>
+                        {tagLabels.length > 0 && (
+                          <div className={styles.tagOverlay}>
+                            {tagLabels.slice(0, 3).map((label, i) => (
+                              <span key={i} className={styles.tagChip}>{label}</span>
+                            ))}
+                            {tagLabels.length > 3 && (
+                              <span className={styles.tagChip}>+{tagLabels.length - 3}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            ));
+          })()}
 
           {/* Tag Editor Modal */}
           {taggingId && (() => {

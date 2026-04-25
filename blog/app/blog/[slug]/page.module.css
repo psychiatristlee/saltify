@@ -107,11 +107,48 @@
 
 .content ul, .content ol {
   margin: 12px 0;
-  padding-left: 20px;
+  padding-left: 22px;
 }
 
 .content li {
   margin: 6px 0;
+}
+
+.content strong { font-weight: 800; color: #4E342E; }
+.content em { font-style: italic; }
+
+.content blockquote {
+  margin: 24px 0;
+  padding: 14px 20px;
+  border-left: 5px solid #FF8C00;
+  background: linear-gradient(135deg, #FFF8E1, #FFF3E0);
+  color: #5D4037;
+  font-style: italic;
+  border-radius: 0 12px 12px 0;
+  font-size: 1.05em;
+}
+
+.content code {
+  background: #FFF3E0;
+  color: #E65100;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, monospace;
+}
+
+.content a {
+  color: #FF8C00;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+.content hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 140, 0, 0.3), transparent);
+  margin: 32px 0;
 }
 
 .footer {

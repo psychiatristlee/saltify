@@ -141,8 +141,14 @@ export async function analyzePhotoForMenuTags(file: File): Promise<string[]> {
       body: JSON.stringify({ imageBase64: base64, mimeType: file.type }),
     });
     if (!res.ok) await throwFromResponse(res, 'AI 분석 실패');
-    const data = (await res.json()) as { tags: string[] };
-    writeCache(hash, data.tags);
+    const data = (await res.json()) as { tags: string[]; raw?: string };
+    if (data.raw) {
+      console.log('[analyze-photo] raw model output:', data.raw);
+    }
+    // Only cache non-empty results so empty/failed runs can be retried
+    if (data.tags.length > 0) {
+      writeCache(hash, data.tags);
+    }
     return data.tags;
   });
 }
@@ -156,6 +162,19 @@ export async function generateBlogPost(imageUrls: string[]): Promise<GeneratedPo
   if (!res.ok) await throwFromResponse(res, '블로그 생성 실패');
   const data = (await res.json()) as { post: GeneratedPost };
   return data.post;
+}
+
+export async function generateMetaForContent(content: string): Promise<{
+  title: string; slug: string; description: string; tags: string[];
+}> {
+  const res = await fetch('/api/generate-meta', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  });
+  if (!res.ok) await throwFromResponse(res, '메타데이터 생성 실패');
+  const data = (await res.json()) as { meta: { title: string; slug: string; description: string; tags: string[] } };
+  return data.meta;
 }
 
 export async function refineBlogPost(

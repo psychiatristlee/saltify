@@ -15,6 +15,7 @@ export const MENU_BREADS: BreadItem[] = [
   { id: 'olive-cheese', nameKey: 'breadOliveCheeseName', descKey: 'breadOliveCheeseDesc', price: 3800, image: '/breads/olive-cheese.png' },
   { id: 'basil-tomato', nameKey: 'breadBasilTomatoName', descKey: 'breadBasilTomatoDesc', price: 3800, image: '/breads/basil-tomato.png' },
   { id: 'garlic-butter', nameKey: 'breadGarlicButterName', descKey: 'breadGarlicButterDesc', price: 4300, image: '/breads/garlic-butter.png' },
+  { id: 'almond', nameKey: 'breadAlmondName', descKey: 'breadAlmondDesc', price: 4300, image: '/brandings/plain.png' },
   { id: 'seed-hotteok', nameKey: 'breadHotteokName', descKey: 'breadHotteokDesc', price: 4300, image: '/breads/hotteok.png' },
   { id: 'chive-cream-cheese', nameKey: 'breadChiveCreamCheeseName', descKey: 'breadChiveCreamCheeseDesc', price: 5500, image: '/brandings/plain.png' },
   { id: 'salt-butter-tteok', nameKey: 'breadSaltButterTteokName', descKey: 'breadSaltButterTteokDesc', price: 3900, image: '/brandings/plain.png' },

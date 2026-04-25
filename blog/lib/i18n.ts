@@ -168,6 +168,21 @@ const translations = {
     'zh-TW': '蒜香與奶油醬的甜美濃郁風味',
     ja: 'ガーリックの香りと、バターソースの甘く香ばしい味わい',
   },
+  // ===== Bread: Almond =====
+  breadAlmondName: {
+    ko: '아몬드 소금빵',
+    en: 'Almond Salt Bread',
+    'zh-CN': '杏仁盐面包',
+    'zh-TW': '杏仁鹽麵包',
+    ja: 'アーモンド塩パン',
+  },
+  breadAlmondDesc: {
+    ko: '바삭한 아몬드 슬라이스 토핑과 달콤한 풍미가 어우러진 소금빵',
+    en: 'Salt bread topped with crispy sliced almonds for a sweet and nutty flavor',
+    'zh-CN': '香脆杏仁片配上甜美风味的盐面包',
+    'zh-TW': '香脆杏仁片配上甜美風味的鹽麵包',
+    ja: 'カリッと香ばしいアーモンドスライスをトッピングした甘く香ばしい塩パン',
+  },
   // ===== Bread: Seed Hotteok =====
   breadHotteokName: {
     ko: '씨앗호떡',
@@ -275,11 +290,11 @@ const translations = {
   },
   // ===== Drink: Zero Sugar Milk Tea =====
   drinkMilkTeaName: {
-    ko: '논슈가 밀크티',
+    ko: '제로슈가 밀크티',
     en: 'Zero Sugar Milk Tea',
-    'zh-CN': '无糖奶茶',
-    'zh-TW': '無糖奶茶',
-    ja: 'ノンシュガーミルクティー',
+    'zh-CN': '零糖奶茶',
+    'zh-TW': '零糖奶茶',
+    ja: 'ゼロシュガーミルクティー',
   },
   drinkMilkTeaDesc: {
     ko: '설탕 없이, 홍차(얼그레이+아쌈)와 우유의 밸런스만으로 완성한 자체 페어링 음료. 300ml',
