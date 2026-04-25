@@ -8,22 +8,27 @@ import {
   uploadMediaRaw, createMediaDoc, listMedia, deleteMedia, updateMediaTags, MediaItem,
 } from '@/lib/services/mediaService';
 import { createPost, getAllPosts, updatePost, deletePost, BlogPost } from '@/lib/services/blogService';
-import { generateBlogPost, refineBlogPost, analyzePhotoForMenuTags, GeneratedPost } from '@/lib/services/aiService';
+import {
+  generateBlogPost, refineBlogPost, analyzePhotoForMenuTags, GeneratedPost, RateLimitError,
+} from '@/lib/services/aiService';
 import { MENU_BREADS, MENU_DRINKS } from '@/lib/breadData';
 import { t as translate } from '@/lib/i18n';
 import {
   listKeywords, addKeyword, deleteKeyword, updateKeywordRank, TrackedKeyword,
 } from '@/lib/services/keywordService';
+import { useToast } from '@/components/Toast';
 import styles from './page.module.css';
 
 type Tab = 'media' | 'posts' | 'rankings';
 type EditorMode = { type: 'idle' } | { type: 'edit'; post: BlogPost } | { type: 'generating' };
 
 export default function AdminPage() {
+  const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>('media');
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null);
 
   // Media state
   const [media, setMedia] = useState<MediaItem[]>([]);
@@ -150,29 +155,69 @@ export default function AdminPage() {
     if (!files?.length) return;
     setUploading(true);
     const fileArr = Array.from(files);
+    setUploadProgress({ current: 0, total: fileArr.length });
+
+    let rateLimitNotified = false;
+    let analysisFailed = 0;
+
     for (let i = 0; i < fileArr.length; i++) {
       const file = fileArr[i];
+      setUploadProgress({ current: i + 1, total: fileArr.length });
+
       // 1) Storage 업로드
-      const uploaded = await uploadMediaRaw(file);
-      // 2) AI로 메뉴 자동 태깅 (이미지만, 실패해도 무시)
+      let uploaded;
+      try {
+        uploaded = await uploadMediaRaw(file);
+      } catch (err) {
+        console.error('[upload] storage upload failed', { name: file.name, err });
+        toast(`업로드 실패: ${file.name}`, { kind: 'error' });
+        continue;
+      }
+
+      // 2) AI 태깅 (이미지만). 실패 시 빈 태그로 저장되고 업로드는 계속 진행
       let tags: string[] = [];
       if (uploaded.type === 'image') {
         try {
           tags = await analyzePhotoForMenuTags(file);
         } catch (err) {
-          console.error('auto-tag failed', err);
+          analysisFailed++;
+          if (err instanceof RateLimitError) {
+            if (!rateLimitNotified) {
+              rateLimitNotified = true;
+              const hint = err.retryAfter
+                ? `약 ${err.retryAfter}초 후 다시 시도해 주세요.`
+                : '잠시 후 다시 시도해 주세요.';
+              toast(`AI 분석 요청량이 많습니다. ${hint}`, {
+                kind: 'warn',
+                durationMs: 6000,
+              });
+            }
+          } else {
+            console.error('[upload] auto-tag failed', { name: file.name, err });
+          }
         }
       }
+
       // 3) Firestore 메타데이터 저장
-      await createMediaDoc({ ...uploaded, name: file.name, tags });
-      // 4) 다음 파일 전 짧은 지연 (Gemini free tier rate limit 회피)
-      if (i < fileArr.length - 1 && uploaded.type === 'image') {
-        await new Promise((r) => setTimeout(r, 4000));
+      try {
+        await createMediaDoc({ ...uploaded, name: file.name, tags });
+      } catch (err) {
+        console.error('[upload] metadata save failed', { name: file.name, err });
+        toast(`메타데이터 저장 실패: ${file.name}`, { kind: 'error' });
       }
     }
+
     await loadMedia();
     setUploading(false);
+    setUploadProgress(null);
     if (fileRef.current) fileRef.current.value = '';
+
+    // Final summary toast
+    if (analysisFailed === fileArr.length && fileArr.length > 0) {
+      toast('AI 태그 없이 업로드 완료 — 태그는 수동으로 추가할 수 있습니다', { kind: 'info' });
+    } else if (fileArr.length > 0) {
+      toast(`${fileArr.length}개 업로드 완료`, { kind: 'success' });
+    }
   };
 
   const toggleSelect = (url: string) => {
@@ -211,9 +256,20 @@ export default function AdminPage() {
     setEditImages(urls);
   };
 
+  const describeError = (err: unknown, fallback: string): string => {
+    if (err instanceof RateLimitError) {
+      const hint = err.retryAfter ? `약 ${err.retryAfter}초 후 다시 시도해 주세요.` : '잠시 후 다시 시도해 주세요.';
+      return `AI 요청량이 많습니다. ${hint}`;
+    }
+    return err instanceof Error ? err.message : fallback;
+  };
+
   const handleGenerate = async () => {
     const urls = Array.from(selected);
-    if (!urls.length) return alert('사진을 선택해주세요');
+    if (!urls.length) {
+      toast('사진을 선택해주세요', { kind: 'warn' });
+      return;
+    }
     setEditor({ type: 'generating' });
     setTab('posts');
     try {
@@ -223,8 +279,11 @@ export default function AdminPage() {
       setRefineFeedback('');
       setEditor({ type: 'edit', post: {} as BlogPost });
     } catch (err) {
-      console.error(err);
-      alert('AI 생성 실패: ' + (err instanceof Error ? err.message : 'unknown'));
+      console.error('[generate-blog]', err);
+      toast(describeError(err, 'AI 생성 실패'), {
+        kind: err instanceof RateLimitError ? 'warn' : 'error',
+        durationMs: 6000,
+      });
       setEditor({ type: 'idle' });
     }
   };
@@ -243,9 +302,13 @@ export default function AdminPage() {
       const refined = await refineBlogPost(current, refineFeedback, editImages);
       applyGenerated(refined, editImages);
       setRefineFeedback('');
+      toast('AI가 본문을 업데이트했습니다', { kind: 'success' });
     } catch (err) {
-      console.error(err);
-      alert('수정 실패: ' + (err instanceof Error ? err.message : 'unknown'));
+      console.error('[refine-blog]', err);
+      toast(describeError(err, '수정 실패'), {
+        kind: err instanceof RateLimitError ? 'warn' : 'error',
+        durationMs: 6000,
+      });
     } finally {
       setRefining(false);
     }
@@ -419,7 +482,11 @@ export default function AdminPage() {
               id="media-upload"
             />
             <label htmlFor="media-upload" className={styles.uploadBtn}>
-              {uploading ? '업로드 중...' : '📷 사진/영상 업로드'}
+              {uploading
+                ? uploadProgress
+                  ? `업로드 중... (${uploadProgress.current}/${uploadProgress.total})`
+                  : '업로드 중...'
+                : '📷 사진/영상 업로드'}
             </label>
             {selected.size > 0 && (
               <button onClick={handleGenerate} className={styles.generateBtn}>

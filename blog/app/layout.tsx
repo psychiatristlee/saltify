@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { LanguageProvider } from '@/lib/LanguageContext';
+import { ToastProvider } from '@/components/Toast';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -67,7 +68,9 @@ export default function RootLayout({
         <meta name="theme-color" content="#FF8C00" />
       </head>
       <body>
+        <ToastProvider>
           <LanguageProvider>{children}</LanguageProvider>
+        </ToastProvider>
       </body>
     </html>
   );

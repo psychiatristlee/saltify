@@ -6,5 +6,13 @@ runConfig:
 env:
   - variable: NEXT_PUBLIC_SITE_URL
     value: https://salt-bbang.com
-  - variable: NEXT_PUBLIC_GEMINI_API_KEY
+
+  # Server-only. Do not use NEXT_PUBLIC_ prefix so the key isn't bundled to the browser.
+  - variable: GEMINI_API_KEY
     secret: GEMINI_API_KEY
+    availability:
+      - RUNTIME
+
+  # Easy model swap: bump to gemini-2.0-pro, gemini-2.0-flash-exp, etc.
+  - variable: GEMINI_MODEL
+    value: gemini-2.0-flash
