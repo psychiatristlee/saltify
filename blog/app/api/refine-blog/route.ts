@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   callGemini, getGeminiModel, urlToImagePart, stripJsonFence, GeminiError, MODEL_NAME,
 } from '@/lib/server/gemini';
+import { applyMarkdown } from '@/lib/markdown';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -78,6 +79,9 @@ ${STORE_INFO}
     const text = stripJsonFence(result.response.text());
     try {
       const post = JSON.parse(text);
+      if (typeof post.content === 'string') {
+        post.content = applyMarkdown(post.content);
+      }
       return NextResponse.json({ post, model: MODEL_NAME });
     } catch {
       return NextResponse.json({ post: current, model: MODEL_NAME });

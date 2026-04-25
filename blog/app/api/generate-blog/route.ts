@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   callGemini, getGeminiModel, urlToImagePart, stripJsonFence, GeminiError, MODEL_NAME,
 } from '@/lib/server/gemini';
+import { applyMarkdown } from '@/lib/markdown';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -112,7 +113,7 @@ ${urls.map((u, i) => `${i + 1}. ${u}`).join('\n')}
     try {
       const post = JSON.parse(text);
       if (typeof post.content === 'string') {
-        post.content = fixImageUrls(post.content, urls);
+        post.content = applyMarkdown(fixImageUrls(post.content, urls));
       }
       return NextResponse.json({ post, model: MODEL_NAME });
     } catch {

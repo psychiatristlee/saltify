@@ -636,7 +636,7 @@
   padding-bottom: 40px;
 }
 
-.draftBtn, .publishBtn {
+.draftBtn, .publishBtn, .previewBtn {
   flex: 1;
   padding: 14px;
   border: none;
@@ -644,6 +644,23 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.previewBtn {
+  background: white;
+  color: #FF8C00;
+  border: 2px solid #FF8C00;
+  flex: 0 0 auto;
+  min-width: 120px;
+}
+
+.previewBtn:hover {
+  background: #FFF3E0;
+}
+
+.previewBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .draftBtn {

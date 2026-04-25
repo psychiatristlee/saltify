@@ -19,6 +19,8 @@ import {
 } from '@/lib/services/keywordService';
 import { useToast } from '@/components/Toast';
 import RichEditor from '@/components/RichEditor';
+import BlogPreview from '@/components/BlogPreview';
+import { applyMarkdown } from '@/lib/markdown';
 import styles from './page.module.css';
 
 type Tab = 'media' | 'posts' | 'rankings';
@@ -356,6 +358,7 @@ export default function AdminPage() {
   };
 
   const [savingMeta, setSavingMeta] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Auto-generate metadata if missing, then save.
   const handleSaveAuto = async (status: 'draft' | 'published') => {
@@ -510,6 +513,9 @@ export default function AdminPage() {
           </details>
 
           <div className={styles.editorActions}>
+            <button onClick={() => setShowPreview(true)} className={styles.previewBtn} disabled={savingMeta}>
+              👁 미리보기
+            </button>
             <button onClick={() => handleSaveAuto('draft')} className={styles.draftBtn} disabled={savingMeta}>
               {savingMeta ? '저장 중...' : '💾 드래프트로 저장'}
             </button>
@@ -518,6 +524,21 @@ export default function AdminPage() {
             </button>
           </div>
         </div>
+
+        {showPreview && (
+          <BlogPreview
+            title={editTitle || '(제목은 저장 시 자동 생성됩니다)'}
+            description={editDesc}
+            tags={editTags.split(',').map((s) => s.trim()).filter(Boolean)}
+            coverImage={
+              editCover ||
+              editContent.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1] ||
+              editImages[0] || ''
+            }
+            content={applyMarkdown(editContent)}
+            onClose={() => setShowPreview(false)}
+          />
+        )}
       </div>
     );
   }

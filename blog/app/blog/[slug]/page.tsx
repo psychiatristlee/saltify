@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPostBySlugServer } from '@/lib/services/blogServer';
+import { applyMarkdown } from '@/lib/markdown';
 import styles from './page.module.css';
 
 // ISR: Revalidate every 60 seconds (so new/updated posts show up reasonably quickly)
@@ -116,7 +117,10 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
         </div>
 
-        <div className={styles.content} dangerouslySetInnerHTML={{ __html: post.content }} />
+        <div
+          className={styles.content}
+          dangerouslySetInnerHTML={{ __html: applyMarkdown(post.content) }}
+        />
 
         <footer className={styles.footer}>
           <div className={styles.storeCard}>
