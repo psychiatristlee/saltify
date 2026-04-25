@@ -12,6 +12,14 @@ import {
   generateBlogPost, refineBlogPost, analyzePhotoForMenuTags, generateMetaForContent,
   GeneratedPost, RateLimitError,
 } from '@/lib/services/aiService';
+import {
+  createPost as createBlogPost, getAllUsedImageUrls,
+} from '@/lib/services/blogService';
+import type { PostLanguage } from '@/lib/services/blogService';
+import {
+  getBlogConfig, saveBlogConfig, markGenerated, BlogConfig,
+} from '@/lib/services/configService';
+import { LANGUAGES } from '@/lib/i18n';
 import { MENU_BREADS, MENU_DRINKS } from '@/lib/breadData';
 import { t as translate } from '@/lib/i18n';
 import {
@@ -23,7 +31,7 @@ import BlogPreview from '@/components/BlogPreview';
 import { applyMarkdown } from '@/lib/markdown';
 import styles from './page.module.css';
 
-type Tab = 'media' | 'posts' | 'rankings';
+type Tab = 'media' | 'posts' | 'rankings' | 'settings';
 type EditorMode = { type: 'idle' } | { type: 'edit'; post: BlogPost } | { type: 'generating' };
 
 export default function AdminPage() {
@@ -360,6 +368,147 @@ export default function AdminPage() {
   const [savingMeta, setSavingMeta] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
+  // Settings state
+  const [config, setConfig] = useState<BlogConfig | null>(null);
+  const [autoRunning, setAutoRunning] = useState<{ lang: PostLanguage; current: number; total: number } | null>(null);
+
+  const loadConfig = useCallback(async () => {
+    try {
+      const cfg = await getBlogConfig();
+      setConfig(cfg);
+    } catch (err) {
+      console.error('[loadConfig]', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAdmin) loadConfig();
+  }, [isAdmin, loadConfig]);
+
+  const handleConfigChange = (lang: PostLanguage, count: number) => {
+    if (!config) return;
+    setConfig({
+      ...config,
+      dailyCounts: { ...config.dailyCounts, [lang]: Math.max(0, Math.min(10, count)) },
+    });
+  };
+
+  const handleSaveConfig = async () => {
+    if (!config) return;
+    try {
+      await saveBlogConfig({ dailyCounts: config.dailyCounts });
+      toast('설정이 저장되었습니다', { kind: 'success' });
+    } catch (err) {
+      toast('설정 저장 실패: ' + (err instanceof Error ? err.message : 'unknown'), { kind: 'error' });
+    }
+  };
+
+  // Pick N photos for one auto-generated post: prefer unused images,
+  // prefer images with menu tags, then by recency.
+  const pickPhotosForPost = (
+    pool: MediaItem[],
+    used: Set<string>,
+    count: number
+  ): MediaItem[] => {
+    const available = pool.filter((m) => m.type === 'image' && !used.has(m.url));
+    if (available.length === 0) return [];
+    // Score: tagged photos higher, more recent higher
+    const scored = available.map((m) => ({
+      m,
+      score: (m.tags?.length ?? 0) * 1000 +
+        (m.createdAt?.toDate ? m.createdAt.toDate().getTime() : 0) / 1e9,
+    }));
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, count).map((s) => s.m);
+  };
+
+  const handleAutoGenerate = async () => {
+    if (!config) return;
+    const today = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
+
+    const allMedia = await listMedia();
+    const usedUrls = await getAllUsedImageUrls();
+    const usedThisRun = new Set(usedUrls);
+
+    const tasks: Array<{ lang: PostLanguage; index: number }> = [];
+    (Object.keys(config.dailyCounts) as PostLanguage[]).forEach((lang) => {
+      const target = config.dailyCounts[lang] ?? 0;
+      const lastDate = config.lastGeneratedDate?.[lang];
+      // Skip if already done today for that language
+      if (lastDate === today) return;
+      for (let i = 0; i < target; i++) tasks.push({ lang, index: i });
+    });
+
+    if (tasks.length === 0) {
+      toast('오늘 자동 생성할 분량이 없습니다 (이미 완료되었거나 카운트가 0)', { kind: 'info' });
+      return;
+    }
+
+    let success = 0;
+    let failure = 0;
+
+    for (let t = 0; t < tasks.length; t++) {
+      const { lang } = tasks[t];
+      setAutoRunning({ lang, current: t + 1, total: tasks.length });
+
+      const PHOTOS_PER_POST = 4;
+      const picks = pickPhotosForPost(allMedia, usedThisRun, PHOTOS_PER_POST);
+
+      if (picks.length === 0) {
+        toast(`사용 가능한 사진이 부족합니다 (남은 작업 건너뜀)`, { kind: 'warn' });
+        failure += tasks.length - t;
+        break;
+      }
+
+      const urls = picks.map((p) => p.url);
+      try {
+        const post = await generateBlogPost(urls, lang);
+        const cover = post.content.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1] || urls[0];
+        await createBlogPost({
+          title: post.title,
+          slug: post.slug,
+          description: post.description,
+          content: post.content,
+          coverImage: cover,
+          images: urls,
+          tags: post.tags,
+          status: 'draft',
+          language: lang,
+        });
+        urls.forEach((u) => usedThisRun.add(u));
+        await markGenerated(today, lang);
+        success++;
+      } catch (err) {
+        failure++;
+        console.error('[auto-generate] task failed', { lang, err });
+        if (err instanceof RateLimitError) {
+          toast(`AI 한도 초과로 중단합니다 (${success}/${tasks.length} 완료)`, {
+            kind: 'warn',
+            durationMs: 7000,
+          });
+          break;
+        }
+      }
+
+      // Small breather between calls
+      if (t < tasks.length - 1) await new Promise((r) => setTimeout(r, 1500));
+    }
+
+    setAutoRunning(null);
+    await loadPosts();
+    await loadConfig();
+
+    if (success > 0) {
+      toast(`${success}개의 드래프트가 생성되었습니다 (실패 ${failure}건)`, {
+        kind: success > 0 && failure === 0 ? 'success' : 'info',
+        durationMs: 5000,
+      });
+      setTab('posts');
+    } else {
+      toast('블로그 생성에 실패했습니다', { kind: 'error' });
+    }
+  };
+
   // Auto-generate metadata if missing, then save.
   const handleSaveAuto = async (status: 'draft' | 'published') => {
     if (!editContent.trim()) {
@@ -552,6 +701,7 @@ export default function AdminPage() {
           <button onClick={() => setTab('media')} className={tab === 'media' ? styles.activeTab : styles.tab}>미디어</button>
           <button onClick={() => setTab('posts')} className={tab === 'posts' ? styles.activeTab : styles.tab}>포스트</button>
           <button onClick={() => setTab('rankings')} className={tab === 'rankings' ? styles.activeTab : styles.tab}>순위</button>
+          <button onClick={() => setTab('settings')} className={tab === 'settings' ? styles.activeTab : styles.tab}>⚙️ 설정</button>
         </div>
       </div>
 
@@ -812,6 +962,73 @@ export default function AdminPage() {
                 추적할 키워드를 추가하세요. (예: &quot;홍대 소금빵&quot;, &quot;연남동 베이커리&quot;)
               </p>
             )}
+          </div>
+        </div>
+      )}
+
+      {tab === 'settings' && (
+        <div className={styles.settingsPanel}>
+          <h2 className={styles.settingsTitle}>🤖 블로그 자동 생성</h2>
+          <p className={styles.settingsHint}>
+            언어별로 하루에 몇 개의 블로그 글을 자동 생성할지 설정하세요. <br />
+            <strong>실행</strong>을 누르면 저장된 사진 중에서 아직 사용되지 않은 사진을 골라서 드래프트를 만듭니다.
+          </p>
+
+          {config && (
+            <div className={styles.langGrid}>
+              {LANGUAGES.map((lang) => {
+                const today = new Date().toISOString().slice(0, 10);
+                const lastDate = config.lastGeneratedDate?.[lang.code as PostLanguage];
+                const doneToday = lastDate === today;
+                return (
+                  <div key={lang.code} className={styles.langCard}>
+                    <div className={styles.langCardHeader}>
+                      <span className={styles.langFlag}>{lang.flag}</span>
+                      <span className={styles.langName}>{lang.name}</span>
+                      {doneToday && <span className={styles.doneBadge}>✓ 오늘 완료</span>}
+                    </div>
+                    <div className={styles.countRow}>
+                      <button
+                        className={styles.countBtn}
+                        onClick={() => handleConfigChange(lang.code as PostLanguage, (config.dailyCounts[lang.code as PostLanguage] ?? 0) - 1)}
+                      >−</button>
+                      <span className={styles.countValue}>
+                        {config.dailyCounts[lang.code as PostLanguage] ?? 0}
+                      </span>
+                      <button
+                        className={styles.countBtn}
+                        onClick={() => handleConfigChange(lang.code as PostLanguage, (config.dailyCounts[lang.code as PostLanguage] ?? 0) + 1)}
+                      >+</button>
+                      <span className={styles.countLabel}>개/일</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className={styles.settingsActions}>
+            <button onClick={handleSaveConfig} className={styles.draftBtn}>💾 설정 저장</button>
+            <button
+              onClick={handleAutoGenerate}
+              className={styles.publishBtn}
+              disabled={!!autoRunning}
+            >
+              {autoRunning
+                ? `생성 중... ${autoRunning.current}/${autoRunning.total} (${autoRunning.lang})`
+                : '🤖 자동 생성 실행'}
+            </button>
+          </div>
+
+          <div className={styles.settingsNote}>
+            <strong>동작 방식</strong>
+            <ul>
+              <li>사용 가능한 사진 중 <strong>아직 어떤 포스트에도 쓰이지 않은 사진</strong>을 우선 선택</li>
+              <li>메뉴 태그가 있는 사진을 우선 선택 (콘텐츠 풍부도)</li>
+              <li>각 포스트는 사진 4장 사용</li>
+              <li>당일 이미 생성된 언어는 건너뜀 (수동 다시 실행 시에도)</li>
+              <li>모두 <strong>드래프트 상태로 저장</strong>됨 — 검토 후 직접 퍼블리시</li>
+            </ul>
           </div>
         </div>
       )}

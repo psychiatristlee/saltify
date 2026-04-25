@@ -153,11 +153,14 @@ export async function analyzePhotoForMenuTags(file: File): Promise<string[]> {
   });
 }
 
-export async function generateBlogPost(imageUrls: string[]): Promise<GeneratedPost> {
+export async function generateBlogPost(
+  imageUrls: string[],
+  language?: string
+): Promise<GeneratedPost> {
   const res = await fetch('/api/generate-blog', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imageUrls }),
+    body: JSON.stringify({ imageUrls, language }),
   });
   if (!res.ok) await throwFromResponse(res, '블로그 생성 실패');
   const data = (await res.json()) as { post: GeneratedPost };

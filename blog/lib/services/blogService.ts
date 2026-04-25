@@ -5,6 +5,7 @@ import {
 import { db } from '../firebase';
 
 export type PostStatus = 'draft' | 'published';
+export type PostLanguage = 'ko' | 'en' | 'zh-CN' | 'zh-TW' | 'ja';
 
 export interface BlogPost {
   id: string;
@@ -15,6 +16,7 @@ export interface BlogPost {
   coverImage: string;          // main image URL
   images: string[];            // all image URLs used
   tags: string[];
+  language: PostLanguage;      // post language (default 'ko')
   status: PostStatus;
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -45,13 +47,17 @@ export async function createPost(data: {
   images: string[];
   tags: string[];
   status: PostStatus;
+  language?: PostLanguage;
+  slug?: string;
 }): Promise<string> {
-  const slug = generateSlug(data.title) + '-' + Date.now().toString(36);
+  const baseSlug = data.slug?.trim() || generateSlug(data.title);
+  const slug = baseSlug + '-' + Date.now().toString(36);
   const ref = doc(collection(db, COLLECTION));
   const now = Timestamp.now();
   await setDoc(ref, {
     ...data,
     slug,
+    language: data.language || 'ko',
     createdAt: now,
     updatedAt: now,
     publishedAt: data.status === 'published' ? now : null,
@@ -103,4 +109,18 @@ export async function getAllPosts(): Promise<BlogPost[]> {
   const q = query(collection(db, COLLECTION), orderBy('createdAt', 'desc'));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as BlogPost));
+}
+
+/**
+ * Collect every image URL referenced by every existing post (any status).
+ * Used by auto-generation to avoid reusing photos.
+ */
+export async function getAllUsedImageUrls(): Promise<Set<string>> {
+  const posts = await getAllPosts();
+  const urls = new Set<string>();
+  for (const p of posts) {
+    (p.images || []).forEach((u) => urls.add(u));
+    if (p.coverImage) urls.add(p.coverImage);
+  }
+  return urls;
 }

@@ -4,9 +4,10 @@ import { ToastProvider } from '@/components/Toast';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://salt-bbang.com'),
   title: '솔트빵 - 홍대 소금빵 맛집 | 연남동 베이커리 카페 | 서울 소금빵 추천',
   description:
-    '서울 홍대 소금빵 맛집 솔트빵. 홍대입구역 도보 5분, 연남동 카페거리에 위치한 프리미엄 수제 소금빵 전문 베이커리. 플레인·갈릭버터·큐브 말차크림 등 8종. 소금빵 게임도 즐기고 무료 쿠폰도 받아보세요. 영업시간 11:00-21:00 (일요일 휴무)',
+    '서울 홍대 소금빵 맛집 솔트빵(Salt,0). 홍대입구역 도보 5분, 연남동 카페거리. 수제 소금빵 8종 + 음료. 영업시간 11:00-19:30 (일요일 휴무, 소진시 마감).',
   keywords:
     '솔트빵, 소금빵, 홍대 소금빵, 홍대 소금빵 맛집, 홍대 빵집, 홍대 맛집, 홍대 베이커리, 연남동 빵집, 연남동 카페, 서울 소금빵, 서울 베이커리',
   authors: [{ name: '솔트빵' }],
@@ -53,6 +54,16 @@ export const metadata: Metadata = {
     apple: '/brandings/plain.png',
   },
   manifest: '/manifest.json',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
