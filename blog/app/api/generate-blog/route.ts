@@ -154,6 +154,14 @@ ${tone}
 - Slug must be **English kebab-case** regardless of post language (e.g. "salt-bread-spring-menu")
 - Tags should be terms locals search for in ${LANG_NAME[lang]}
 
+## Local SEO — strongly recommended
+Toward the end of the body, naturally weave in links to the store's map
+listings (in ${LANG_NAME[lang]}, in a sentence the patissier would say):
+- Naver Place: <a href="https://map.naver.com/p/entry/place/2082452936">[link text]</a>
+- Google Maps: <a href="https://www.google.com/maps/search/?api=1&query=Salt%2C0+%EC%97%B0%EB%82%A8%EB%8F%99+%EC%86%94%ED%8A%B8%EB%B9%B5">[link text]</a>
+Don't dump them as a list — work them into a real sentence (e.g.
+"directions over on Naver / Google Maps", "review us on Naver Place").
+
 ${storeInfo}
 
 ${naverContext}

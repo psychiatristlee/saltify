@@ -7,6 +7,7 @@ import LanguageSelector from './LanguageSelector';
 import { MENU_BREADS, MENU_DRINKS } from '@/lib/breadData';
 import NaverMap, { openNaverMapPlace } from './NaverMap';
 import BlogList from './BlogList';
+import { STORE } from '@/lib/storeInfo';
 import styles from './LandingPage.module.css';
 
 const GAME_URL = 'https://game.salt-bbang.com';
@@ -137,9 +138,19 @@ export default function LandingPage() {
             <span className={styles.storeAddress}>{t('storeAddress')}</span>
             <span className={styles.storeHours}>{t('storeHours')}</span>
           </div>
-          <button className={styles.mapButton} onClick={openNaverMapPlace}>
-            {t('getDirections')}
-          </button>
+          <div className={styles.mapButtons}>
+            <button className={styles.mapButton} onClick={openNaverMapPlace}>
+              📍 {t('getDirections')}
+            </button>
+            <a
+              href={STORE.googleMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.googleMapButton}
+            >
+              🗺️ Google Maps
+            </a>
+          </div>
         </div>
       </section>
 

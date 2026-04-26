@@ -16,6 +16,7 @@ export interface ServerBlogPost {
   coverImage: string;
   images: string[];
   tags: string[];
+  language?: string;
   status: 'draft' | 'published';
   publishedAt: Date | null;
   updatedAt: Date | null;
@@ -60,6 +61,7 @@ function parseDoc(doc: FirestoreDoc): ServerBlogPost {
     coverImage: (parseValue(f.coverImage) as string) || '',
     images: (parseValue(f.images) as string[]) || [],
     tags: (parseValue(f.tags) as string[]) || [],
+    language: (parseValue(f.language) as string) || undefined,
     status: (parseValue(f.status) as 'draft' | 'published') || 'draft',
     publishedAt: (parseValue(f.publishedAt) as Date) || null,
     updatedAt: (parseValue(f.updatedAt) as Date) || null,

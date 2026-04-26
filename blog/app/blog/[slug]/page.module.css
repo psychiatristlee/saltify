@@ -34,6 +34,34 @@
   margin-bottom: 12px;
 }
 
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #999;
+  margin: 12px 0 16px;
+}
+
+.breadcrumb a {
+  color: #FF8C00;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb [aria-current="page"] {
+  color: #555;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60vw;
+}
+
 .coverImage {
   width: 100%;
   border-radius: 16px;
@@ -158,28 +186,89 @@
 }
 
 .storeCard {
-  background: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.85);
   border-radius: 16px;
-  padding: 20px;
+  padding: 24px 20px;
   text-align: center;
 }
 
-.storeCard h3 {
+.storeHeader {
   font-size: 18px;
   color: #4E342E;
-  margin-bottom: 8px;
+  margin: 0 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
 }
 
-.storeCard p {
+.storeSub {
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.address {
+  font-style: normal;
   font-size: 14px;
-  color: #666;
-  margin: 4px 0;
+  color: #555;
+  margin: 8px 0 4px;
+  line-height: 1.5;
 }
 
-.storeCard a {
-  display: inline-block;
-  margin-top: 8px;
+.hours {
+  font-size: 13px;
+  color: #777;
+  margin: 0 0 16px;
+}
+
+.mapButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.naverBtn,
+.googleBtn,
+.igBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  transition: transform 0.15s, box-shadow 0.15s;
+  color: white;
+}
+
+.naverBtn { background: #03C75A; }
+.googleBtn { background: #4285F4; }
+.igBtn {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.naverBtn:hover,
+.googleBtn:hover,
+.igBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.permalink {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+}
+.permalink a {
   color: #FF8C00;
+  text-decoration: none;
   font-weight: 600;
-  font-size: 14px;
+}
+.permalink a:hover {
+  text-decoration: underline;
 }

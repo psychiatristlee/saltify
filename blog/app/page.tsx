@@ -1,30 +1,30 @@
 import LandingPage from '@/components/LandingPage';
+import { STORE } from '@/lib/storeInfo';
 
 const BAKERY_JSON_LD = {
   '@context': 'https://schema.org',
   '@type': 'Bakery',
-  name: '솔트빵 (Salt,0)',
-  alternateName: ['Salt,0', '솔트빵', 'Salt Bbang'],
-  description:
-    '서울 홍대 연남동에 위치한 수제 소금빵 전문 베이커리. 매일 갓 구운 소금빵을 만나보세요.',
-  url: 'https://salt-bbang.com',
-  telephone: '',
-  image: 'https://salt-bbang.com/brandings/thumbnail.png',
-  logo: 'https://salt-bbang.com/brandings/plain.png',
+  '@id': `${STORE.websiteUrl}#bakery`,
+  name: `${STORE.name} (${STORE.englishName})`,
+  alternateName: [STORE.englishName, STORE.name, 'Salt Bbang'],
+  description: STORE.description,
+  url: STORE.websiteUrl,
+  image: `${STORE.websiteUrl}/brandings/thumbnail.png`,
+  logo: `${STORE.websiteUrl}/brandings/plain.png`,
   priceRange: '₩₩',
   servesCuisine: ['Korean Bakery', 'Salt Bread', 'Coffee'],
   address: {
     '@type': 'PostalAddress',
-    streetAddress: '동교로 39길 10 1층',
-    addressLocality: '마포구',
-    addressRegion: '서울특별시',
-    postalCode: '03996',
-    addressCountry: 'KR',
+    streetAddress: STORE.streetAddress,
+    addressLocality: STORE.addressLocality,
+    addressRegion: STORE.addressRegion,
+    postalCode: STORE.postalCode,
+    addressCountry: STORE.addressCountry,
   },
   geo: {
     '@type': 'GeoCoordinates',
-    latitude: 37.5621326,
-    longitude: 126.9237369,
+    latitude: STORE.lat,
+    longitude: STORE.lng,
   },
   openingHoursSpecification: [
     {
@@ -34,12 +34,17 @@ const BAKERY_JSON_LD = {
       closes: '19:30',
     },
   ],
-  sameAs: [
-    'https://www.instagram.com/salt_bread_official',
-    'https://map.naver.com/p/entry/place/2082452936',
-  ],
-  hasMap: 'https://map.naver.com/p/entry/place/2082452936',
+  // sameAs is the strongest signal for "this website == this Google Maps /
+  // Naver Place / Instagram entity". Helps the local pack tie everything
+  // together.
+  sameAs: [STORE.naverPlaceUrl, STORE.googleMapsUrl, STORE.instagramUrl],
+  hasMap: [STORE.naverPlaceUrl, STORE.googleMapsUrl],
   areaServed: { '@type': 'City', name: '서울' },
+  potentialAction: {
+    '@type': 'ViewAction',
+    target: STORE.naverPlaceUrl,
+    name: '네이버 플레이스에서 보기',
+  },
 };
 
 export default function Home() {

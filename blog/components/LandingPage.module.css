@@ -278,28 +278,44 @@
   color: #888;
 }
 
-.mapButton {
+.mapButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.mapButton,
+.googleMapButton {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 100%;
-  padding: 14px;
-  background: #03C75A;
+  flex: 1;
+  padding: 14px 12px;
   color: white;
   border: none;
   border-radius: 12px;
-  font-size: 0.9375rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.2s;
 }
 
-.mapButton:hover {
+.mapButton {
+  background: #03C75A;
+}
+
+.googleMapButton {
+  background: #4285F4;
+}
+
+.mapButton:hover,
+.googleMapButton:hover {
   transform: scale(1.02);
 }
 
-.mapButton:active {
+.mapButton:active,
+.googleMapButton:active {
   transform: scale(0.98);
 }
 
