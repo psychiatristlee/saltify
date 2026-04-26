@@ -5,7 +5,7 @@ import {
 import { db } from '../firebase';
 
 export type PostStatus = 'draft' | 'published';
-export type PostLanguage = 'ko' | 'en' | 'zh-CN' | 'zh-TW' | 'ja';
+export type PostLanguage = 'ko' | 'en' | 'zh-CN' | 'ja';
 
 export interface BlogPost {
   id: string;

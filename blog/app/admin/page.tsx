@@ -396,7 +396,11 @@ export default function AdminPage() {
   const handleSaveConfig = async () => {
     if (!config) return;
     try {
-      await saveBlogConfig({ dailyCounts: config.dailyCounts });
+      await saveBlogConfig({
+        dailyCounts: config.dailyCounts,
+        autoPublish: config.autoPublish,
+        scheduleTime: config.scheduleTime,
+      });
       toast('설정이 저장되었습니다', { kind: 'success' });
     } catch (err) {
       toast('설정 저장 실패: ' + (err instanceof Error ? err.message : 'unknown'), { kind: 'error' });
@@ -472,7 +476,7 @@ export default function AdminPage() {
           coverImage: cover,
           images: urls,
           tags: post.tags,
-          status: 'draft',
+          status: config.autoPublish ? 'published' : 'draft',
           language: lang,
         });
         urls.forEach((u) => usedThisRun.add(u));
@@ -1007,6 +1011,37 @@ export default function AdminPage() {
             </div>
           )}
 
+          {/* Schedule + auto-publish */}
+          {config && (
+            <div className={styles.scheduleBox}>
+              <div className={styles.scheduleRow}>
+                <label className={styles.scheduleLabel}>⏰ 매일 실행 시각 (KST)</label>
+                <input
+                  type="time"
+                  value={config.scheduleTime}
+                  onChange={(e) => setConfig({ ...config, scheduleTime: e.target.value })}
+                  className={styles.timeInput}
+                />
+                <span className={styles.scheduleHint}>매일 이 시각에 자동으로 실행됩니다</span>
+              </div>
+              <label className={styles.toggleRow}>
+                <input
+                  type="checkbox"
+                  checked={config.autoPublish}
+                  onChange={(e) => setConfig({ ...config, autoPublish: e.target.checked })}
+                />
+                <span>
+                  <strong>{config.autoPublish ? '자동 게시' : '드래프트만 생성'}</strong>
+                  <span className={styles.toggleHint}>
+                    {config.autoPublish
+                      ? ' — 생성 즉시 사이트에 게시됩니다'
+                      : ' — 검토 후 직접 게시 (안전)'}
+                  </span>
+                </span>
+              </label>
+            </div>
+          )}
+
           <div className={styles.settingsActions}>
             <button onClick={handleSaveConfig} className={styles.draftBtn}>💾 설정 저장</button>
             <button
@@ -1016,18 +1051,19 @@ export default function AdminPage() {
             >
               {autoRunning
                 ? `생성 중... ${autoRunning.current}/${autoRunning.total} (${autoRunning.lang})`
-                : '🤖 자동 생성 실행'}
+                : '🤖 지금 실행'}
             </button>
           </div>
 
           <div className={styles.settingsNote}>
             <strong>동작 방식</strong>
             <ul>
-              <li>사용 가능한 사진 중 <strong>아직 어떤 포스트에도 쓰이지 않은 사진</strong>을 우선 선택</li>
-              <li>메뉴 태그가 있는 사진을 우선 선택 (콘텐츠 풍부도)</li>
+              <li>매일 설정한 시각에 자동 실행 (Firebase Cloud Scheduler)</li>
+              <li>사용 가능한 사진 중 <strong>아직 어떤 포스트에도 쓰이지 않은 사진</strong> 우선</li>
+              <li>메뉴 태그가 있는 사진을 우선 (콘텐츠 풍부도)</li>
               <li>각 포스트는 사진 4장 사용</li>
-              <li>당일 이미 생성된 언어는 건너뜀 (수동 다시 실행 시에도)</li>
-              <li>모두 <strong>드래프트 상태로 저장</strong>됨 — 검토 후 직접 퍼블리시</li>
+              <li>당일 이미 생성된 언어는 건너뜀 (멱등성)</li>
+              <li>{config?.autoPublish ? '✅ 자동 게시 모드 — 즉시 사이트맵 반영' : '📝 드래프트 모드 — 포스트 탭에서 검토 후 직접 게시'}</li>
             </ul>
           </div>
         </div>

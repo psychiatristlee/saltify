@@ -4,6 +4,7 @@ import * as admin from "firebase-admin";
 
 // Re-export scheduled functions
 export { searchKeywordsScheduled } from "./scheduled/searchKeywords.js";
+export { autoBlogScheduler } from "./scheduled/autoBlog.js";
 
 admin.initializeApp();
 

@@ -3,6 +3,7 @@ import {
   callGemini, getGeminiModel, urlToImagePart, stripJsonFence, GeminiError, MODEL_NAME,
 } from '@/lib/server/gemini';
 import { applyMarkdown } from '@/lib/markdown';
+import { fetchNaverPlaceContext, naverContextToPrompt } from '@/lib/server/naverPlace';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -27,11 +28,6 @@ const STORE_INFO_BY_LANG: Record<string, string> = {
 - 店名: Salt,0 (솔트빵)
 - 地址: 首尔特别市 麻浦区 东桥路39街 10号 1层 (延南洞,弘大入口站步行5分钟)
 - 营业时间: 11:00 - 19:30 (周日休息,售完即止)
-- Instagram: @salt_bread_official`,
-  'zh-TW': `## 門店資訊 (自然融入)
-- 店名: Salt,0 (솔트빵)
-- 地址: 首爾特別市 麻浦區 東橋路39街 10號 1樓 (延南洞,弘大入口站步行5分鐘)
-- 營業時間: 11:00 - 19:30 (週日休息,售完即止)
 - Instagram: @salt_bread_official`,
 };
 
@@ -58,11 +54,6 @@ const TONE_BY_LANG: Record<string, string> = {
 - 像跟熟客聊天一样自然亲切
 - 避免广告化、生硬的措辞 (如"高级"、"顶级"、"精选食材"等)
 - 灵活使用 Markdown: **粗体**、*斜体*、> 引用、- 列表、## 标题`,
-  'zh-TW': `## 語氣與風格 (必須遵守)
-- 以**Salt,0 烘焙師親自向顧客介紹麵包**的第一人稱語氣書寫
-- 像跟熟客聊天一樣自然親切
-- 避免廣告化、生硬的措辭 (如「高級」「頂級」「精選食材」等)
-- 靈活使用 Markdown: **粗體**、*斜體*、> 引用、- 列表、## 標題`,
 };
 
 const LANG_NAME: Record<string, string> = {
@@ -70,7 +61,6 @@ const LANG_NAME: Record<string, string> = {
   en: 'English',
   ja: '日本語 (Japanese)',
   'zh-CN': '简体中文 (Simplified Chinese)',
-  'zh-TW': '繁體中文 (Traditional Chinese)',
 };
 
 function fallback(text: string) {
@@ -132,6 +122,20 @@ export async function POST(req: NextRequest) {
   const tone = TONE_BY_LANG[lang] || TONE_BY_LANG.ko;
   const storeInfo = STORE_INFO_BY_LANG[lang] || STORE_INFO_BY_LANG.ko;
 
+  // Live Naver Place context — refetched on every blog generation so the
+  // post never references menus/prices that don't actually exist.
+  let naverContext = '';
+  try {
+    const ctx = await fetchNaverPlaceContext();
+    naverContext = naverContextToPrompt(ctx);
+    console.log('[generate-blog] naver context', {
+      menus: ctx.menus.length,
+      reviews: ctx.reviewSnippets.length,
+    });
+  } catch (err) {
+    console.warn('[generate-blog] naver fetch failed', err);
+  }
+
   const prompt = `You are the patissier at Salt,0 (솔트빵), a salt bread bakery in Seoul.
 
 ⚠️ WRITE THE ENTIRE BLOG POST IN ${LANG_NAME[lang]}. All title, description, content, and tags must be in ${LANG_NAME[lang]}.
@@ -151,6 +155,8 @@ ${tone}
 - Tags should be terms locals search for in ${LANG_NAME[lang]}
 
 ${storeInfo}
+
+${naverContext}
 
 ## Available image URLs (use exactly these)
 ${urls.map((u, i) => `${i + 1}. ${u}`).join('\n')}

@@ -17,7 +17,6 @@ function getDefaultLanguage(): Language {
   if (saved) return saved as Language;
   const nav = navigator.language.toLowerCase();
   if (nav.startsWith('ja')) return 'ja';
-  if (nav.startsWith('zh-tw') || nav.startsWith('zh-hant')) return 'zh-TW';
   if (nav.startsWith('zh')) return 'zh-CN';
   if (nav.startsWith('en')) return 'en';
   return 'ko';
