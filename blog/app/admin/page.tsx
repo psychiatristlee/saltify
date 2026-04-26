@@ -370,7 +370,8 @@ export default function AdminPage() {
 
   // Settings state
   const [config, setConfig] = useState<BlogConfig | null>(null);
-  const [autoRunning, setAutoRunning] = useState<{ lang: PostLanguage; current: number; total: number } | null>(null);
+  const [autoRunning, setAutoRunning] = useState<{ lang: PostLanguage } | null>(null);
+  const [manualLang, setManualLang] = useState<PostLanguage>('ko');
 
   const loadConfig = useCallback(async () => {
     try {
@@ -426,90 +427,63 @@ export default function AdminPage() {
     return scored.slice(0, count).map((s) => s.m);
   };
 
+  // Manual single-language single-post run.
+  // The scheduled cron handles bulk multi-language generation per day —
+  // this button is for "I just want one post in language X right now".
   const handleAutoGenerate = async () => {
     if (!config) return;
-    const today = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
+    setAutoRunning({ lang: manualLang });
 
     const allMedia = await listMedia();
     const usedUrls = await getAllUsedImageUrls();
-    const usedThisRun = new Set(usedUrls);
 
-    const tasks: Array<{ lang: PostLanguage; index: number }> = [];
-    (Object.keys(config.dailyCounts) as PostLanguage[]).forEach((lang) => {
-      const target = config.dailyCounts[lang] ?? 0;
-      const lastDate = config.lastGeneratedDate?.[lang];
-      // Skip if already done today for that language
-      if (lastDate === today) return;
-      for (let i = 0; i < target; i++) tasks.push({ lang, index: i });
-    });
-
-    if (tasks.length === 0) {
-      toast('오늘 자동 생성할 분량이 없습니다 (이미 완료되었거나 카운트가 0)', { kind: 'info' });
+    const PHOTOS_PER_POST = 4;
+    const picks = pickPhotosForPost(allMedia, usedUrls, PHOTOS_PER_POST);
+    if (picks.length === 0) {
+      setAutoRunning(null);
+      toast('사용 가능한 사진이 부족합니다 (모든 사진이 이미 다른 포스트에 쓰임)', {
+        kind: 'warn', durationMs: 6000,
+      });
       return;
     }
 
-    let success = 0;
-    let failure = 0;
-
-    for (let t = 0; t < tasks.length; t++) {
-      const { lang } = tasks[t];
-      setAutoRunning({ lang, current: t + 1, total: tasks.length });
-
-      const PHOTOS_PER_POST = 4;
-      const picks = pickPhotosForPost(allMedia, usedThisRun, PHOTOS_PER_POST);
-
-      if (picks.length === 0) {
-        toast(`사용 가능한 사진이 부족합니다 (남은 작업 건너뜀)`, { kind: 'warn' });
-        failure += tasks.length - t;
-        break;
-      }
-
-      const urls = picks.map((p) => p.url);
-      try {
-        const post = await generateBlogPost(urls, lang);
-        const cover = post.content.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1] || urls[0];
-        await createBlogPost({
-          title: post.title,
-          slug: post.slug,
-          description: post.description,
-          content: post.content,
-          coverImage: cover,
-          images: urls,
-          tags: post.tags,
-          status: config.autoPublish ? 'published' : 'draft',
-          language: lang,
-        });
-        urls.forEach((u) => usedThisRun.add(u));
-        await markGenerated(today, lang);
-        success++;
-      } catch (err) {
-        failure++;
-        console.error('[auto-generate] task failed', { lang, err });
-        if (err instanceof RateLimitError) {
-          toast(`AI 한도 초과로 중단합니다 (${success}/${tasks.length} 완료)`, {
-            kind: 'warn',
-            durationMs: 7000,
-          });
-          break;
-        }
-      }
-
-      // Small breather between calls
-      if (t < tasks.length - 1) await new Promise((r) => setTimeout(r, 1500));
-    }
-
-    setAutoRunning(null);
-    await loadPosts();
-    await loadConfig();
-
-    if (success > 0) {
-      toast(`${success}개의 드래프트가 생성되었습니다 (실패 ${failure}건)`, {
-        kind: success > 0 && failure === 0 ? 'success' : 'info',
-        durationMs: 5000,
+    const urls = picks.map((p) => p.url);
+    try {
+      const post = await generateBlogPost(urls, manualLang);
+      const cover = post.content.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1] || urls[0];
+      await createBlogPost({
+        title: post.title,
+        slug: post.slug,
+        description: post.description,
+        content: post.content,
+        coverImage: cover,
+        images: urls,
+        tags: post.tags,
+        status: config.autoPublish ? 'published' : 'draft',
+        language: manualLang,
       });
+      const today = new Date().toISOString().slice(0, 10);
+      await markGenerated(today, manualLang);
+      await loadPosts();
+      await loadConfig();
+      toast(
+        config.autoPublish
+          ? `${manualLang} 포스트가 게시되었습니다`
+          : `${manualLang} 드래프트가 생성되었습니다 — 포스트 탭에서 확인`,
+        { kind: 'success', durationMs: 5000 }
+      );
       setTab('posts');
-    } else {
-      toast('블로그 생성에 실패했습니다', { kind: 'error' });
+    } catch (err) {
+      console.error('[auto-generate] manual failed', err);
+      const isRate = err instanceof RateLimitError;
+      toast(
+        isRate
+          ? 'AI 한도 초과 — 잠시 후 다시 시도해주세요'
+          : `생성 실패: ${err instanceof Error ? err.message : 'unknown'}`,
+        { kind: isRate ? 'warn' : 'error', durationMs: 6000 }
+      );
+    } finally {
+      setAutoRunning(null);
     }
   };
 
@@ -1044,15 +1018,34 @@ export default function AdminPage() {
 
           <div className={styles.settingsActions}>
             <button onClick={handleSaveConfig} className={styles.draftBtn}>💾 설정 저장</button>
-            <button
-              onClick={handleAutoGenerate}
-              className={styles.publishBtn}
-              disabled={!!autoRunning}
-            >
-              {autoRunning
-                ? `생성 중... ${autoRunning.current}/${autoRunning.total} (${autoRunning.lang})`
-                : '🤖 지금 실행'}
-            </button>
+          </div>
+
+          <div className={styles.manualRunBox}>
+            <h3 className={styles.manualRunTitle}>🚀 지금 1개 생성</h3>
+            <p className={styles.manualRunHint}>
+              선택한 언어로 블로그 포스트 1개를 즉시 생성합니다 (스케줄과 무관).
+            </p>
+            <div className={styles.manualRunRow}>
+              <select
+                value={manualLang}
+                onChange={(e) => setManualLang(e.target.value as PostLanguage)}
+                className={styles.langSelect}
+                disabled={!!autoRunning}
+              >
+                {LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.flag} {l.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleAutoGenerate}
+                className={styles.publishBtn}
+                disabled={!!autoRunning}
+              >
+                {autoRunning ? `생성 중... (${autoRunning.lang})` : '🤖 1개 생성'}
+              </button>
+            </div>
           </div>
 
           <div className={styles.settingsNote}>
