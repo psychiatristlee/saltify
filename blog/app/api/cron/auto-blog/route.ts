@@ -127,8 +127,20 @@ Output (pure JSON only, no markdown fence):
 }
 
 export async function POST(req: NextRequest) {
-  const auth = req.headers.get('authorization') || '';
-  if (!CRON_SECRET || auth !== `Bearer ${CRON_SECRET}`) {
+  // Cloud Run / Google Frontend strips/intercepts the Authorization header
+  // for IAM purposes, so we use a custom header that passes through cleanly.
+  const provided =
+    req.headers.get('x-cron-secret') ||
+    req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
+    new URL(req.url).searchParams.get('secret') ||
+    '';
+  if (!CRON_SECRET || provided !== CRON_SECRET) {
+    console.warn('[cron/auto-blog] unauthorized', {
+      hasSecretEnv: Boolean(CRON_SECRET),
+      hasHeader: Boolean(req.headers.get('x-cron-secret')),
+      hasAuth: Boolean(req.headers.get('authorization')),
+      hasQuery: Boolean(new URL(req.url).searchParams.get('secret')),
+    });
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
