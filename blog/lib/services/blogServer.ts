@@ -106,6 +106,10 @@ export async function getPostBySlugServer(slug: string): Promise<ServerBlogPost 
 }
 
 export async function getPublishedPostsServer(): Promise<ServerBlogPost[]> {
+  // Filter only on `status` — sort client-side. status+publishedAt orderBy
+  // requires a composite index, which has historically been the cause of
+  // mysterious empty homepages. Published-post counts will never be huge
+  // enough to need server-side ordering here.
   const query = {
     structuredQuery: {
       from: [{ collectionId: 'blogPosts' }],
@@ -116,7 +120,6 @@ export async function getPublishedPostsServer(): Promise<ServerBlogPost[]> {
           value: { stringValue: 'published' },
         },
       },
-      orderBy: [{ field: { fieldPath: 'publishedAt' }, direction: 'DESCENDING' }],
     },
   };
 
@@ -125,7 +128,6 @@ export async function getPublishedPostsServer(): Promise<ServerBlogPost[]> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(query),
-      // Match the page-level revalidate so we never serve stale empty list.
       next: { revalidate: 60 },
     });
     if (!res.ok) {
@@ -139,6 +141,11 @@ export async function getPublishedPostsServer(): Promise<ServerBlogPost[]> {
     }
     const data = (await res.json()) as Array<{ document?: FirestoreDoc }>;
     const posts = data.filter((r) => r.document).map((r) => parseDoc(r.document!));
+    posts.sort((a, b) => {
+      const ta = a.publishedAt?.getTime() ?? 0;
+      const tb = b.publishedAt?.getTime() ?? 0;
+      return tb - ta;
+    });
     console.log('[getPublishedPostsServer] loaded', posts.length, 'posts');
     return posts;
   } catch (err) {

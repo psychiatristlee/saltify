@@ -96,13 +96,16 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
 }
 
 export async function getPublishedPosts(): Promise<BlogPost[]> {
-  const q = query(
-    collection(db, COLLECTION),
-    where('status', '==', 'published'),
-    orderBy('publishedAt', 'desc'),
-  );
+  // Filter only — sort client-side. Avoids needing a composite index.
+  const q = query(collection(db, COLLECTION), where('status', '==', 'published'));
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as BlogPost));
+  const posts = snap.docs.map((d) => ({ id: d.id, ...d.data() } as BlogPost));
+  posts.sort((a, b) => {
+    const ta = a.publishedAt?.toMillis?.() ?? 0;
+    const tb = b.publishedAt?.toMillis?.() ?? 0;
+    return tb - ta;
+  });
+  return posts;
 }
 
 export async function getAllPosts(): Promise<BlogPost[]> {
@@ -112,15 +115,33 @@ export async function getAllPosts(): Promise<BlogPost[]> {
 }
 
 /**
- * Collect every image URL referenced by every existing post (any status).
- * Used by auto-generation to avoid reusing photos.
+ * For each image URL, return the most-recent post-creation timestamp that
+ * referenced it. Photos never used → not present in the map.
+ *
+ * Used by auto-generation to penalize photos that were used recently:
+ * recently-used photos drop in score, but stay eligible (we don't hard-block
+ * reuse across blogs anymore — a photo can show up in multiple posts as long
+ * as it's not duplicated within one post).
  */
-export async function getAllUsedImageUrls(): Promise<Set<string>> {
+export async function getImageUsageMap(): Promise<Map<string, number>> {
   const posts = await getAllPosts();
-  const urls = new Set<string>();
+  const m = new Map<string, number>();
   for (const p of posts) {
+    const ts = p.createdAt?.toMillis?.() ?? 0;
+    const urls = new Set<string>();
     (p.images || []).forEach((u) => urls.add(u));
     if (p.coverImage) urls.add(p.coverImage);
+    for (const u of urls) {
+      const prev = m.get(u) ?? 0;
+      if (ts > prev) m.set(u, ts);
+    }
   }
-  return urls;
+  return m;
+}
+
+/** @deprecated kept for backwards-compatibility callers — soft-penalty
+ *  selection is preferred via getImageUsageMap(). */
+export async function getAllUsedImageUrls(): Promise<Set<string>> {
+  const m = await getImageUsageMap();
+  return new Set(m.keys());
 }

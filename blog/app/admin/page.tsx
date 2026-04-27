@@ -13,7 +13,7 @@ import {
   GeneratedPost, RateLimitError,
 } from '@/lib/services/aiService';
 import {
-  createPost as createBlogPost, getAllUsedImageUrls,
+  createPost as createBlogPost, getImageUsageMap,
 } from '@/lib/services/blogService';
 import type { PostLanguage } from '@/lib/services/blogService';
 import {
@@ -408,21 +408,36 @@ export default function AdminPage() {
     }
   };
 
-  // Pick N photos for one auto-generated post: prefer unused images,
-  // prefer images with menu tags, then by recency.
+  // Photo selection — recency-weighted instead of hard-blocked.
+  // A photo can appear in multiple blog posts (just not duplicated within
+  // one post), but photos used recently get a score penalty so the picker
+  // prefers fresher / never-used images first.
   const pickPhotosForPost = (
     pool: MediaItem[],
-    used: Set<string>,
+    usageMap: Map<string, number>,   // url → most recent createdAt millis it was used
     count: number
   ): MediaItem[] => {
-    const available = pool.filter((m) => m.type === 'image' && !used.has(m.url));
-    if (available.length === 0) return [];
-    // Score: tagged photos higher, more recent higher
-    const scored = available.map((m) => ({
-      m,
-      score: (m.tags?.length ?? 0) * 1000 +
-        (m.createdAt?.toDate ? m.createdAt.toDate().getTime() : 0) / 1e9,
-    }));
+    const images = pool.filter((m) => m.type === 'image');
+    if (images.length === 0) return [];
+
+    const now = Date.now();
+    const DAY_MS = 86_400_000;
+    const scored = images.map((m) => {
+      const tagBonus = (m.tags?.length ?? 0) * 1000;
+      const uploadedAt = m.createdAt?.toDate ? m.createdAt.toDate().getTime() : 0;
+      // Recency of upload: newer photos slightly preferred (small effect)
+      const uploadFreshness = uploadedAt / 1e9;
+      // Penalty for recent use in another post: drops score by up to 5000
+      // for photos used in the last 24h, decaying linearly to 0 over 14 days.
+      const lastUsedAt = usageMap.get(m.url) ?? 0;
+      const daysSinceUsed = lastUsedAt
+        ? Math.max(0, (now - lastUsedAt) / DAY_MS)
+        : 999;
+      const recencyPenalty = lastUsedAt
+        ? Math.max(0, 5000 - daysSinceUsed * (5000 / 14))
+        : 0;
+      return { m, score: tagBonus + uploadFreshness - recencyPenalty };
+    });
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, count).map((s) => s.m);
   };
@@ -435,13 +450,13 @@ export default function AdminPage() {
     setAutoRunning({ lang: manualLang });
 
     const allMedia = await listMedia();
-    const usedUrls = await getAllUsedImageUrls();
+    const usageMap = await getImageUsageMap();
 
     const PHOTOS_PER_POST = 4;
-    const picks = pickPhotosForPost(allMedia, usedUrls, PHOTOS_PER_POST);
+    const picks = pickPhotosForPost(allMedia, usageMap, PHOTOS_PER_POST);
     if (picks.length === 0) {
       setAutoRunning(null);
-      toast('사용 가능한 사진이 부족합니다 (모든 사진이 이미 다른 포스트에 쓰임)', {
+      toast('업로드된 사진이 없습니다', {
         kind: 'warn', durationMs: 6000,
       });
       return;

@@ -1,6 +1,7 @@
 {
   "firestore": {
-    "rules": "game/firestore.rules"
+    "rules": "game/firestore.rules",
+    "indexes": "game/firestore.indexes.json"
   },
   "storage": {
     "rules": "game/storage.rules"

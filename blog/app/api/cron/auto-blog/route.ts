@@ -158,13 +158,24 @@ export async function POST(req: NextRequest) {
   const mediaSnap = await db.collection('mediaItems').orderBy('createdAt', 'desc').get();
   const allMedia: MediaDoc[] = mediaSnap.docs.map((d) => ({ id: d.id, ...(d.data() as object) } as MediaDoc));
 
-  // Load images already used in any blog post
+  // Build usage map: image URL → most recent createdAt millis it was used in.
+  // Used as a soft penalty in scoring (recently-used photos drop in score
+  // but stay eligible) — photos can be reused across blog posts, just not
+  // duplicated within one post.
   const postsSnap = await db.collection('blogPosts').get();
-  const usedUrls = new Set<string>();
+  const usageMap = new Map<string, number>();
   postsSnap.forEach((doc) => {
-    const data = doc.data() as { images?: string[]; coverImage?: string };
-    (data.images || []).forEach((u) => usedUrls.add(u));
-    if (data.coverImage) usedUrls.add(data.coverImage);
+    const data = doc.data() as {
+      images?: string[]; coverImage?: string; createdAt?: { toMillis(): number };
+    };
+    const ts = data.createdAt?.toMillis?.() ?? 0;
+    const urls = new Set<string>();
+    (data.images || []).forEach((u) => urls.add(u));
+    if (data.coverImage) urls.add(data.coverImage);
+    for (const u of urls) {
+      const prev = usageMap.get(u) ?? 0;
+      if (ts > prev) usageMap.set(u, ts);
+    }
   });
 
   // Build task list (skip langs already done today)
@@ -191,16 +202,30 @@ export async function POST(req: NextRequest) {
     console.warn('[cron/auto-blog] naver fetch failed', err);
   }
 
-  const usedThisRun = new Set(usedUrls);
+  // Track URLs already picked in *this run* so two simultaneously-generated
+  // posts in the same cron tick don't end up with the same photos.
+  const pickedThisRun = new Set<string>();
   const summary = { generated: 0, failed: 0, skipped: 0, errors: [] as string[] };
+
+  const now = Date.now();
+  const DAY_MS = 86_400_000;
 
   for (const task of tasks) {
     const available = allMedia
-      .filter((m) => m.type === 'image' && !usedThisRun.has(m.url))
-      .map((m) => ({
-        ...m,
-        score: (m.tags?.length || 0) * 1000 + (m.createdAt?.toMillis() || 0) / 1e9,
-      }))
+      .filter((m) => m.type === 'image' && !pickedThisRun.has(m.url))
+      .map((m) => {
+        const tagBonus = (m.tags?.length || 0) * 1000;
+        const uploadFreshness = (m.createdAt?.toMillis() || 0) / 1e9;
+        const lastUsedAt = usageMap.get(m.url) ?? 0;
+        const daysSinceUsed = lastUsedAt
+          ? Math.max(0, (now - lastUsedAt) / DAY_MS)
+          : 999;
+        // Recently used (last 14d) → up to -5000; never used → 0 penalty.
+        const recencyPenalty = lastUsedAt
+          ? Math.max(0, 5000 - daysSinceUsed * (5000 / 14))
+          : 0;
+        return { ...m, score: tagBonus + uploadFreshness - recencyPenalty };
+      })
       .sort((a, b) => b.score - a.score)
       .slice(0, PHOTOS_PER_POST);
 
@@ -215,7 +240,7 @@ export async function POST(req: NextRequest) {
       const post = await generatePostForLanguage(task.lang, urls, naverContext);
       const cover = post.content.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1] || urls[0];
       const slug = generateSlug(post.slug || post.title) + '-' + Date.now().toString(36);
-      const now = Timestamp.now();
+      const tsNow = Timestamp.now();
       const status = autoPublish ? 'published' : 'draft';
 
       await db.collection('blogPosts').add({
@@ -228,13 +253,15 @@ export async function POST(req: NextRequest) {
         tags: post.tags || [],
         language: task.lang,
         status,
-        createdAt: now,
-        updatedAt: now,
-        publishedAt: status === 'published' ? now : null,
+        createdAt: tsNow,
+        updatedAt: tsNow,
+        publishedAt: status === 'published' ? tsNow : null,
       });
 
-      // Mark used so subsequent tasks in the same run don't reuse
-      urls.forEach((u) => usedThisRun.add(u));
+      // Within this cron run, prevent picking the same URLs for another task
+      urls.forEach((u) => pickedThisRun.add(u));
+      // Update the usage map so the next task's recency penalty is correct
+      urls.forEach((u) => usageMap.set(u, Date.now()));
 
       // Mark this language done for today
       await db.doc('blogConfig/default').set(
