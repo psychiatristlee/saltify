@@ -125,13 +125,24 @@ export async function getPublishedPostsServer(): Promise<ServerBlogPost[]> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(query),
-      next: { revalidate: 300 },
+      // Match the page-level revalidate so we never serve stale empty list.
+      next: { revalidate: 60 },
     });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      console.error(
+        '[getPublishedPostsServer] non-ok response',
+        res.status,
+        body.slice(0, 400)
+      );
+      return [];
+    }
     const data = (await res.json()) as Array<{ document?: FirestoreDoc }>;
-    return data.filter((r) => r.document).map((r) => parseDoc(r.document!));
+    const posts = data.filter((r) => r.document).map((r) => parseDoc(r.document!));
+    console.log('[getPublishedPostsServer] loaded', posts.length, 'posts');
+    return posts;
   } catch (err) {
-    console.error('getPublishedPostsServer failed:', err);
+    console.error('[getPublishedPostsServer] failed:', err);
     return [];
   }
 }
