@@ -1,5 +1,11 @@
 import LandingPage from '@/components/LandingPage';
+import type { BlogListItem } from '@/components/BlogList';
+import { getPublishedPostsServer } from '@/lib/services/blogServer';
 import { STORE } from '@/lib/storeInfo';
+
+// Revalidate every minute so a freshly-published post shows up on the
+// homepage within ~60s without a redeploy.
+export const revalidate = 60;
 
 const BAKERY_JSON_LD = {
   '@context': 'https://schema.org',
@@ -34,9 +40,6 @@ const BAKERY_JSON_LD = {
       closes: '19:30',
     },
   ],
-  // sameAs is the strongest signal for "this website == this Google Maps /
-  // Naver Place / Instagram entity". Helps the local pack tie everything
-  // together.
   sameAs: [STORE.naverPlaceUrl, STORE.googleMapsUrl, STORE.instagramUrl],
   hasMap: [STORE.naverPlaceUrl, STORE.googleMapsUrl],
   areaServed: { '@type': 'City', name: '서울' },
@@ -47,10 +50,20 @@ const BAKERY_JSON_LD = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const rawPosts = await getPublishedPostsServer();
+  const posts: BlogListItem[] = rawPosts.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    description: p.description,
+    coverImage: p.coverImage,
+    publishedAt: p.publishedAt ? p.publishedAt.toISOString() : null,
+  }));
+
   return (
     <>
-      <LandingPage />
+      <LandingPage posts={posts} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(BAKERY_JSON_LD) }}

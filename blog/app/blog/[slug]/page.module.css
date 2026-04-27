@@ -272,3 +272,17 @@
 .permalink a:hover {
   text-decoration: underline;
 }
+
+.copyright {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.copyright .adminLink {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+}

@@ -247,6 +247,10 @@ export default async function BlogPostPage({ params }: Props) {
           <p className={styles.permalink}>
             <Link href="/">← 다른 글 보기</Link>
           </p>
+
+          <p className={styles.copyright}>
+            &copy; 2026 <Link href="/admin" className={styles.adminLink}>Saltify</Link>. All rights reserved.
+          </p>
         </footer>
       </article>
 

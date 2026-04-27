@@ -6,13 +6,17 @@ import { useLanguage } from '@/lib/LanguageContext';
 import LanguageSelector from './LanguageSelector';
 import { MENU_BREADS, MENU_DRINKS } from '@/lib/breadData';
 import NaverMap, { openNaverMapPlace } from './NaverMap';
-import BlogList from './BlogList';
+import BlogList, { BlogListItem } from './BlogList';
 import { STORE } from '@/lib/storeInfo';
 import styles from './LandingPage.module.css';
 
 const GAME_URL = 'https://game.salt-bbang.com';
 
-export default function LandingPage() {
+interface Props {
+  posts?: BlogListItem[];
+}
+
+export default function LandingPage({ posts = [] }: Props) {
   const { language, setLanguage, t } = useLanguage();
 
   return (
@@ -126,7 +130,7 @@ export default function LandingPage() {
       </section>
 
       {/* Blog Section */}
-      <BlogList />
+      <BlogList posts={posts} />
 
       {/* Map Section */}
       <section className={styles.mapSection}>
