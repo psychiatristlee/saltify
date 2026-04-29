@@ -31,56 +31,67 @@
 
 .card {
   display: flex;
-  gap: 12px;
-  background: rgba(255,255,255,0.7);
-  border-radius: 14px;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
   overflow: hidden;
   text-decoration: none;
-  transition: transform 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 140, 0, 0.08);
 }
 
 .card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
 }
 
 .cardImage {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   object-fit: cover;
   flex-shrink: 0;
 }
 
 .cardBody {
-  padding: 10px 12px 10px 0;
+  padding: 12px 14px 12px 0;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  flex: 1;
 }
 
+/* Treat as an h3-level heading — was 14px which read as a sub-label. */
 .cardTitle {
-  font-size: 14px;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 4px;
+  font-size: 1.0625rem;          /* ≈ 17px */
+  font-weight: 800;
+  color: #2C1810;
+  line-height: 1.35;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-break: keep-all;
 }
 
 .cardDesc {
-  font-size: 12px;
-  color: #888;
+  font-size: 0.8125rem;          /* ≈ 13px */
+  color: #6B5D54;
+  line-height: 1.5;
   margin-bottom: auto;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-break: keep-all;
 }
 
 .cardDate {
-  font-size: 11px;
-  color: #bbb;
-  margin-top: 6px;
+  font-size: 0.6875rem;          /* ≈ 11px */
+  color: #B0A299;
+  margin-top: 8px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
