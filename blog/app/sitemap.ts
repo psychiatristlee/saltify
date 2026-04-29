@@ -35,6 +35,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     },
     {
+      url: `${BASE}/blog`,
+      lastModified:
+        posts[0]?.updatedAt || posts[0]?.publishedAt || undefined,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
       url: `${BASE}/menu/jp`,
       changeFrequency: 'monthly',
       priority: 0.8,

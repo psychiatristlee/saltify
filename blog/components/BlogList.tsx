@@ -19,9 +19,16 @@ interface Props {
 export default function BlogList({ posts }: Props) {
   if (!posts || posts.length === 0) return null;
 
+  const hasMore = posts.length > 6;
+
   return (
     <section className={styles.section} id="blog">
-      <h2 className={styles.sectionTitle}>Blog</h2>
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>Blog</h2>
+        <Link href="/blog" className={styles.viewAll} aria-label="전체 글 보기">
+          전체 글 보기 →
+        </Link>
+      </div>
       <div className={styles.list}>
         {posts.slice(0, 6).map((post) => (
           <Link href={`/blog/${post.slug}`} key={post.id} className={styles.card}>
@@ -43,6 +50,11 @@ export default function BlogList({ posts }: Props) {
           </Link>
         ))}
       </div>
+      {hasMore && (
+        <Link href="/blog" className={styles.viewAllBtn}>
+          + 전체 {posts.length}개 글 보기
+        </Link>
+      )}
     </section>
   );
 }
