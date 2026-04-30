@@ -147,12 +147,36 @@ export async function POST(req: NextRequest) {
   const today = new Date().toISOString().slice(0, 10);
   const db = adminDb();
 
+  // Query overrides — let an authorized caller bypass blogConfig for ad-hoc
+  // runs. Same Bearer secret already proven above.
+  const url = new URL(req.url);
+  const langsParam = url.searchParams.get('langs');     // e.g. "en,ja,zh-CN"
+  const countParam = url.searchParams.get('count');     // e.g. "1"
+  const force = url.searchParams.get('force') === '1';  // ignore lastGeneratedDate
+  const publishOverride = url.searchParams.get('publish'); // "1" → published, "0" → draft
+
   // Load config
   const configSnap = await db.doc('blogConfig/default').get();
   const config = (configSnap.exists ? configSnap.data() : {}) as Record<string, unknown>;
-  const dailyCounts = (config.dailyCounts as Record<Lang, number>) || ({} as Record<Lang, number>);
   const lastDate = (config.lastGeneratedDate as Partial<Record<Lang, string>>) || {};
-  const autoPublish = config.autoPublish === true;
+  const baseAutoPublish = config.autoPublish === true;
+  const autoPublish =
+    publishOverride === '1' ? true :
+    publishOverride === '0' ? false :
+    baseAutoPublish;
+
+  let dailyCounts: Record<Lang, number>;
+  if (langsParam) {
+    const validLangs: Lang[] = ['ko', 'en', 'zh-CN', 'ja'];
+    const requested = langsParam.split(',').map((s) => s.trim()) as Lang[];
+    const count = countParam ? Math.max(1, Math.min(5, parseInt(countParam, 10) || 1)) : 1;
+    dailyCounts = {} as Record<Lang, number>;
+    for (const l of validLangs) {
+      dailyCounts[l] = requested.includes(l) ? count : 0;
+    }
+  } else {
+    dailyCounts = (config.dailyCounts as Record<Lang, number>) || ({} as Record<Lang, number>);
+  }
 
   // Load all media (for photo selection)
   const mediaSnap = await db.collection('mediaItems').orderBy('createdAt', 'desc').get();
@@ -178,10 +202,11 @@ export async function POST(req: NextRequest) {
     }
   });
 
-  // Build task list (skip langs already done today)
+  // Build task list. `force=1` skips the "already done today" idempotence
+  // guard, which is needed for ad-hoc multi-lang catch-up runs.
   const tasks: Array<{ lang: Lang; index: number }> = [];
   (Object.keys(dailyCounts) as Lang[]).forEach((lang) => {
-    if (lastDate[lang] === today) return;
+    if (!force && lastDate[lang] === today) return;
     const target = dailyCounts[lang] || 0;
     for (let i = 0; i < target; i++) tasks.push({ lang, index: i });
   });
