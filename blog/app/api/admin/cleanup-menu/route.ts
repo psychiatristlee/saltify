@@ -76,7 +76,10 @@ export async function POST(req: NextRequest) {
   }
 
   // Actually delete: Storage object first (best-effort), then Firestore doc.
-  const bucket = getStorage().bucket();
+  // Bucket name explicit — App Hosting's FIREBASE_CONFIG doesn't always
+  // populate the default storageBucket reliably.
+  const BUCKET_NAME = 'saltify-game.firebasestorage.app';
+  const bucket = getStorage().bucket(BUCKET_NAME);
   const deleted: string[] = [];
   const errors: Array<{ id: string; error: string }> = [];
 
