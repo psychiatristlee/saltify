@@ -11,7 +11,13 @@ function getApp(): App {
   }
   // App Hosting / Cloud Run uses Application Default Credentials.
   // The runtime service account has Firestore + Storage access by default.
-  adminApp = initializeApp({ credential: applicationDefault() });
+  // storageBucket must be explicit — App Hosting's auto FIREBASE_CONFIG
+  // doesn't always populate it, leading to "Bucket name not specified" at
+  // first getStorage().bucket() call.
+  adminApp = initializeApp({
+    credential: applicationDefault(),
+    storageBucket: 'saltify-game.firebasestorage.app',
+  });
   return adminApp;
 }
 
