@@ -9,6 +9,15 @@ export interface BreadItem {
 }
 
 // 소금빵 메뉴 (메뉴판 기준)
+// Discontinued (kept here as a record so server-side cleanup can find them):
+//   chive-cream-cheese, salt-butter-tteok, choco-cream, matcha-cream
+export const DISCONTINUED_MENU_IDS = [
+  'chive-cream-cheese',
+  'salt-butter-tteok',
+  'choco-cream',
+  'matcha-cream',
+] as const;
+
 export const MENU_BREADS: BreadItem[] = [
   { id: 'plain', nameKey: 'breadPlainName', descKey: 'breadPlainDesc', price: 3000, image: '/breads/plain.png' },
   { id: 'everything', nameKey: 'breadEverythingName', descKey: 'breadEverythingDesc', price: 3500, image: '/breads/everything.png' },
@@ -17,10 +26,6 @@ export const MENU_BREADS: BreadItem[] = [
   { id: 'garlic-butter', nameKey: 'breadGarlicButterName', descKey: 'breadGarlicButterDesc', price: 4300, image: '/breads/garlic-butter.png' },
   { id: 'almond', nameKey: 'breadAlmondName', descKey: 'breadAlmondDesc', price: 4300, image: '/brandings/plain.png' },
   { id: 'seed-hotteok', nameKey: 'breadHotteokName', descKey: 'breadHotteokDesc', price: 4300, image: '/breads/hotteok.png' },
-  { id: 'chive-cream-cheese', nameKey: 'breadChiveCreamCheeseName', descKey: 'breadChiveCreamCheeseDesc', price: 5500, image: '/brandings/plain.png' },
-  { id: 'salt-butter-tteok', nameKey: 'breadSaltButterTteokName', descKey: 'breadSaltButterTteokDesc', price: 3900, image: '/brandings/plain.png' },
-  { id: 'choco-cream', nameKey: 'breadChocoName', descKey: 'breadChocoDesc', price: 5000, image: '/brandings/cube-choco-cream.png' },
-  { id: 'matcha-cream', nameKey: 'breadMatchaName', descKey: 'breadMatchaDesc', price: 5000, image: '/brandings/cube-matcha-cream.png' },
 ];
 
 // 음료 메뉴

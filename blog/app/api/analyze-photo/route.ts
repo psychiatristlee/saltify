@@ -20,8 +20,6 @@ const REFERENCE_MENU = [
   { id: 'basil-tomato', name: '바질토마토 (녹색 바질, 빨간 토마토)', file: 'breads/basil-tomato.png' },
   { id: 'garlic-butter', name: '갈릭버터 (마늘과 버터, 광택)', file: 'breads/garlic-butter.png' },
   { id: 'seed-hotteok', name: '씨앗호떡 (견과류 토핑)', file: 'breads/hotteok.png' },
-  { id: 'choco-cream', name: '초코크림 (정사각형 큐브, 갈색)', file: 'brandings/cube-choco-cream.png' },
-  { id: 'matcha-cream', name: '말차크림 (정사각형 큐브, 녹색)', file: 'brandings/cube-matcha-cream.png' },
   { id: 'milk-tea', name: '제로슈가 밀크티 (밀크티 컵)', file: 'breads/milktea.png' },
 ];
 
@@ -164,10 +162,6 @@ export async function POST(req: NextRequest) {
   parts.push({
     text: `
 
-== 참조 이미지가 없는 메뉴 (텍스트 설명만) ==
-- chive-cream-cheese: 가운데가 갈라져서 크림치즈가 보이고 그 위에 쪽파(작은 초록 조각)가 흩뿌려진 빵
-- salt-butter-tteok: 정사각형 떡이 여러 개 (보통 4개) 모여 있고 위에 굵은 소금이 뿌려진 한국 떡
-
 == 음료 ==
 ${drinkList}
 ※ 음료는 컵/병에 담겨 있고 빵과 명확히 다름
@@ -192,7 +186,7 @@ ${drinkList}
 순수 JSON 배열 1개만 출력. 예시:
 ["plain","everything"]
 또는
-["choco-cream"]
+["garlic-butter"]
 또는
 []
 

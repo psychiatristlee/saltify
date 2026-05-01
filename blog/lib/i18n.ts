@@ -171,58 +171,6 @@ const translations = {
     'zh-CN': '韩国传统小吃糖饼与盐面包的结合。香脆坚果和甜蜜糖浆温暖地融化其中',
     ja: '韓国伝統おやつ「ホットク」を塩パンに。香ばしいナッツと甘いシロップが温かく広がります',
   },
-  // ===== Bread: Chive Cream Cheese =====
-  breadChiveCreamCheeseName: {
-    ko: '쪽파크림치즈',
-    en: 'Chive Cream Cheese',
-    'zh-CN': '香葱奶油芝士',
-    ja: 'チャイブクリームチーズ',
-  },
-  breadChiveCreamCheeseDesc: {
-    ko: '쪽파와 크림치즈가 듬뿍. 틀림없는 조합',
-    en: 'Packed with chives and cream cheese. A perfect combination',
-    'zh-CN': '满满的香葱与奶油芝士，完美组合',
-    ja: 'チャイブ(細ねぎ)とクリームチーズがたっぷり。間違いない組み合わせ',
-  },
-  // ===== Bread: Salt Butter Tteok =====
-  breadSaltButterTteokName: {
-    ko: '소금버터떡',
-    en: 'Salt Butter Tteok',
-    'zh-CN': '盐黄油年糕',
-    ja: '塩バター餅',
-  },
-  breadSaltButterTteokDesc: {
-    ko: '말돈 소금을 올린 쫀득한 식감과 달콤짭짤함이 절묘한 한국 떡. 4개 1세트',
-    en: 'Chewy Korean rice cake topped with Maldon salt. Sweet and salty perfection. 4 pieces per set',
-    'zh-CN': '撒上莫尔顿盐的Q弹韩国年糕，甜咸绝配。4个一组',
-    ja: 'モルドン塩をのせた、もちもち食感と甘塩っぱさが絶妙な韓国餅。4個セット',
-  },
-  // ===== Bread: Choco Cream =====
-  breadChocoName: {
-    ko: '초코크림',
-    en: 'Choco Cream',
-    'zh-CN': '巧克力奶油',
-    ja: 'チョコクリーム',
-  },
-  breadChocoDesc: {
-    ko: '꾸덕하고 진한 초코크림과 입안에서 톡 터지는 초코칩이 가득 들어가 있는 소금빵',
-    en: 'Salt bread filled with rich chocolate cream and crunchy chocolate chips',
-    'zh-CN': '盐面包内含浓郁巧克力奶油和爆裂巧克力碎片',
-    ja: '濃厚チョコクリームと、口の中で弾けるチョコチップがたっぷり詰まった一つ',
-  },
-  // ===== Bread: Matcha Cream =====
-  breadMatchaName: {
-    ko: '말차크림',
-    en: 'Matcha Cream',
-    'zh-CN': '抹茶奶油',
-    ja: '抹茶クリーム',
-  },
-  breadMatchaDesc: {
-    ko: '소금빵 안에 꾸덕하고 진한 말차크림을 한가득 넣어',
-    en: 'Salt bread generously filled with rich, creamy matcha',
-    'zh-CN': '盐面包中满满的浓郁抹茶奶油',
-    ja: '塩パンの中に、濃厚でとろりとした抹茶クリームをたっぷり詰めて',
-  },
   // ===== Drink: Cold Brew =====
   drinkColdBrewName: {
     ko: '콜드브루 커피',
