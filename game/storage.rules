@@ -13,6 +13,12 @@ service firebase.storage {
       allow write: if isAdmin();
     }
 
+    // Menu images for the order/pickup system
+    match /menu-images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Default deny
     match /{allPaths=**} {
       allow read, write: if false;

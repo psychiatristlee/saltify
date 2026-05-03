@@ -15,9 +15,10 @@ import {
 } from '../services/admin';
 import { BREAD_DATA, BreadType } from '../models/BreadType';
 import { useAuth } from '../hooks/useAuth';
+import MenuAdminTab from './MenuAdminTab';
 import styles from './AdminPage.module.css';
 
-type TabType = 'branches' | 'stats' | 'admins';
+type TabType = 'branches' | 'stats' | 'admins' | 'menu' | 'orders';
 
 export default function AdminPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -161,18 +162,34 @@ export default function AdminPage() {
       </header>
 
       <nav className={styles.tabs}>
-        {(['branches', 'stats', 'admins'] as TabType[]).map((tab) => (
+        {(['menu', 'orders', 'branches', 'stats', 'admins'] as TabType[]).map((tab) => (
           <button
             key={tab}
             className={`${styles.tab} ${activeTab === tab ? styles.activeTab : ''}`}
             onClick={() => setActiveTab(tab)}
           >
-            {tab === 'branches' ? '지점' : tab === 'stats' ? '통계' : '관리자'}
+            {tab === 'menu' ? '🥖 메뉴'
+              : tab === 'orders' ? '📦 주문'
+              : tab === 'branches' ? '지점'
+              : tab === 'stats' ? '통계'
+              : '관리자'}
           </button>
         ))}
       </nav>
 
       <main className={styles.content}>
+        {/* ═══ Menu Tab ═══ */}
+        {activeTab === 'menu' && <MenuAdminTab />}
+
+        {/* ═══ Orders Tab — populated in step 2 ═══ */}
+        {activeTab === 'orders' && (
+          <div className={styles.section}>
+            <p className={styles.emptyHint}>
+              주문 대시보드는 다음 단계에서 추가됩니다 (결제 모듈 통합 후).
+            </p>
+          </div>
+        )}
+
         {/* ═══ Branches Tab ═══ */}
         {activeTab === 'branches' && (
           <div className={styles.section}>
