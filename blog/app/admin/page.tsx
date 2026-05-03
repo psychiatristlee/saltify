@@ -1020,11 +1020,11 @@ export default function AdminPage() {
                   onChange={(e) => setConfig({ ...config, autoPublish: e.target.checked })}
                 />
                 <span>
-                  <strong>{config.autoPublish ? '자동 게시' : '드래프트만 생성'}</strong>
+                  <strong>자동 게시 (체크 시 ON)</strong>
                   <span className={styles.toggleHint}>
                     {config.autoPublish
-                      ? ' — 생성 즉시 사이트에 게시됩니다'
-                      : ' — 검토 후 직접 게시 (안전)'}
+                      ? ' ✅ 켜짐 — 생성 즉시 사이트에 게시됩니다'
+                      : ' ⚠️ 꺼짐 — 드래프트로만 저장됩니다 (사이트에 안 보임)'}
                   </span>
                 </span>
               </label>
