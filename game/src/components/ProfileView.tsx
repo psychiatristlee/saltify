@@ -9,6 +9,7 @@ interface Props {
   onLogout: () => void;
   onDeleteAccount: () => void;
   onClose: () => void;
+  onOpenMyOrders?: () => void;
 }
 
 export default function ProfileView({
@@ -18,6 +19,7 @@ export default function ProfileView({
   onLogout,
   onDeleteAccount,
   onClose,
+  onOpenMyOrders,
 }: Props) {
   const { t } = useLanguage();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -102,6 +104,19 @@ export default function ProfileView({
               </div>
             </div>
           </section>
+
+          {/* My Orders */}
+          {onOpenMyOrders && (
+            <section className={styles.section}>
+              <button
+                onClick={onOpenMyOrders}
+                className={styles.blogButton}
+                style={{ background: 'linear-gradient(135deg, #4CAF50, #66BB6A)' }}
+              >
+                📦 내 주문 내역
+              </button>
+            </section>
+          )}
 
           {/* Admin Menu */}
           {isAdmin && (

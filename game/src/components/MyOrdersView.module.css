@@ -1,0 +1,103 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(232, 212, 184, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dateLabel {
+  font-size: 0.75rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.statusBadge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.pickupRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #FFF8E1, #FFE0B2);
+  border-radius: 10px;
+  border: 1.5px solid #FFB347;
+}
+.pickupRow span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #8B4513;
+}
+.pickupRow strong {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #E65100;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.items li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: #555;
+}
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 1px dashed rgba(232, 212, 184, 0.6);
+  padding-top: 8px;
+}
+.total span {
+  font-size: 0.75rem;
+  color: #888;
+}
+.total strong {
+  font-size: 1rem;
+  color: #FF8C00;
+  font-weight: 700;
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  font-size: 0.6875rem;
+  color: #999;
+  background: #FAFAFA;
+  border-radius: 8px;
+  padding: 8px 12px;
+}

@@ -10,6 +10,11 @@ import { getReferrerFromUrl } from './services/referral';
 import { BREAD_DATA } from './models/BreadType';
 import { isEmbeddedApp, isTossApp } from './lib/platform';
 import { isUserAdmin } from './services/admin';
+import { createPendingOrder, OrderItem } from './services/order';
+import { requestTossPayment } from './services/order/toss';
+import OrderView from './components/OrderView';
+import PaymentResultView from './components/PaymentResultView';
+import MyOrdersView from './components/MyOrdersView';
 import {
   trackScreenView,
   trackCouponViewOpen,
@@ -71,6 +76,11 @@ function MainApp() {
     return !localStorage.getItem('saltify_visited');
   });
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showOrderView, setShowOrderView] = useState(false);
+  const [showMyOrdersView, setShowMyOrdersView] = useState(false);
+  const [paymentResult, setPaymentResult] = useState<
+    { orderId: string; paymentKey: string; amount: number } | null
+  >(null);
   const hasRecordedGameOver = useRef(false);
   const referralProcessed = useRef(false);
 
@@ -162,6 +172,61 @@ function MainApp() {
     }
   }, [user]);
 
+  // Toss Payments redirect handler. After the user finishes the hosted
+  // payment page Toss redirects to /?payment=success&orderId=...&paymentKey=...&amount=...
+  // (or &payment=fail). We pop the result modal and clean the URL so a
+  // refresh won't re-trigger.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('payment');
+    if (!status) return;
+    if (status === 'success') {
+      const orderId = params.get('orderId');
+      const paymentKey = params.get('paymentKey');
+      const amount = parseInt(params.get('amount') || '0', 10);
+      if (orderId && paymentKey && amount) {
+        setPaymentResult({ orderId, paymentKey, amount });
+      }
+    } else if (status === 'fail') {
+      const message = params.get('message') || '결제가 취소되었거나 실패했습니다.';
+      alert(message);
+    }
+    // Clean URL
+    const clean = window.location.pathname + window.location.hash;
+    window.history.replaceState(null, '', clean);
+  }, []);
+
+  const handleStartOrderCheckout = async (items: OrderItem[]) => {
+    if (!user) return;
+    try {
+      const orderId = await createPendingOrder({
+        userId: user.id,
+        userName: user.displayName || undefined,
+        userEmail: user.email || undefined,
+        items,
+      });
+      const total = items.reduce((s, it) => s + it.price * it.qty, 0);
+      const orderName = items.length === 1
+        ? items[0].name
+        : `${items[0].name} 외 ${items.reduce((c, it) => c + it.qty, 0) - items[0].qty}개`;
+
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://game.salt-bbang.com';
+      await requestTossPayment({
+        orderId,
+        orderName,
+        amount: total,
+        customerEmail: user.email || undefined,
+        customerName: user.displayName || undefined,
+        successUrl: `${origin}?payment=success`,
+        failUrl: `${origin}?payment=fail`,
+      });
+    } catch (err) {
+      console.error('payment failed', err);
+      alert('결제 시작 실패: ' + (err instanceof Error ? err.message : 'unknown'));
+    }
+  };
+
   // Track screen views
   useEffect(() => {
     if (isLoading) return;
@@ -237,6 +302,13 @@ function MainApp() {
         />
         {!isTossApp() && (
           <div className={styles.headerRight}>
+            <button
+              className={styles.couponButton}
+              onClick={() => setShowOrderView(true)}
+              title="주문"
+            >
+              🛒
+            </button>
             <button
               className={styles.couponButton}
               onClick={() => { trackCouponViewOpen(); setShowCouponView(true); }}
@@ -461,6 +533,34 @@ function MainApp() {
             if (!isEmbeddedApp()) setShowLanding(true);
           }}
           onClose={() => setShowProfileView(false)}
+          onOpenMyOrders={() => { setShowProfileView(false); setShowMyOrdersView(true); }}
+        />
+      )}
+
+      {showMyOrdersView && user && (
+        <MyOrdersView
+          userId={user.id}
+          onClose={() => setShowMyOrdersView(false)}
+        />
+      )}
+
+      {showOrderView && user && (
+        <OrderView
+          user={user}
+          onClose={() => setShowOrderView(false)}
+          onCheckout={async (items) => {
+            setShowOrderView(false);
+            await handleStartOrderCheckout(items);
+          }}
+        />
+      )}
+
+      {paymentResult && (
+        <PaymentResultView
+          orderId={paymentResult.orderId}
+          paymentKey={paymentResult.paymentKey}
+          amount={paymentResult.amount}
+          onDone={() => setPaymentResult(null)}
         />
       )}
 

@@ -1,0 +1,163 @@
+.dateRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #666;
+}
+.dateRow label {
+  font-weight: 600;
+  color: #555;
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #555;
+  font-weight: 700;
+  padding-bottom: 6px;
+  border-bottom: 2px solid rgba(255, 140, 0, 0.2);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(232, 212, 184, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pickupBig {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #E65100;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.statusBadge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.userRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: #333;
+  flex-wrap: wrap;
+}
+.userRow span { color: #888; font-size: 0.75rem; }
+
+.items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.items li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: #555;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(232, 212, 184, 0.6);
+}
+.totalRow span { font-size: 0.75rem; color: #888; }
+.totalRow strong {
+  font-size: 0.9375rem;
+  color: #FF8C00;
+  font-weight: 700;
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px 10px;
+  font-size: 0.6875rem;
+  color: #999;
+  background: #FAFAFA;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.actionBtn {
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #FF8C00, #FFB347);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex: 1;
+  min-width: 80px;
+}
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.danger {
+  background: white;
+  color: #C62828;
+  border: 1px solid rgba(198, 40, 40, 0.3);
+  flex: 0 0 auto;
+}
+
+.testBanner {
+  background: linear-gradient(90deg, #FFEB3B, #FFC107);
+  color: #5D4037;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  letter-spacing: 0.02em;
+}

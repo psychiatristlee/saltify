@@ -22,6 +22,7 @@
     "@capacitor/ios": "^8.0.1",
     "@capacitor/share": "^8.0.1",
     "@google/generative-ai": "^0.24.1",
+    "@tosspayments/payment-sdk": "^1.9.2",
     "firebase": "^12.8.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

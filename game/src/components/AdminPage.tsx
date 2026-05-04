@@ -16,6 +16,7 @@ import {
 import { BREAD_DATA, BreadType } from '../models/BreadType';
 import { useAuth } from '../hooks/useAuth';
 import MenuAdminTab from './MenuAdminTab';
+import OrdersAdminTab from './OrdersAdminTab';
 import styles from './AdminPage.module.css';
 
 type TabType = 'branches' | 'stats' | 'admins' | 'menu' | 'orders';
@@ -181,14 +182,8 @@ export default function AdminPage() {
         {/* ═══ Menu Tab ═══ */}
         {activeTab === 'menu' && <MenuAdminTab />}
 
-        {/* ═══ Orders Tab — populated in step 2 ═══ */}
-        {activeTab === 'orders' && (
-          <div className={styles.section}>
-            <p className={styles.emptyHint}>
-              주문 대시보드는 다음 단계에서 추가됩니다 (결제 모듈 통합 후).
-            </p>
-          </div>
-        )}
+        {/* ═══ Orders Tab ═══ */}
+        {activeTab === 'orders' && <OrdersAdminTab />}
 
         {/* ═══ Branches Tab ═══ */}
         {activeTab === 'branches' && (
