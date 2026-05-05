@@ -145,18 +145,31 @@ const translations = {
     'zh-CN': '蒜香与黄油酱的甜美浓郁风味',
     ja: 'ガーリックの香りと、バターソースの甘く香ばしい味わい',
   },
-  // ===== Bread: Almond =====
-  breadAlmondName: {
-    ko: '아몬드 소금빵',
-    en: 'Almond Salt Bread',
-    'zh-CN': '杏仁盐面包',
-    ja: 'アーモンド塩パン',
+  // ===== Bread: Choco Bun (covered with chocolate-bun dough) =====
+  breadChocoBunName: {
+    ko: '초코번 소금빵',
+    en: 'Choco-Bun Salt Bread',
+    'zh-CN': '巧克力球盐面包',
+    ja: 'チョコバン塩パン',
   },
-  breadAlmondDesc: {
-    ko: '바삭한 아몬드 슬라이스 토핑과 달콤한 풍미가 어우러진 소금빵',
-    en: 'Salt bread topped with crispy sliced almonds for a sweet and nutty flavor',
-    'zh-CN': '香脆杏仁片配上甜美风味的盐面包',
-    ja: 'カリッと香ばしいアーモンドスライスをトッピングした甘く香ばしい塩パン',
+  breadChocoBunDesc: {
+    ko: '달콤하고 꾸덕한 초코크림이 가득. 소금빵 겉면에 초코번 반죽을 덮어 구운 시그니처',
+    en: 'Salt bread loaded with rich chocolate cream and wrapped in a glossy choco-bun crust',
+    'zh-CN': '内含浓郁巧克力奶油，外层覆盖巧克力球面团烤制的招牌盐面包',
+    ja: '濃厚なチョコクリームをたっぷり、表面にチョコバン生地をかぶせて焼き上げた看板塩パン',
+  },
+  // ===== Bread: Matcha Cream =====
+  breadMatchaName: {
+    ko: '말차크림 소금빵',
+    en: 'Matcha Cream Salt Bread',
+    'zh-CN': '抹茶奶油盐面包',
+    ja: '抹茶クリーム塩パン',
+  },
+  breadMatchaDesc: {
+    ko: '소금빵 안에 진하고 꾸덕한 말차크림이 한가득',
+    en: 'Salt bread generously filled with rich, creamy matcha',
+    'zh-CN': '盐面包中满满的浓郁抹茶奶油',
+    ja: '塩パンの中に、濃厚な抹茶クリームをたっぷり詰めて',
   },
   // ===== Bread: Seed Hotteok =====
   breadHotteokName: {

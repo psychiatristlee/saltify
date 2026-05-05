@@ -20,6 +20,11 @@ const REFERENCE_MENU = [
   { id: 'basil-tomato', name: '바질토마토 (녹색 바질, 빨간 토마토)', file: 'breads/basil-tomato.png' },
   { id: 'garlic-butter', name: '갈릭버터 (마늘과 버터, 광택)', file: 'breads/garlic-butter.png' },
   { id: 'seed-hotteok', name: '씨앗호떡 (견과류 토핑)', file: 'breads/hotteok.png' },
+  // Cream-filled / coated specialty breads — these reference photos are
+  // generic stand-ins; AI primarily uses the text hint below.
+  { id: 'matcha-cream', name: '말차크림 (녹색 크림 충전)', file: 'brandings/cube-matcha-cream.png' },
+  { id: 'choco-bun', name: '초코번 소금빵 (초콜릿 반죽이 빵 표면을 덮음)', file: 'brandings/cube-choco-cream.png' },
+  // Drinks
   { id: 'milk-tea', name: '제로슈가 밀크티 (밀크티 컵)', file: 'breads/milktea.png' },
 ];
 
@@ -161,6 +166,13 @@ export async function POST(req: NextRequest) {
 
   parts.push({
     text: `
+
+== 시각적 식별 힌트 (참조 사진과 별개로 적용) ==
+- choco-bun (초코번 소금빵): 소금빵 위에 갈색/짙은 코코아 색의 부드러운 반죽이 덮여 있어
+  표면이 매끈하고 갈색. 단면을 자르면 안에 진한 초코크림이 보임. 모양은 일반 소금빵과
+  같은 길쭉한 형태. (참조 이미지의 "큐브" 모양과 달리 길쭉함)
+- matcha-cream (말차크림): 일반 길쭉한 소금빵 형태인데, 단면을 자르면 진한 녹색 크림이
+  안에 가득 차 있음. 표면은 보통의 소금빵 색. 큐브 형태가 아님.
 
 == 음료 ==
 ${drinkList}

@@ -8,14 +8,13 @@ export interface BreadItem {
   image: string;
 }
 
-// 소금빵 메뉴 (메뉴판 기준)
-// Discontinued (kept here as a record so server-side cleanup can find them):
-//   chive-cream-cheese, salt-butter-tteok, choco-cream, matcha-cream
+// Synced with Naver Place (the merchant's source of truth).
+// Discontinued IDs are kept so server-side cleanup can find legacy photos.
 export const DISCONTINUED_MENU_IDS = [
   'chive-cream-cheese',
   'salt-butter-tteok',
-  'choco-cream',
-  'matcha-cream',
+  'choco-cream',           // replaced by 'choco-bun'
+  'almond',                // removed from Naver menu 2026-05
 ] as const;
 
 export const MENU_BREADS: BreadItem[] = [
@@ -24,8 +23,9 @@ export const MENU_BREADS: BreadItem[] = [
   { id: 'olive-cheese', nameKey: 'breadOliveCheeseName', descKey: 'breadOliveCheeseDesc', price: 3800, image: '/breads/olive-cheese.png' },
   { id: 'basil-tomato', nameKey: 'breadBasilTomatoName', descKey: 'breadBasilTomatoDesc', price: 3800, image: '/breads/basil-tomato.png' },
   { id: 'garlic-butter', nameKey: 'breadGarlicButterName', descKey: 'breadGarlicButterDesc', price: 4300, image: '/breads/garlic-butter.png' },
-  { id: 'almond', nameKey: 'breadAlmondName', descKey: 'breadAlmondDesc', price: 4300, image: '/brandings/plain.png' },
   { id: 'seed-hotteok', nameKey: 'breadHotteokName', descKey: 'breadHotteokDesc', price: 4300, image: '/breads/hotteok.png' },
+  { id: 'choco-bun', nameKey: 'breadChocoBunName', descKey: 'breadChocoBunDesc', price: 4300, image: '/brandings/cube-choco-cream.png' },
+  { id: 'matcha-cream', nameKey: 'breadMatchaName', descKey: 'breadMatchaDesc', price: 5000, image: '/brandings/cube-matcha-cream.png' },
 ];
 
 // 음료 메뉴
