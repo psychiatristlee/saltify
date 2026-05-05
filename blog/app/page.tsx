@@ -59,6 +59,7 @@ export default async function Home() {
     description: p.description,
     coverImage: p.coverImage,
     publishedAt: p.publishedAt ? p.publishedAt.toISOString() : null,
+    language: p.language,
   }));
 
   return (

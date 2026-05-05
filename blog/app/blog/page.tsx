@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getPublishedPostsServer } from '@/lib/services/blogServer';
 import { STORE } from '@/lib/storeInfo';
+import BlogIndexClient, { BlogIndexItem } from '@/components/BlogIndexClient';
 import styles from './page.module.css';
 
 // Same revalidate as homepage so a freshly-published post shows up here
@@ -35,8 +36,20 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogIndexPage() {
-  const posts = await getPublishedPostsServer();
+  const rawPosts = await getPublishedPostsServer();
 
+  const posts: BlogIndexItem[] = rawPosts.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    description: p.description,
+    coverImage: p.coverImage,
+    tags: p.tags || [],
+    publishedAt: p.publishedAt ? p.publishedAt.toISOString() : null,
+    language: p.language,
+  }));
+
+  // BreadcrumbList — language-agnostic, fine for crawlers regardless of UI lang.
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -46,6 +59,8 @@ export default async function BlogIndexPage() {
     ],
   };
 
+  // CollectionPage lists ALL languages — Google can index every locale's slug
+  // through this single CollectionPage rather than the language-filtered UI.
   const collectionJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -55,7 +70,7 @@ export default async function BlogIndexPage() {
     isPartOf: { '@type': 'WebSite', name: '솔트빵', url: STORE.websiteUrl },
     mainEntity: {
       '@type': 'ItemList',
-      itemListElement: posts.map((p, i) => ({
+      itemListElement: rawPosts.map((p, i) => ({
         '@type': 'ListItem',
         position: i + 1,
         url: `${STORE.websiteUrl}/blog/${p.slug}`,
@@ -73,59 +88,7 @@ export default async function BlogIndexPage() {
           <span aria-current="page">Blog</span>
         </nav>
 
-        <header className={styles.header}>
-          <h1 className={styles.title}>솔트빵 블로그</h1>
-          <p className={styles.subtitle}>
-            파티시에가 직접 쓰는 소금빵 이야기. 매일 갓 구운 소금빵의 비하인드를 만나보세요.
-          </p>
-          <p className={styles.count}>총 {posts.length}개의 글</p>
-        </header>
-
-        {posts.length === 0 ? (
-          <div className={styles.empty}>
-            아직 발행된 글이 없습니다.
-            <Link href="/" className={styles.emptyLink}>홈으로 돌아가기</Link>
-          </div>
-        ) : (
-          <ul className={styles.list}>
-            {posts.map((post) => (
-              <li key={post.id}>
-                <Link href={`/blog/${post.slug}`} className={styles.card}>
-                  {post.coverImage && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={post.coverImage}
-                      alt={post.title}
-                      className={styles.cardImage}
-                      loading="lazy"
-                    />
-                  )}
-                  <div className={styles.cardBody}>
-                    <h2 className={styles.cardTitle}>{post.title}</h2>
-                    <p className={styles.cardDesc}>{post.description}</p>
-                    <div className={styles.cardMeta}>
-                      <time
-                        dateTime={post.publishedAt?.toISOString()}
-                        className={styles.cardDate}
-                      >
-                        {post.publishedAt?.toLocaleDateString('ko-KR', {
-                          year: 'numeric', month: 'long', day: 'numeric',
-                        })}
-                      </time>
-                      {post.tags.length > 0 && (
-                        <div className={styles.cardTags}>
-                          {post.tags.slice(0, 3).map((tag) => (
-                            <span key={tag} className={styles.cardTag}>#{tag}</span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+        <BlogIndexClient posts={posts} />
       </article>
 
       <script
