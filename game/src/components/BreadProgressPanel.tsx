@@ -11,6 +11,7 @@ const BREAD_I18N: Record<BreadType, { name: TranslationKey }> = {
   [BreadType.BasilTomato]: { name: 'breadBasilTomatoName' },
   [BreadType.GarlicButter]: { name: 'breadGarlicButterName' },
   [BreadType.Hotteok]: { name: 'breadHotteokName' },
+  [BreadType.ChocoBun]: { name: 'breadChocoBunName' },
 };
 
 interface BreadProgressPanelProps {

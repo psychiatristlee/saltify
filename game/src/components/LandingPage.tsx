@@ -13,23 +13,31 @@ const BREAD_I18N: Record<BreadType, { name: TranslationKey; desc: TranslationKey
   [BreadType.BasilTomato]: { name: 'breadBasilTomatoName', desc: 'breadBasilTomatoDesc' },
   [BreadType.GarlicButter]: { name: 'breadGarlicButterName', desc: 'breadGarlicButterDesc' },
   [BreadType.Hotteok]: { name: 'breadHotteokName', desc: 'breadHotteokDesc' },
+  [BreadType.ChocoBun]: { name: 'breadChocoBunName', desc: 'breadChocoBunDesc' },
 };
 
-// 랜딩 페이지 전용 메뉴 (게임에 포함되지 않음)
-const LANDING_ONLY_BREADS = [
+// Landing-page drink menu (not part of the puzzle game).
+const LANDING_DRINKS = [
   {
-    id: 'cube-choco',
-    nameKey: 'landingCubeChocoName' as TranslationKey,
-    descKey: 'landingCubeChocoDesc' as TranslationKey,
-    price: 5000,
-    image: '/brandings/cube-choco-cream.png',
+    id: 'cold-brew',
+    nameKey: 'drinkColdBrewName' as TranslationKey,
+    descKey: 'drinkColdBrewDesc' as TranslationKey,
+    price: 5500,
+    image: '/breads/cold-brew-naver.png',
   },
   {
-    id: 'cube-matcha',
-    nameKey: 'landingCubeMatchaName' as TranslationKey,
-    descKey: 'landingCubeMatchaDesc' as TranslationKey,
-    price: 5000,
-    image: '/brandings/cube-matcha-cream.png',
+    id: 'cold-brew-latte',
+    nameKey: 'drinkColdBrewLatteName' as TranslationKey,
+    descKey: 'drinkColdBrewLatteDesc' as TranslationKey,
+    price: 6000,
+    image: '/breads/cold-brew-latte-naver.png',
+  },
+  {
+    id: 'milk-tea',
+    nameKey: 'drinkMilkTeaName' as TranslationKey,
+    descKey: 'drinkMilkTeaDesc' as TranslationKey,
+    price: 7000,
+    image: '/breads/milktea-naver.jpg',
   },
 ];
 
@@ -125,17 +133,24 @@ export default function LandingPage({ onStartGame }: Props) {
               </div>
             );
           })}
-          {LANDING_ONLY_BREADS.map((bread) => (
-            <div key={bread.id} className={styles.menuCard}>
+        </div>
+      </section>
+
+      {/* Drinks Section */}
+      <section className={styles.menuSection}>
+        <h2 className={styles.sectionTitle}>{t('drinks')}</h2>
+        <div className={styles.menuGrid}>
+          {LANDING_DRINKS.map((drink) => (
+            <div key={drink.id} className={styles.menuCard}>
               <img
-                src={bread.image}
-                alt={t(bread.nameKey)}
+                src={drink.image}
+                alt={t(drink.nameKey)}
                 className={styles.menuImage}
               />
-              <h3 className={styles.menuName}>{t(bread.nameKey)}</h3>
-              <p className={styles.menuDesc}>{t(bread.descKey)}</p>
+              <h3 className={styles.menuName}>{t(drink.nameKey)}</h3>
+              <p className={styles.menuDesc}>{t(drink.descKey)}</p>
               <span className={styles.menuPrice}>
-                {bread.price.toLocaleString()}{t('currencyUnit')}
+                {drink.price.toLocaleString()}{t('currencyUnit')}
               </span>
             </div>
           ))}

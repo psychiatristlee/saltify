@@ -18,6 +18,7 @@ const BREAD_I18N: Record<BreadType, { name: TranslationKey; desc: TranslationKey
   [BreadType.BasilTomato]: { name: 'breadBasilTomatoName', desc: 'breadBasilTomatoDesc' },
   [BreadType.GarlicButter]: { name: 'breadGarlicButterName', desc: 'breadGarlicButterDesc' },
   [BreadType.Hotteok]: { name: 'breadHotteokName', desc: 'breadHotteokDesc' },
+  [BreadType.ChocoBun]: { name: 'breadChocoBunName', desc: 'breadChocoBunDesc' },
 };
 
 interface CouponManager {
