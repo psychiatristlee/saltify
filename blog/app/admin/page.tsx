@@ -423,7 +423,6 @@ export default function AdminPage() {
     const now = Date.now();
     const DAY_MS = 86_400_000;
     const scored = images.map((m) => {
-      const tagBonus = (m.tags?.length ?? 0) * 1000;
       const uploadedAt = m.createdAt?.toDate ? m.createdAt.toDate().getTime() : 0;
       // Recency of upload: newer photos slightly preferred (small effect)
       const uploadFreshness = uploadedAt / 1e9;
@@ -436,7 +435,7 @@ export default function AdminPage() {
       const recencyPenalty = lastUsedAt
         ? Math.max(0, 5000 - daysSinceUsed * (5000 / 14))
         : 0;
-      return { m, score: tagBonus + uploadFreshness - recencyPenalty };
+      return { m, score: uploadFreshness - recencyPenalty };
     });
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, count).map((s) => s.m);
@@ -1067,8 +1066,8 @@ export default function AdminPage() {
             <strong>동작 방식</strong>
             <ul>
               <li>매일 설정한 시각에 자동 실행 (Firebase Cloud Scheduler)</li>
-              <li>사용 가능한 사진 중 <strong>아직 어떤 포스트에도 쓰이지 않은 사진</strong> 우선</li>
-              <li>메뉴 태그가 있는 사진을 우선 (콘텐츠 풍부도)</li>
+              <li>사용 가능한 사진 중 <strong>아직 어떤 포스트에도 쓰이지 않은 사진</strong> 우선 (최근 14일 내 사용된 사진은 점수 감점)</li>
+              <li>메뉴 태그 유무와 무관하게 모든 사진이 후보 (태그 없는 사진도 사용됨)</li>
               <li>각 포스트는 사진 4장 사용</li>
               <li>당일 이미 생성된 언어는 건너뜀 (멱등성)</li>
               <li>{config?.autoPublish ? '✅ 자동 게시 모드 — 즉시 사이트맵 반영' : '📝 드래프트 모드 — 포스트 탭에서 검토 후 직접 게시'}</li>

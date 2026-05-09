@@ -239,7 +239,6 @@ export async function POST(req: NextRequest) {
     const available = allMedia
       .filter((m) => m.type === 'image' && !pickedThisRun.has(m.url))
       .map((m) => {
-        const tagBonus = (m.tags?.length || 0) * 1000;
         const uploadFreshness = (m.createdAt?.toMillis() || 0) / 1e9;
         const lastUsedAt = usageMap.get(m.url) ?? 0;
         const daysSinceUsed = lastUsedAt
@@ -249,7 +248,7 @@ export async function POST(req: NextRequest) {
         const recencyPenalty = lastUsedAt
           ? Math.max(0, 5000 - daysSinceUsed * (5000 / 14))
           : 0;
-        return { ...m, score: tagBonus + uploadFreshness - recencyPenalty };
+        return { ...m, score: uploadFreshness - recencyPenalty };
       })
       .sort((a, b) => b.score - a.score)
       .slice(0, PHOTOS_PER_POST);
