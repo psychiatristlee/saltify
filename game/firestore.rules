@@ -125,5 +125,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Tycoon mode 영업 일지 — owner-only read/write.
+    match /tycoonJournals/{userId} {
+      allow read, write: if isOwner(userId);
+      match /days/{dayNumber} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
   }
 }
