@@ -1,122 +1,137 @@
+/* Modern flat tycoon UI — calm bakery palette + tabular figures + tight type. */
+
 .container {
   display: flex;
   flex-direction: column;
   height: 100dvh;
   max-width: 480px;
   margin: 0 auto;
-  background: linear-gradient(to bottom, #fff6e0, #ffe2b8);
+  background: #f5ecd9;
   overflow: hidden;
   position: relative;
+  font-feature-settings: 'tnum';
+  color: #2e2316;
 }
 
+/* ============ TOP HUD ============ */
 .hud {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid #e8d2a3;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-bottom: 1px solid #e6d8b8;
   flex-shrink: 0;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
 }
 
 .backButton {
-  background: none;
-  border: 1px solid #b88a5a;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 14px;
+  width: 36px;
+  height: 36px;
+  background: #f0e6cc;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
   color: #6d4d2e;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
-.backButton:active { background: #f3e3c0; }
+.backButton:active { background: #e6d8b8; }
 
-.timeBlock {
+.dayBlock {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
+  gap: 3px;
   min-width: 0;
 }
-.dayLabel {
+.dayPill {
+  background: #6d4d2e;
+  color: #fff;
   font-size: 10px;
-  color: #8b6f47;
-  letter-spacing: 1.5px;
-  font-weight: bold;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+.timeRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 .clock {
-  font-family: 'Menlo', 'Courier New', monospace;
-  font-size: 18px;
-  font-weight: bold;
-  color: #6d4d2e;
-  line-height: 1;
+  font-family: 'Menlo', 'SF Mono', 'Roboto Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2e2316;
+  letter-spacing: 0.5px;
 }
-.phaseLabel {
-  font-size: 10px;
-  color: #c44d3a;
-  font-weight: bold;
+.phaseTag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #b56a2c;
+  background: #fff1d9;
+  padding: 1px 7px;
+  border-radius: 4px;
 }
 .timeBar {
   width: 100%;
-  height: 4px;
-  background: #f3e3c0;
+  height: 3px;
+  background: #f0e6cc;
   border-radius: 2px;
   overflow: hidden;
-  margin-top: 2px;
 }
 .timeBarFill {
   height: 100%;
-  background: linear-gradient(to right, #ffb84d, #ff8a3d);
-  transition: width 0.2s;
+  background: linear-gradient(to right, #ffc06b, #ff8a3d);
+  transition: width 0.15s linear;
 }
 
-.stats {
+.moneyBlock {
   display: flex;
   flex-direction: column;
-  gap: 0;
   align-items: flex-end;
-  font-feature-settings: 'tnum';
+  gap: 2px;
 }
-.stat {
+.cashRow {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 5px;
 }
-.statSm {
+.cashLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+  color: #8a7a5d;
+}
+.cashValue {
+  font-size: 17px;
+  font-weight: 800;
+  color: #1f7a3a;
+}
+.cashLow {
+  color: #c44d3a;
+  animation: cashLowPulse 1.6s ease-in-out infinite;
+}
+@keyframes cashLowPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.subStats {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 4px;
   font-size: 10px;
+  color: #6d6049;
 }
-.statLabel {
-  font-size: 10px;
-  color: #8b6f47;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-.statLabelSm {
-  font-size: 9px;
-  color: #8b6f47;
-  text-transform: uppercase;
-}
-.statValue {
-  font-size: 16px;
-  font-weight: bold;
-  color: #2a8c4a;
-}
-.statValueSm {
-  font-size: 12px;
-  font-weight: bold;
-  color: #6d4d2e;
-}
-.statValueBadSm {
-  font-size: 12px;
-  font-weight: bold;
-  color: #c44d3a;
-}
+.subStatDot { color: #c4b692; }
+.lostStat { color: #b04638; }
 
+/* ============ CANVAS ============ */
 .canvas {
   flex: 1;
   min-height: 0;
@@ -131,132 +146,226 @@
   font-size: 14px;
 }
 
+/* ============ OVEN STRIP ============ */
+.ovenStrip {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #2e2316;
+  border-top: 2px solid #1d160e;
+  flex-shrink: 0;
+}
+.ovenCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #1d160e;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #4a3a26;
+}
+.ovenHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.ovenLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+  color: #c0a065;
+}
+.ovenStatus {
+  font-size: 10px;
+  color: #ffc06b;
+  font-weight: 600;
+}
+.ovenBar {
+  width: 100%;
+  height: 5px;
+  background: #0c0a09;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.ovenBarFill {
+  height: 100%;
+  background: linear-gradient(to right, #ff8a3d, #ffd66b);
+  transition: width 0.2s linear;
+}
+
+/* ============ BAKE BAR ============ */
 .bakeBar {
   flex-shrink: 0;
-  padding: 6px 10px 8px;
-  background: rgba(255, 255, 255, 0.95);
-  border-top: 1px solid #e8d2a3;
+  padding: 8px 12px 10px;
+  background: #ffffff;
+  border-top: 1px solid #e6d8b8;
 }
 .bakeHint {
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   font-size: 11px;
-  color: #8b6f47;
+  color: #8a7a5d;
   text-align: center;
+  font-weight: 500;
 }
 .bakeRow {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   overflow-x: auto;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
 }
 .bakeRow::-webkit-scrollbar { height: 4px; }
 .bakeRow::-webkit-scrollbar-thumb { background: #d4b486; border-radius: 2px; }
+
 .bakeButton {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1px;
-  padding: 3px 6px;
-  background: #fff;
-  border: 1px solid #e8d2a3;
-  border-radius: 8px;
+  padding: 5px 6px 4px;
+  background: #fffaef;
+  border: 1px solid #e6d8b8;
+  border-radius: 10px;
   cursor: pointer;
-  min-width: 60px;
-  transition: transform 0.05s;
+  min-width: 66px;
+  transition: transform 0.05s, background 0.1s;
 }
-.bakeButton:active { transform: scale(0.94); background: #fff6e0; }
+.bakeButton:active:not(:disabled) {
+  transform: scale(0.94);
+  background: #fff1d9;
+}
+.bakeButtonDisabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
 .bakeIcon {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   object-fit: cover;
   border-radius: 5px;
 }
 .bakeName {
   font-size: 9px;
-  color: #6d4d2e;
+  color: #2e2316;
+  font-weight: 600;
   white-space: nowrap;
-  max-width: 60px;
+  max-width: 64px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.testBanner {
-  margin: 4px 0 0;
+.bakeCost {
   font-size: 10px;
-  color: #c44d3a;
+  color: #b56a2c;
+  font-weight: 700;
+  font-family: 'Menlo', monospace;
+}
+
+.testBanner {
+  margin: 5px 0 0;
+  font-size: 10px;
+  color: #8a7a5d;
   text-align: center;
 }
 
-/* End-of-day modal */
+/* ============ END-OF-DAY MODAL ============ */
 .modalScrim {
   position: absolute;
   inset: 0;
-  background: rgba(50, 30, 20, 0.55);
+  background: rgba(30, 22, 14, 0.62);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
   animation: fadeIn 0.25s ease-out;
+  padding: 20px;
 }
 .modal {
-  background: #fff8e8;
-  border: 2px solid #b88a5a;
-  border-radius: 16px;
-  padding: 22px 24px;
-  width: min(360px, calc(100% - 40px));
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-  animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: #fffdf7;
+  border-radius: 18px;
+  padding: 22px 24px 20px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+  animation: pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modalHeader {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.modalSubtitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #b56a2c;
+  text-transform: uppercase;
 }
 .modalTitle {
-  margin: 0 0 14px;
-  font-size: 22px;
-  text-align: center;
-  color: #6d4d2e;
+  margin: 4px 0 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: #2e2316;
+  letter-spacing: 1px;
+}
+.modalSection {
+  background: #f5ecd9;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
 }
 .modalRow {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 6px 0;
-  border-bottom: 1px dashed #e8d2a3;
-  font-size: 14px;
-  color: #6d4d2e;
+  padding: 4px 0;
+  font-size: 13px;
+  color: #4a3a26;
 }
-.modalRow:last-of-type { border-bottom: none; }
-.modalValue {
-  font-weight: bold;
-  color: #2a8c4a;
-  font-size: 16px;
+.modalRowTotal {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2e2316;
+  padding-top: 8px;
 }
-.modalValueBad {
-  font-weight: bold;
-  color: #c44d3a;
-  font-size: 16px;
+.modalDivider {
+  height: 1px;
+  background: #d4c4a0;
+  margin: 4px 0;
 }
-.modalCumulative {
-  margin: 12px 0 16px;
-  padding: 8px;
-  background: #fff2d6;
-  border-radius: 8px;
+.modalSubRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 3px 0;
   font-size: 12px;
-  text-align: center;
-  color: #8b6f47;
+  color: #6d6049;
+}
+.posMoney {
+  color: #1f7a3a;
+  font-weight: 700;
+  font-family: 'Menlo', monospace;
+}
+.negMoney {
+  color: #b04638;
+  font-weight: 700;
+  font-family: 'Menlo', monospace;
 }
 .modalButton {
   width: 100%;
-  background: linear-gradient(to bottom, #ffb84d, #ff8a3d);
-  color: white;
+  background: #2e2316;
+  color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 14px;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 3px 0 #c66a2e;
+  letter-spacing: 0.5px;
+  transition: transform 0.06s, background 0.15s;
 }
-.modalButton:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 #c66a2e;
+.modalButton:active:not(:disabled) {
+  transform: translateY(1px);
+  background: #1f1810;
 }
 .modalButton:disabled {
   opacity: 0.6;
