@@ -72,12 +72,13 @@ const BREADS = [
     prompt:
       `Draw ${SALT_BREAD_SHAPE} ` +
       'BUT the signature toppings sit boldly on TOP of the loaf so the icon ' +
-      'reads at a glance: 3 to 4 distinct BLACK OLIVE RINGS pressed into the ' +
-      'top crust along with thick chunks of melted golden-yellow CHEESE ' +
-      'visibly bubbling out from between the score lines and oozing slightly ' +
-      'down the sides. The black-olive-rings + melted-cheese pair is the ' +
-      'unmistakable signature — make both very prominent and dark/yellow ' +
-      'contrast pop. Coarse white salt sprinkled around.',
+      'reads at a glance: EXACTLY ONE single BLACK OLIVE RING pressed into ' +
+      'the dead-center top of the crust (one olive only — not 2, not 3, ' +
+      'just one prominent ring). Around the olive and from between the score ' +
+      'lines, thick chunks of melted golden-yellow CHEESE visibly bubble out ' +
+      'and ooze slightly down the sides. The single-olive + melted-cheese ' +
+      'pair is the unmistakable signature — make the olive bold and the ' +
+      'yellow cheese ooze pop. Coarse white salt sprinkled around.',
   },
   {
     id: 'basil-tomato',
@@ -113,14 +114,17 @@ const BREADS = [
     referencePath: 'game/public/breads/hotteok-naver.jpg',
     prompt:
       `Draw ${SALT_BREAD_SHAPE} ` +
-      'BUT the top of the loaf has clearly burst open along one of the score ' +
-      'lines, and a generous mound of HOTTEOK-style filling is bursting up ' +
-      'through that opening: chopped peanuts, walnuts, pumpkin seeds, and ' +
-      'sunflower seeds, all glossy-coated in a thick dark caramel-brown sugar ' +
-      'syrup that drips visibly down one side of the loaf. A few extra nuts ' +
-      'and a single green pumpkin seed scattered on top. The big nut-and-' +
-      'caramel mound bursting from the top IS the signature — must be the ' +
-      'most eye-catching feature even at small size.',
+      'BUT the top has EXACTLY 3 LARGE WHOLE SEEDS pressed prominently into ' +
+      'the crust, arranged in a clear triangle pattern (one near the top-' +
+      'center toward the front of the loaf, one at the upper-left, one at ' +
+      'the upper-right) — the triangular 3-seed arrangement is the most ' +
+      'important visual cue. The seeds should be a mix: one green pumpkin ' +
+      'seed (kernel), one beige sunflower-seed kernel, and one whole ' +
+      'almond — all clearly visible, large enough to recognize, evenly ' +
+      'spaced. Around the seeds, a small drizzle of dark caramel-brown ' +
+      'syrup glosses the crust and shows that the loaf is filled with ' +
+      'sweet hotteok filling. Coarse white salt sprinkled around the seeds. ' +
+      'Three triangle-arranged seeds + caramel drizzle IS the signature.',
   },
   {
     id: 'choco-bun',
@@ -202,7 +206,15 @@ async function generateOne(bread) {
 }
 
 async function main() {
-  for (const bread of BREADS) {
+  // Optional filter: ONLY=olive-cheese,seed-hotteok node ...
+  const onlyEnv = process.env.ONLY;
+  const filter = onlyEnv ? new Set(onlyEnv.split(',').map((s) => s.trim())) : null;
+  const targets = filter ? BREADS.filter((b) => filter.has(b.id)) : BREADS;
+  if (targets.length === 0) {
+    console.error(`No breads match ONLY=${onlyEnv}`);
+    process.exit(1);
+  }
+  for (const bread of targets) {
     process.stdout.write(`[${bread.id}] generating... `);
     try {
       const png = await generateOne(bread);
