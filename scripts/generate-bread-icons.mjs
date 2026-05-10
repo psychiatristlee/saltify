@@ -30,107 +30,112 @@ if (!API_KEY) {
 
 const MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-image-preview';
 
-// Shared shape description — every salt bread (소금빵) has this base form.
+// Shared shape — every icon is ONE whole salt bread, never cut, never paired.
 const SALT_BREAD_SHAPE =
-  'a small elongated salt bread (소금빵) shaped like a fat little crescent / oblong. ' +
-  'Two-tone color: deep caramelized golden-brown on the top arch fading to pale ' +
-  'cream-white on the underside. Four shallow horizontal score lines across the top ' +
-  'crust. Coarse white salt crystals (chunky pearl-salt) sprinkled on the very top.';
+  'a single whole elongated salt bread (소금빵) shaped like a fat little ' +
+  'crescent / oblong loaf. Two-tone color: deep caramelized golden-brown on ' +
+  'the top arch, pale cream-white on the underside. Four shallow horizontal ' +
+  'score lines across the top crust. Coarse white salt crystals (chunky ' +
+  'pearl-salt) sprinkled on the very top.';
 
-// For breads where the SIGNATURE is on the inside (cross-section), we draw
-// the loaf cut in half so the filling is visible. For breads where the
-// signature is on the OUTSIDE, we draw a single whole loaf.
+// All 7 icons: ONE whole bread, no cross-section, no paired bread, no slice.
+// The signature feature must be visible from the OUTSIDE — for fillings, the
+// filling oozes / peeks out through the score lines and the open ends so it's
+// still loud at icon size.
 const BREADS = [
   {
     id: 'plain',
     referencePath: 'game/public/breads/plain-naver.jpg',
-    cut: false,
     prompt:
       `Draw ${SALT_BREAD_SHAPE} ` +
-      'NO toppings other than the salt. NO seeds, NO herbs, NO cream — ' +
-      'this is the PLAIN variant. The signature feature is the clean two-tone ' +
-      'crust + visible score marks + chunky salt crystals on top.',
+      'NO toppings beyond the salt. NO seeds, NO herbs, NO filling, NO drip. ' +
+      'The signature is the clean two-tone caramelized crust + 4 visible ' +
+      'score marks + chunky white pearl-salt crystals scattered on top. ' +
+      'It must be obvious this is the PLAIN baseline — bare, golden, salty.',
   },
   {
     id: 'everything',
     referencePath: 'game/public/breads/everything-naver.jpg',
-    cut: false,
     prompt:
       `Draw ${SALT_BREAD_SHAPE} ` +
-      'BUT the entire top half of the bread is DENSELY COVERED with everything-bagel ' +
-      'topping: thick layer of black sesame seeds, white sesame seeds, poppy seeds, ' +
-      'and small white crispy onion flakes. The topping covers about 80% of the ' +
-      'top crust — barely any plain crust shows through. The signature is the ' +
-      'almost-black studded surface from the dense seed mix.',
+      'BUT the ENTIRE TOP ARCH (about 70% of the visible surface) is ' +
+      'completely encrusted with a dense everything-bagel topping mix: a thick ' +
+      'crowd of black sesame seeds, white sesame seeds, poppy seeds, and small ' +
+      'crispy onion flakes packed shoulder-to-shoulder. The dense seed coat is ' +
+      'the dominant visual — barely any bare crust shows through, the top ' +
+      'reads almost-black-with-flecks at a glance. Pale cream underside still ' +
+      'visible for the salt-bread shape cue.',
   },
   {
     id: 'olive-cheese',
     referencePath: 'game/public/breads/olive-cheese-naver.jpg',
-    cut: true,
     prompt:
-      `Two breads side by side: a whole one and a half-cut one showing the cross section. ` +
-      `Both are ${SALT_BREAD_SHAPE} ` +
-      'The whole loaf has ONE single black olive ring placed dead-center on top + a ' +
-      'sprinkle of coarse salt — that is the only visible topping on the outside. ' +
-      'The CUT half is the signature view: cross-section densely studded with ' +
-      'creamy white melted-cheese chunks AND chopped black olive pieces packed ' +
-      'inside the white crumb. Make the cheese-and-olive cross-section visually ' +
-      'unmistakable.',
+      `Draw ${SALT_BREAD_SHAPE} ` +
+      'BUT the signature toppings sit boldly on TOP of the loaf so the icon ' +
+      'reads at a glance: 3 to 4 distinct BLACK OLIVE RINGS pressed into the ' +
+      'top crust along with thick chunks of melted golden-yellow CHEESE ' +
+      'visibly bubbling out from between the score lines and oozing slightly ' +
+      'down the sides. The black-olive-rings + melted-cheese pair is the ' +
+      'unmistakable signature — make both very prominent and dark/yellow ' +
+      'contrast pop. Coarse white salt sprinkled around.',
   },
   {
     id: 'basil-tomato',
     referencePath: 'game/public/breads/basil-tomato-naver.jpg',
-    cut: true,
     prompt:
-      `Two breads side by side: a whole one and a half-cut one showing the cross section. ` +
-      'Both are an elongated salt bread shape, but the dough itself is flecked ' +
-      'with tiny dark-green basil specks throughout the crust (basil-pesto-infused ' +
-      'dough — gives the crust a faint green-speckled look). The whole loaf has ' +
-      'a small opening on top revealing a peek of bright red filling. ' +
-      'The CUT half is the signature view: a bold red sun-dried-tomato + basil ' +
-      'pesto filling pocket at the center of the cross-section, surrounded by ' +
-      'white bread interior. Make the red-and-green filling visually loud.',
+      'Draw a single whole elongated salt bread (소금빵), shaped like a fat ' +
+      'little crescent loaf. Same caramelized two-tone crust + score lines + ' +
+      'pearl salt as a normal salt bread, BUT: ' +
+      '(1) the entire crust is visibly speckled with tiny dark-green basil ' +
+      'flakes baked into the dough — like a fine green confetti across the ' +
+      'whole top, ' +
+      '(2) bright RED chopped sun-dried tomato pieces are pushed up between ' +
+      'the score lines and at the open ends of the loaf, very visible, almost ' +
+      'spilling out — vivid red that pops against the brown crust, ' +
+      '(3) a touch of green basil leaves visible alongside the red bits. ' +
+      'The bold red-and-green topping is the unmistakable signature.',
   },
   {
     id: 'garlic-butter',
     referencePath: 'game/public/breads/garlic-butter-naver.jpg',
-    cut: false,
     prompt:
       `Draw ${SALT_BREAD_SHAPE} ` +
-      'BUT the entire top is heavily dusted with bright fresh GREEN PARSLEY ' +
-      'flakes — like a heavy snowfall of parsley covering most of the top crust. ' +
-      'A small drip of glossy yellow garlic butter glistens at one end where it ' +
-      'has soaked through. The signature feature is the dominant green parsley ' +
-      'cover (like an herby green coat) — make it unmistakable that this is the ' +
-      'GARLIC BUTTER variant by the heavy green dusting on the brown crust.',
+      'BUT the entire top arch is heavily dusted with bright fresh GREEN ' +
+      'PARSLEY flakes — like a thick herby snowfall covering most of the top ' +
+      'crust (the parsley layer is the dominant visual). On top of the parsley, ' +
+      'add small chopped chunks of pale garlic and a few small glossy golden ' +
+      'pools of melted butter pooled along the score lines, with one dramatic ' +
+      'butter drip running down the side of the bread. Brown crust + heavy ' +
+      'green coat + glossy yellow butter is the unmistakable signature combo.',
   },
   {
     id: 'seed-hotteok',
     referencePath: 'game/public/breads/hotteok-naver.jpg',
-    cut: true,
     prompt:
-      `Two breads side by side: a whole one and a half-cut one showing the cross section. ` +
-      `Both are ${SALT_BREAD_SHAPE} ` +
-      'The whole loaf has a single small green pumpkin-seed kernel pressed into ' +
-      'the top center as the only topping (besides salt). ' +
-      'The CUT half is the signature view: cross-section oozing with sweet HOTTEOK ' +
-      'filling — chopped peanuts, walnuts, pumpkin seeds bound in a glossy dark ' +
-      'caramel-brown sugar syrup, dripping out of the cross-section. Make the ' +
-      'caramel-and-nut filling visually loud and gooey.',
+      `Draw ${SALT_BREAD_SHAPE} ` +
+      'BUT the top of the loaf has clearly burst open along one of the score ' +
+      'lines, and a generous mound of HOTTEOK-style filling is bursting up ' +
+      'through that opening: chopped peanuts, walnuts, pumpkin seeds, and ' +
+      'sunflower seeds, all glossy-coated in a thick dark caramel-brown sugar ' +
+      'syrup that drips visibly down one side of the loaf. A few extra nuts ' +
+      'and a single green pumpkin seed scattered on top. The big nut-and-' +
+      'caramel mound bursting from the top IS the signature — must be the ' +
+      'most eye-catching feature even at small size.',
   },
   {
     id: 'choco-bun',
     referencePath: 'game/public/breads/choco-bun-naver.jpg',
-    cut: false,
     prompt:
-      'An elongated bread (same shape as a salt bread) but the entire top crust ' +
-      'is covered with a MELON-BREAD style cocoa-cookie-dough topping — matte ' +
-      'dark cocoa-brown color, NOT smooth glaze, but a textured cookie crust ' +
-      'that has CRACKED while baking. Pale yellow bread underneath shows through ' +
-      'the cracks in 3-4 jagged lines, creating a strong dark-brown / pale-yellow ' +
-      'contrast. NO chocolate drip, NO smooth shine — the look is a craggy, ' +
-      'dry, cocoa-cookie crust like Korean choco-bun (초코번) or Mexican concha. ' +
-      'This dark crackle pattern IS the signature.',
+      'Draw ONE single whole elongated bread (same shape as a salt bread). ' +
+      'The entire top arch is covered with a MELON-BREAD / Mexican-concha ' +
+      'style cocoa-cookie-dough topping — matte, dry, dark cocoa-brown, NOT ' +
+      'a smooth chocolate glaze. The cocoa topping has cracked while baking, ' +
+      'forming 3 or 4 jagged crackle lines that reveal pale golden bread ' +
+      'showing through the cracks — high-contrast dark-brown / pale-yellow ' +
+      'pattern is the dominant visual. The bottom underside of the loaf is ' +
+      'still pale cream like a normal salt bread (so the salt-bread shape ' +
+      'reads). NO smooth chocolate drip, NO shiny ganache. Cocoa-cookie ' +
+      'crackle crust IS the signature.',
   },
 ];
 
