@@ -13,12 +13,13 @@ import {
   PERSONA_PROFILE, Persona, phaseAt, pickPersona,
 } from '../../data/dayConfig';
 import {
-  BREAD_ECONOMY, DAILY_WAGES, MAX_STOCK_PER_SLOT,
-  OVEN_SLOT_COUNT, STARTING_CASH, STARTING_STOCK,
+  BREAD_ECONOMY, QUEUE_CAPACITY_BASE, STARTING_STOCK,
+  bakeTimeMultiplier, ovenCount, shelfCapacity, albaCount, dailyWages, trafficBoost,
 } from '../../data/economy';
+import { TycoonState } from '../../state/tycoonState';
 import type { PixiSceneController } from '../PixiCanvas';
 
-// Refined warm bakery palette
+// Warm flat bakery palette
 const WALL = 0xfaf2e2;
 const WALL_DARK = 0xeadcb8;
 const FLOOR = 0xb88a5a;
@@ -43,34 +44,38 @@ interface BreadSlot {
 interface Customer {
   container: Container;
   patienceFill: Graphics;
+  bubbleQtyText: Text | null;
   speed: number;
-  state: 'arriving' | 'browsing' | 'leaving';
-  arriveTargetX: number;
+  state: 'arriving' | 'waiting' | 'serving' | 'leaving';
+  queueIndex: number;
   patienceMaxMs: number;
   patienceLeftMs: number;
-  buyDwellMs: number;
+  serveDwellMs: number;
   dwellElapsed: number;
   wantedType: BreadType;
+  wantedQty: number;
   persona: Persona;
 }
 
 interface OvenSlot {
+  index: number;
   baking: BreadType | null;
   remainingMs: number;
   totalMs: number;
-  // visuals
   doorContainer: Container;
   trayBread: Sprite | null;
   glow: Graphics;
   progressBar: Graphics;
   progressBarBg: Graphics;
   progressLabel: Text;
+  bodyGfx: Graphics;
+  labelText: Text;
 }
 
 export interface OvenStateView {
   index: number;
   baking: BreadType | null;
-  progress: number; // 0..1
+  progress: number;
 }
 
 export interface DayResult {
@@ -82,13 +87,16 @@ export interface DayResult {
   lost: number;
   satisfaction: number;
   cashEnd: number;
+  goalHit: boolean;
+  goalBonus: number;
 }
 
 export interface StorefrontHandle {
   controller: PixiSceneController;
-  /** Try to start a tray bake. Returns true if successful, false if no oven free / no cash / already baking. */
   bakeTray: (type: BreadType) => boolean;
   startNextDay: () => void;
+  /** Sync upgrade state changes mid-life (e.g., after a between-day shop purchase). */
+  refreshUpgrades: () => void;
   onDayEnd: (cb: (r: DayResult) => void) => void;
   onSale: (cb: (revenue: number, type: BreadType) => void) => void;
   onCustomerLost: (cb: () => void) => void;
@@ -104,49 +112,57 @@ const CUSTOMER_TEXTURES: Record<Persona, string> = {
   evening: '/customers/evening.png',
 };
 
+// Logical canvas
+const W = 720;
+const H = 1280;
+const SHELF_X = 56;
+const SHELF_Y = 200;
+const SHELF_W = W - 112;
+const SHELF_H = 360;
+const COUNTER_TOP_Y = 700;
+const COUNTER_H = 60;
+const FLOOR_Y = COUNTER_TOP_Y + COUNTER_H;
+const QUEUE_Y = 1100;
+const QUEUE_START_X = W / 2 - 60;
+const QUEUE_SPACING = 110;
+const OVEN_AREA_Y = 580;
+const OVEN_W = 200;
+const OVEN_H = 100;
+
+export interface SceneOptions {
+  state: TycoonState;
+  /** Optional revenue goal — if hit by end of day, fires goalHit=true. */
+  revenueGoal?: number;
+  /** Bonus paid out when goal is hit. */
+  goalBonus?: number;
+}
+
 export async function createStorefrontScene(
   app: Application,
-  startDay = 1,
-  startCash = STARTING_CASH,
+  opts: SceneOptions,
 ): Promise<StorefrontHandle> {
   const stage = app.stage;
   const root = new Container();
   stage.addChild(root);
 
-  // Logical canvas
-  const W = 720;
-  const H = 1280;
-  const SHELF_X = 56;
-  const SHELF_Y = 200;
-  const SHELF_W = W - 112;
-  const SHELF_H = 360;
-  const COUNTER_TOP_Y = 700;
-  const COUNTER_H = 60;
-  const FLOOR_Y = COUNTER_TOP_Y + COUNTER_H;
-  const CUSTOMER_LANE_Y = 1140;
-  const OVEN_AREA_Y = 580;
-  const OVEN_W = 260;
-  const OVEN_H = 110;
+  const state = opts.state;
+  const revenueGoal = opts.revenueGoal ?? 0;
+  const goalBonus = opts.goalBonus ?? 0;
 
   const world = new Container();
   root.addChild(world);
 
-  // --- Layered background ---
-  // Wall + wallpaper pattern
+  // === Background ===
   const bg = new Graphics();
   bg.rect(0, 0, W, COUNTER_TOP_Y).fill(WALL);
-  // subtle vertical wallpaper stripes
   for (let x = 0; x < W; x += 60) {
     bg.rect(x, 0, 30, COUNTER_TOP_Y).fill({ color: WALL_DARK, alpha: 0.18 });
   }
-  // Wood floor
   bg.rect(0, FLOOR_Y, W, H - FLOOR_Y).fill(FLOOR);
-  // floor planks
   for (let i = 0; i < 6; i++) {
     const y = FLOOR_Y + i * (H - FLOOR_Y) / 6;
     bg.rect(0, y, W, 3).fill(FLOOR_DARK);
   }
-  // Wall-floor seam
   bg.rect(0, COUNTER_TOP_Y + COUNTER_H - 4, W, 4).fill(0x4d3320);
   world.addChild(bg);
 
@@ -159,9 +175,13 @@ export async function createStorefrontScene(
       .lineTo(W, COUNTER_TOP_Y + 22 + i * 12)
       .stroke({ color: 0x4d3320, width: 1, alpha: 0.45 });
   }
+  // cash register on the counter
+  counter.roundRect(W / 2 - 60, COUNTER_TOP_Y - 10, 120, 24, 4).fill(0x4d3320);
+  counter.roundRect(W / 2 - 55, COUNTER_TOP_Y - 7, 110, 8, 2).fill(0x2a1a0e);
+  counter.roundRect(W / 2 - 28, COUNTER_TOP_Y + 2, 56, 10, 2).fill(0xc0a065);
   world.addChild(counter);
 
-  // Decorative wall sign
+  // Sign
   const sign = new Text({
     text: 'Salt, 0',
     style: {
@@ -186,21 +206,17 @@ export async function createStorefrontScene(
   subSign.y = 102;
   world.addChild(subSign);
 
-  // --- Display case (shelf) ---
+  // === Display case (shelf) ===
   const shelf = new Graphics();
-  // shelf body
   shelf.roundRect(SHELF_X, SHELF_Y, SHELF_W, SHELF_H, 14).fill(SHELF_BG);
-  // top + bottom dark trim
   shelf.roundRect(SHELF_X, SHELF_Y, SHELF_W, 18, 14).fill(SHELF_TRIM);
   shelf.roundRect(SHELF_X, SHELF_Y + SHELF_H - 18, SHELF_W, 18, 14).fill(SHELF_TRIM);
-  // mid divider
   shelf.rect(SHELF_X, SHELF_Y + SHELF_H / 2 - 3, SHELF_W, 6).fill(SHELF_TRIM);
-  // glass-pane shimmer
   shelf.rect(SHELF_X + 6, SHELF_Y + 20, SHELF_W - 12, 4).fill({ color: 0xffffff, alpha: 0.18 });
   shelf.rect(SHELF_X + 6, SHELF_Y + SHELF_H / 2 + 3, SHELF_W - 12, 4).fill({ color: 0xffffff, alpha: 0.18 });
   world.addChild(shelf);
 
-  // --- Load assets ---
+  // === Load assets ===
   const breadTypes = getAllBreadTypes();
   const [breadTextures, customerTextures] = await Promise.all([
     Promise.all(breadTypes.map((t) => Assets.load<Texture>(BREAD_DATA[t].image))),
@@ -231,7 +247,6 @@ export async function createStorefrontScene(
     sprite.y = cy;
     sprite.scale.set((cellW * 0.78) / sprite.width);
     world.addChild(sprite);
-
     slots.push({ type, sprite, baseX: cx, baseY: cy, inStock: STARTING_STOCK });
   }
 
@@ -263,106 +278,125 @@ export async function createStorefrontScene(
   }
   refreshStock();
 
-  // --- Ovens ---
-  const ovens: OvenSlot[] = [];
+  // === Ovens — built dynamically based on state.upgrades ===
   const ovenLayer = new Container();
   world.addChild(ovenLayer);
+  let ovens: OvenSlot[] = [];
 
-  for (let i = 0; i < OVEN_SLOT_COUNT; i++) {
-    const ox = i === 0 ? 56 : W - 56 - OVEN_W;
-    const oy = OVEN_AREA_Y;
+  function buildOvens(count: number) {
+    // Tear down existing
+    for (const o of ovens) {
+      ovenLayer.removeChild(o.bodyGfx);
+      ovenLayer.removeChild(o.labelText);
+      ovenLayer.removeChild(o.glow);
+      ovenLayer.removeChild(o.doorContainer);
+      ovenLayer.removeChild(o.progressBarBg);
+      ovenLayer.removeChild(o.progressBar);
+      ovenLayer.removeChild(o.progressLabel);
+      if (o.trayBread) o.trayBread.destroy();
+      o.bodyGfx.destroy();
+      o.labelText.destroy();
+      o.glow.destroy();
+      o.progressBarBg.destroy();
+      o.progressBar.destroy();
+      o.progressLabel.destroy();
+    }
+    ovens = [];
 
-    const ovenBox = new Graphics();
-    // body
-    ovenBox.roundRect(ox, oy, OVEN_W, OVEN_H, 10).fill(OVEN_BODY);
-    ovenBox.roundRect(ox, oy, OVEN_W, OVEN_H, 10).stroke({ color: 0x202020, width: 2 });
-    // top vent
-    ovenBox.rect(ox + 16, oy + 8, OVEN_W - 32, 6).fill({ color: 0x595550, alpha: 0.7 });
-    // door area
-    const doorPad = 10;
-    const doorX = ox + doorPad;
-    const doorY = oy + 22;
-    const doorW = OVEN_W - doorPad * 2;
-    const doorH = OVEN_H - 30;
-    ovenBox.roundRect(doorX, doorY, doorW, doorH, 6).fill(OVEN_DOOR);
-    // glass window inset
-    ovenBox.roundRect(doorX + 8, doorY + 6, doorW - 16, doorH - 18, 4).fill(0x0c0a09);
-    // handle
-    ovenBox.roundRect(doorX + 12, doorY + doorH - 8, doorW - 24, 4, 2).fill(OVEN_HANDLE);
-    // label
-    ovenLayer.addChild(ovenBox);
-    const label = new Text({
-      text: `오븐 ${i + 1}`,
-      style: { fontFamily: 'sans-serif', fontSize: 12, fill: 0xc0a065, fontWeight: 'bold' },
-    });
-    label.anchor.set(0, 0);
-    label.x = ox + 14;
-    label.y = oy + 4;
-    ovenLayer.addChild(label);
+    // Layout: distribute ovens evenly across the width below the shelf
+    const totalW = count * OVEN_W + (count - 1) * 16;
+    const startX = (W - totalW) / 2;
 
-    // Glow (shown when baking) — overlaid on glass window
-    const glow = new Graphics();
-    glow.roundRect(doorX + 10, doorY + 8, doorW - 20, doorH - 22, 3)
-      .fill({ color: OVEN_GLASS_GLOW, alpha: 0 });
-    ovenLayer.addChild(glow);
+    for (let i = 0; i < count; i++) {
+      const ox = startX + i * (OVEN_W + 16);
+      const oy = OVEN_AREA_Y;
 
-    // Tray bread (visible inside oven when baking)
-    const trayBreadContainer = new Container();
-    trayBreadContainer.x = doorX + doorW / 2;
-    trayBreadContainer.y = doorY + (doorH - 18) / 2 + 4;
-    ovenLayer.addChild(trayBreadContainer);
+      const body = new Graphics();
+      body.roundRect(ox, oy, OVEN_W, OVEN_H, 10).fill(OVEN_BODY);
+      body.roundRect(ox, oy, OVEN_W, OVEN_H, 10).stroke({ color: 0x202020, width: 2 });
+      body.rect(ox + 16, oy + 8, OVEN_W - 32, 6).fill({ color: 0x595550, alpha: 0.7 });
+      const doorPad = 10;
+      const doorX = ox + doorPad;
+      const doorY = oy + 22;
+      const doorW = OVEN_W - doorPad * 2;
+      const doorH = OVEN_H - 30;
+      body.roundRect(doorX, doorY, doorW, doorH, 6).fill(OVEN_DOOR);
+      body.roundRect(doorX + 8, doorY + 6, doorW - 16, doorH - 18, 4).fill(0x0c0a09);
+      body.roundRect(doorX + 12, doorY + doorH - 8, doorW - 24, 4, 2).fill(OVEN_HANDLE);
+      ovenLayer.addChild(body);
 
-    // Progress bar UNDER the oven
-    const pbBg = new Graphics();
-    pbBg.roundRect(ox, oy + OVEN_H + 8, OVEN_W, 10, 5)
-      .fill({ color: 0x2e2a26, alpha: 0.85 });
-    ovenLayer.addChild(pbBg);
+      const label = new Text({
+        text: `오븐 ${i + 1}`,
+        style: { fontFamily: 'sans-serif', fontSize: 11, fill: 0xc0a065, fontWeight: 'bold' },
+      });
+      label.anchor.set(0, 0);
+      label.x = ox + 12;
+      label.y = oy + 3;
+      ovenLayer.addChild(label);
 
-    const pb = new Graphics();
-    ovenLayer.addChild(pb);
+      const glow = new Graphics();
+      ovenLayer.addChild(glow);
 
-    const pl = new Text({
-      text: '',
-      style: { fontFamily: 'sans-serif', fontSize: 11, fill: 0xfff2d6, fontWeight: 'bold' },
-    });
-    pl.anchor.set(0.5);
-    pl.x = ox + OVEN_W / 2;
-    pl.y = oy + OVEN_H + 13;
-    ovenLayer.addChild(pl);
+      const trayBreadContainer = new Container();
+      trayBreadContainer.x = doorX + doorW / 2;
+      trayBreadContainer.y = doorY + (doorH - 18) / 2 + 4;
+      ovenLayer.addChild(trayBreadContainer);
 
-    ovens.push({
-      baking: null,
-      remainingMs: 0,
-      totalMs: 0,
-      doorContainer: trayBreadContainer,
-      trayBread: null,
-      glow,
-      progressBar: pb,
-      progressBarBg: pbBg,
-      progressLabel: pl,
-    });
+      const pbBg = new Graphics();
+      pbBg.roundRect(ox, oy + OVEN_H + 6, OVEN_W, 8, 4)
+        .fill({ color: 0x2e2a26, alpha: 0.85 });
+      ovenLayer.addChild(pbBg);
+
+      const pb = new Graphics();
+      ovenLayer.addChild(pb);
+
+      const pl = new Text({
+        text: '',
+        style: { fontFamily: 'sans-serif', fontSize: 10, fill: 0xfff2d6, fontWeight: 'bold' },
+      });
+      pl.anchor.set(0.5);
+      pl.x = ox + OVEN_W / 2;
+      pl.y = oy + OVEN_H + 10;
+      ovenLayer.addChild(pl);
+
+      ovens.push({
+        index: i,
+        baking: null,
+        remainingMs: 0,
+        totalMs: 0,
+        doorContainer: trayBreadContainer,
+        trayBread: null,
+        glow,
+        progressBar: pb,
+        progressBarBg: pbBg,
+        progressLabel: pl,
+        bodyGfx: body,
+        labelText: label,
+      });
+    }
   }
+  buildOvens(ovenCount(state.upgrades));
 
   function drawOvenProgress(o: OvenSlot, idx: number) {
     o.progressBar.clear();
+    o.glow.clear();
     if (!o.baking) {
       o.progressLabel.text = '대기 중';
-      o.glow.clear();
-      o.glow.roundRect(0, 0, 0, 0, 0).fill({ color: OVEN_GLASS_GLOW, alpha: 0 });
       return;
     }
-    const ox = idx === 0 ? 56 : W - 56 - OVEN_W;
+    // recompute oven X based on current oven count layout
+    const count = ovens.length;
+    const totalW = count * OVEN_W + (count - 1) * 16;
+    const startX = (W - totalW) / 2;
+    const ox = startX + idx * (OVEN_W + 16);
     const oy = OVEN_AREA_Y;
     const pct = 1 - o.remainingMs / o.totalMs;
-    const w = OVEN_W * pct;
-    o.progressBar.roundRect(ox, oy + OVEN_H + 8, w, 10, 5)
+    o.progressBar.roundRect(ox, oy + OVEN_H + 6, OVEN_W * pct, 8, 4)
       .fill({ color: 0xff8a3d });
     const remain = Math.ceil(o.remainingMs / 1000);
     o.progressLabel.text = `${BREAD_DATA[o.baking].nameKo}  ${remain}s`;
-    // Pulsing glow (sin)
     const t = (Date.now() / 400) % (Math.PI * 2);
     const intensity = 0.35 + Math.sin(t) * 0.18;
-    o.glow.clear();
     const doorPad = 10;
     const doorX = ox + doorPad;
     const doorY = oy + 22;
@@ -372,11 +406,11 @@ export async function createStorefrontScene(
       .fill({ color: OVEN_GLASS_GLOW, alpha: intensity });
   }
 
-  // --- Customer system ---
+  // === Customer queue ===
   const customerLayer = new Container();
   world.addChild(customerLayer);
 
-  const customers: Customer[] = [];
+  const queue: Customer[] = [];
   const onSaleCbs: Array<(r: number, t: BreadType) => void> = [];
   const onLostCbs: Array<() => void> = [];
   const onDayEndCbs: Array<(r: DayResult) => void> = [];
@@ -384,31 +418,30 @@ export async function createStorefrontScene(
   const onOvenCbs: Array<(s: OvenStateView[]) => void> = [];
   const onTimeChangeCbs: Array<(m: number, phase: string, day: number) => void> = [];
 
-  // --- Day/sim state ---
-  let dayNumber = startDay;
-  let cash = startCash;
+  // === Day/sim state ===
   let gameMin = OPEN_MIN;
   let dayActive = true;
   let dayStats = { revenue: 0, cogs: 0, served: 0, lost: 0, expected: 0 };
   let spawnTimer = 0;
   let lastReportedMin = -1;
   let lastPhaseLabel = '';
+  let albaTimer = 0;
+  let activeTrafficBoost = trafficBoost(state.upgrades.pendingNextDay);
 
   function emitTime() {
     const phase = phaseAt(gameMin);
     if (Math.floor(gameMin) !== lastReportedMin || phase.label !== lastPhaseLabel) {
       lastReportedMin = Math.floor(gameMin);
       lastPhaseLabel = phase.label;
-      for (const cb of onTimeChangeCbs) cb(gameMin, phase.label, dayNumber);
+      for (const cb of onTimeChangeCbs) cb(gameMin, phase.label, state.dayNumber);
     }
   }
   function emitCash() {
-    for (const cb of onCashCbs) cb(cash);
+    for (const cb of onCashCbs) cb(state.cash);
   }
   function emitOvens() {
     const states: OvenStateView[] = ovens.map((o, i) => ({
-      index: i,
-      baking: o.baking,
+      index: i, baking: o.baking,
       progress: o.totalMs > 0 ? 1 - o.remainingMs / o.totalMs : 0,
     }));
     for (const cb of onOvenCbs) cb(states);
@@ -419,21 +452,20 @@ export async function createStorefrontScene(
 
   function bakeTray(type: BreadType): boolean {
     if (!dayActive || gameMin >= CLOSE_MIN) return false;
-    // Already baking the same type? skip
     if (ovens.some((o) => o.baking === type)) return false;
     const oven = ovens.find((o) => o.baking === null);
     if (!oven) return false;
     const econ = BREAD_ECONOMY[type];
-    if (cash < econ.costPerTray) return false;
+    if (state.cash < econ.costPerTray) return false;
 
-    cash -= econ.costPerTray;
+    state.cash -= econ.costPerTray;
     dayStats.cogs += econ.costPerTray;
 
     oven.baking = type;
-    oven.remainingMs = econ.bakeTimeMs;
-    oven.totalMs = econ.bakeTimeMs;
+    const adjustedTime = econ.bakeTimeMs * bakeTimeMultiplier(state.upgrades);
+    oven.remainingMs = adjustedTime;
+    oven.totalMs = adjustedTime;
 
-    // Show the bread inside the oven
     if (oven.trayBread) {
       oven.doorContainer.removeChild(oven.trayBread);
       oven.trayBread.destroy();
@@ -441,7 +473,7 @@ export async function createStorefrontScene(
     const idx = breadTypes.indexOf(type);
     const trayBread = new Sprite(breadTextures[idx]);
     trayBread.anchor.set(0.5);
-    trayBread.scale.set(64 / trayBread.width);
+    trayBread.scale.set(60 / trayBread.width);
     oven.doorContainer.addChild(trayBread);
     oven.trayBread = trayBread;
 
@@ -450,35 +482,60 @@ export async function createStorefrontScene(
     return true;
   }
 
+  /** Alba: pick the lowest-stock bread we can afford and bake it. */
+  function albaAutoBake() {
+    const baking = new Set(ovens.filter((o) => o.baking).map((o) => o.baking!));
+    const candidate = [...slots]
+      .filter((s) => !baking.has(s.type) && state.cash >= BREAD_ECONOMY[s.type].costPerTray)
+      .sort((a, b) => a.inStock - b.inStock)[0];
+    if (candidate) bakeTray(candidate.type);
+  }
+
+  function targetXForQueuePos(i: number): number {
+    return QUEUE_START_X + i * QUEUE_SPACING;
+  }
+
   function spawnCustomer() {
+    if (queue.length >= QUEUE_CAPACITY_BASE) return;
     const phase = phaseAt(gameMin);
     const persona = pickPersona(phase.weights);
     const profile = PERSONA_PROFILE[persona];
     const wantedType = breadTypes[Math.floor(Math.random() * breadTypes.length)];
+    const [qLo, qHi] = profile.purchaseQtyRange;
+    const wantedQty = Math.floor(qLo + Math.random() * (qHi - qLo + 1));
     dayStats.expected++;
 
     const c = new Container();
 
     const sprite = new Sprite(customerTextures[persona]);
     sprite.anchor.set(0.5, 1);
-    sprite.scale.set(220 / sprite.height);
+    sprite.scale.set(210 / sprite.height);
     sprite.y = 0;
     c.addChild(sprite);
 
     // Speech bubble
     const bubble = new Container();
     const bbg = new Graphics();
-    bbg.roundRect(-40, -300, 80, 52, 12).fill(0xffffff);
-    bbg.roundRect(-40, -300, 80, 52, 12).stroke({ color: 0x6d4d2e, width: 2 });
-    bbg.moveTo(-8, -250).lineTo(0, -238).lineTo(8, -250).fill(0xffffff);
-    bbg.moveTo(-8, -250).lineTo(0, -238).lineTo(8, -250).stroke({ color: 0x6d4d2e, width: 2 });
+    bbg.roundRect(-42, -300, 84, 54, 12).fill(0xffffff);
+    bbg.roundRect(-42, -300, 84, 54, 12).stroke({ color: 0x6d4d2e, width: 2 });
+    bbg.moveTo(-8, -246).lineTo(0, -234).lineTo(8, -246).fill(0xffffff);
+    bbg.moveTo(-8, -246).lineTo(0, -234).lineTo(8, -246).stroke({ color: 0x6d4d2e, width: 2 });
     bubble.addChild(bbg);
     const wantedSprite = new Sprite(breadTextures[breadTypes.indexOf(wantedType)]);
     wantedSprite.anchor.set(0.5);
-    wantedSprite.scale.set(40 / wantedSprite.width);
-    wantedSprite.x = 0;
-    wantedSprite.y = -274;
+    wantedSprite.scale.set(38 / wantedSprite.width);
+    wantedSprite.x = -10;
+    wantedSprite.y = -272;
     bubble.addChild(wantedSprite);
+    // Qty text
+    const qtyText = new Text({
+      text: `×${wantedQty}`,
+      style: { fontFamily: 'sans-serif', fontSize: 16, fontWeight: 'bold', fill: 0x6d4d2e },
+    });
+    qtyText.anchor.set(0, 0.5);
+    qtyText.x = 11;
+    qtyText.y = -272;
+    bubble.addChild(qtyText);
     c.addChild(bubble);
 
     // Patience bar
@@ -489,20 +546,23 @@ export async function createStorefrontScene(
     c.addChild(patienceFill);
 
     c.x = -120;
-    c.y = CUSTOMER_LANE_Y;
+    c.y = QUEUE_Y;
     customerLayer.addChild(c);
 
-    customers.push({
+    const queueIndex = queue.length;
+    queue.push({
       container: c,
       patienceFill,
+      bubbleQtyText: qtyText,
       speed: profile.walkSpeed,
       state: 'arriving',
-      arriveTargetX: W / 2 + (Math.random() - 0.5) * (SHELF_W * 0.6),
+      queueIndex,
       patienceMaxMs: profile.patienceMs,
       patienceLeftMs: profile.patienceMs,
-      buyDwellMs: profile.buyDwellMs,
+      serveDwellMs: profile.buyDwellMs,
       dwellElapsed: 0,
       wantedType,
+      wantedQty,
       persona,
     });
   }
@@ -513,30 +573,41 @@ export async function createStorefrontScene(
     const color = pct > 0.5 ? 0x57b85a : pct > 0.25 ? 0xe6a64a : 0xd64545;
     cu.patienceFill.clear();
     cu.patienceFill.roundRect(-34, -322, w, 7, 3).fill(color);
-    cu.patienceFill.alpha = cu.state === 'browsing' ? 1 : 0;
+    cu.patienceFill.alpha = cu.state !== 'arriving' ? 1 : 0;
+  }
+
+  function reindexQueue() {
+    for (let i = 0; i < queue.length; i++) {
+      queue[i].queueIndex = i;
+    }
   }
 
   function endDay() {
     dayActive = false;
-    cash -= DAILY_WAGES;
+    const wages = dailyWages(state.upgrades);
+    state.cash -= wages;
+    const goalHit = revenueGoal > 0 && dayStats.revenue >= revenueGoal;
+    if (goalHit) state.cash += goalBonus;
     emitCash();
     const satisfaction = dayStats.expected > 0
       ? dayStats.served / dayStats.expected
       : 1;
     const result: DayResult = {
-      dayNumber,
+      dayNumber: state.dayNumber,
       revenue: dayStats.revenue,
       cogs: dayStats.cogs,
-      wages: DAILY_WAGES,
+      wages,
       served: dayStats.served,
       lost: dayStats.lost,
       satisfaction,
-      cashEnd: cash,
+      cashEnd: state.cash,
+      goalHit,
+      goalBonus: goalHit ? goalBonus : 0,
     };
     for (const cb of onDayEndCbs) cb(result);
   }
 
-  // --- Tick ---
+  // === Tick ===
   app.ticker.add((tk) => {
     const dt = tk.deltaMS;
 
@@ -548,10 +619,21 @@ export async function createStorefrontScene(
       const phase = phaseAt(gameMin);
       if (gameMin < CLOSE_MIN) {
         spawnTimer += dt;
-        const interval = phase.spawnIntervalMs * (0.7 + Math.random() * 0.6);
-        if (spawnTimer >= interval && customers.length < 5) {
+        const baseInterval = phase.spawnIntervalMs / activeTrafficBoost;
+        const interval = baseInterval * (0.7 + Math.random() * 0.6);
+        if (spawnTimer >= interval) {
           spawnTimer = 0;
           spawnCustomer();
+        }
+      }
+
+      // Alba auto-bake (one alba bakes every 6s, multiple albas stagger via timer)
+      const albas = albaCount(state.upgrades);
+      if (albas > 0) {
+        albaTimer += dt * albas; // multiple albas tick faster collectively
+        if (albaTimer >= 6000) {
+          albaTimer = 0;
+          albaAutoBake();
         }
       }
     }
@@ -563,10 +645,10 @@ export async function createStorefrontScene(
       if (oven.baking) {
         oven.remainingMs -= dt;
         if (oven.remainingMs <= 0) {
-          // Bake complete — deposit breads onto shelf
           const slot = slots.find((s) => s.type === oven.baking);
           if (slot) {
-            slot.inStock = Math.min(MAX_STOCK_PER_SLOT, slot.inStock + BREAD_ECONOMY[oven.baking!].breadsPerTray);
+            slot.inStock = Math.min(shelfCapacity(state.upgrades),
+              slot.inStock + BREAD_ECONOMY[oven.baking!].breadsPerTray);
             refreshStock();
           }
           oven.baking = null;
@@ -579,38 +661,59 @@ export async function createStorefrontScene(
           }
           ovenChanged = true;
         }
-        // glow + progress always update during bake
-        drawOvenProgress(oven, i);
-      } else {
-        drawOvenProgress(oven, i);
       }
+      drawOvenProgress(oven, i);
     }
     if (ovenChanged) emitOvens();
 
     // Customers
-    for (let i = customers.length - 1; i >= 0; i--) {
-      const cu = customers[i];
+    for (let i = queue.length - 1; i >= 0; i--) {
+      const cu = queue[i];
 
       if (cu.state === 'arriving') {
+        const target = targetXForQueuePos(cu.queueIndex);
         cu.container.x += cu.speed * tk.deltaTime * 1.4;
-        if (cu.container.x >= cu.arriveTargetX) {
-          cu.container.x = cu.arriveTargetX;
-          cu.state = 'browsing';
+        if (cu.container.x >= target) {
+          cu.container.x = target;
+          cu.state = cu.queueIndex === 0 ? 'serving' : 'waiting';
           cu.dwellElapsed = 0;
           drawPatience(cu);
         }
-      } else if (cu.state === 'browsing') {
+      } else if (cu.state === 'waiting') {
+        // Drift to assigned queue spot if it changed
+        const target = targetXForQueuePos(cu.queueIndex);
+        if (cu.container.x !== target) {
+          const dx = target - cu.container.x;
+          const step = Math.sign(dx) * Math.min(Math.abs(dx), cu.speed * tk.deltaTime);
+          cu.container.x += step;
+        }
+        // If now at front, start serving
+        if (cu.queueIndex === 0) {
+          cu.state = 'serving';
+          cu.dwellElapsed = 0;
+        } else {
+          cu.patienceLeftMs -= dt;
+          drawPatience(cu);
+          if (cu.patienceLeftMs <= 0) {
+            dayStats.lost += 1;
+            for (const cb of onLostCbs) cb();
+            showAngryFloater(cu.container.x, cu.container.y - 230);
+            cu.state = 'leaving';
+          }
+        }
+      } else if (cu.state === 'serving') {
         cu.patienceLeftMs -= dt;
         cu.dwellElapsed += dt;
         drawPatience(cu);
         const slot = slots.find((s) => s.type === cu.wantedType);
-        if (slot && slot.inStock > 0 && cu.dwellElapsed >= cu.buyDwellMs) {
-          slot.inStock -= 1;
+        // Need ALL requested qty in stock simultaneously
+        if (slot && slot.inStock >= cu.wantedQty && cu.dwellElapsed >= cu.serveDwellMs) {
+          slot.inStock -= cu.wantedQty;
           refreshStock();
-          const price = BREAD_DATA[slot.type].price;
+          const price = BREAD_DATA[slot.type].price * cu.wantedQty;
           dayStats.revenue += price;
           dayStats.served += 1;
-          cash += price;
+          state.cash += price;
           emitCash();
           for (const cb of onSaleCbs) cb(price, slot.type);
           showSaleFloater(cu.container.x, cu.container.y - 230, price);
@@ -622,24 +725,26 @@ export async function createStorefrontScene(
           cu.state = 'leaving';
         }
       } else {
+        // leaving — walk off-stage right
         cu.container.x += cu.speed * tk.deltaTime * 1.8;
         cu.container.alpha -= 0.012 * tk.deltaTime;
         if (cu.container.x > W + 120 || cu.container.alpha <= 0) {
           customerLayer.removeChild(cu.container);
           cu.container.destroy({ children: true });
-          customers.splice(i, 1);
+          queue.splice(i, 1);
+          reindexQueue();
         }
       }
     }
 
     // End-of-day check
-    if (dayActive && gameMin >= CLOSE_MIN && customers.length === 0
+    if (dayActive && gameMin >= CLOSE_MIN && queue.length === 0
         && ovens.every((o) => o.baking === null)) {
       endDay();
     }
   });
 
-  // --- Floaters ---
+  // === Floaters ===
   function showSaleFloater(x: number, y: number, amount: number) {
     const t = new Text({
       text: `+₩${amount.toLocaleString()}`,
@@ -674,7 +779,6 @@ export async function createStorefrontScene(
     requestAnimationFrame(tick);
   }
 
-  // --- Resize ---
   function resize(w: number, h: number) {
     const scale = Math.min(w / W, h / H);
     world.scale.set(scale);
@@ -696,27 +800,28 @@ export async function createStorefrontScene(
     controller,
     bakeTray,
     startNextDay: () => {
-      dayNumber += 1;
+      // Consume marketing items for the now-starting day, then clear pending
+      activeTrafficBoost = trafficBoost(state.upgrades.pendingNextDay);
+      state.upgrades.pendingNextDay = [];
+      buildOvens(ovenCount(state.upgrades));
       gameMin = OPEN_MIN;
       dayActive = true;
       dayStats = { revenue: 0, cogs: 0, served: 0, lost: 0, expected: 0 };
       spawnTimer = 0;
       lastReportedMin = -1;
+      albaTimer = 0;
       for (const slot of slots) slot.inStock = STARTING_STOCK;
       refreshStock();
-      for (const cu of customers) {
+      for (const cu of queue) {
         customerLayer.removeChild(cu.container);
         cu.container.destroy({ children: true });
       }
-      customers.length = 0;
-      // Clear ovens
-      for (const o of ovens) {
-        o.baking = null;
-        o.remainingMs = 0;
-        o.totalMs = 0;
-        if (o.trayBread) { o.doorContainer.removeChild(o.trayBread); o.trayBread.destroy(); o.trayBread = null; }
-      }
+      queue.length = 0;
       emitTime();
+      emitOvens();
+    },
+    refreshUpgrades: () => {
+      buildOvens(ovenCount(state.upgrades));
       emitOvens();
     },
     onDayEnd: (cb) => { onDayEndCbs.push(cb); },

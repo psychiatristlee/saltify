@@ -32,6 +32,8 @@ export interface JournalSummary {
   totalRevenue: number;
   totalServed: number;
   totalLost: number;
+  upgradesOwned?: Record<string, number>;
+  pendingMarketing?: string[];
 }
 
 export async function loadJournal(userId: string): Promise<JournalSummary> {
@@ -53,6 +55,8 @@ export async function loadJournal(userId: string): Promise<JournalSummary> {
     totalRevenue: typeof d.totalRevenue === 'number' ? d.totalRevenue : 0,
     totalServed: typeof d.totalServed === 'number' ? d.totalServed : 0,
     totalLost: typeof d.totalLost === 'number' ? d.totalLost : 0,
+    upgradesOwned: (d.upgradesOwned as Record<string, number> | undefined) ?? {},
+    pendingMarketing: (d.pendingMarketing as string[] | undefined) ?? [],
   };
 }
 
@@ -66,6 +70,10 @@ export interface DayRecord {
   lost: number;
   satisfaction: number;
   cashEnd: number;
+  goalHit: boolean;
+  goalBonus: number;
+  upgradesOwned: Record<string, number>;
+  pendingMarketing: string[];
 }
 
 export async function saveDayResult(userId: string, day: DayRecord): Promise<void> {
@@ -84,6 +92,8 @@ export async function saveDayResult(userId: string, day: DayRecord): Promise<voi
     totalProfit: increment(day.netProfit),
     totalServed: increment(day.served),
     totalLost: increment(day.lost),
+    upgradesOwned: day.upgradesOwned,
+    pendingMarketing: day.pendingMarketing,
     lastPlayedAt: serverTimestamp(),
   }, { merge: true });
 }

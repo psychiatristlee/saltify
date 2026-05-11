@@ -1,21 +1,15 @@
 /**
- * Tycoon mode economy.
+ * Tycoon mode economy + upgrade catalog.
  *
- * Each tray = 6 breads of one type. Baking a tray instantly debits the
- * tray cost from cash (this stands in for buying ingredients), then the
- * tray cooks for `bakeTimeMs` and deposits 6 breads onto the shelf.
+ * Core resources:
+ *   - Cash (₩): liquid, spent on trays + upgrades + wages.
+ *   - Ovens: base 2 slots, +1 per Oven upgrade tier.
+ *   - Shelf: base 8/slot, raised by Shelf upgrades.
+ *   - Staff: 알바 auto-bakes the most-demanded bread when an oven is free.
+ *   - Marketing: temporarily multiplies spawn rate.
  *
- * Margins (sell-through of one tray vs. cost):
- *   plain         18,000 −  4,500 = 13,500 (75 %)
- *   everything    21,000 −  5,500 = 15,500 (74 %)
- *   olive-cheese  22,800 −  7,000 = 15,800 (69 %)
- *   basil-tomato  22,800 −  7,000 = 15,800 (69 %)
- *   garlic-butter 25,800 −  6,500 = 19,300 (75 %)
- *   seed-hotteok  25,800 −  7,500 = 18,300 (71 %)
- *   choco-bun     25,800 −  7,500 = 18,300 (71 %)
- *
- * Daily wages of 30,000 means even on a slow day you must move 2-3 full
- * trays just to cover staff, which keeps cash management interesting.
+ * Tray margins (~70%) leave room for daily wages + upgrade reinvestment,
+ * which is the actual tycoon loop the user was missing in V1.
  */
 
 import { BreadType } from '../../models/BreadType';
@@ -37,10 +31,137 @@ export const BREAD_ECONOMY: Record<BreadType, BreadEconomy> = {
 };
 
 export const STARTING_CASH = 50_000;
-export const DAILY_WAGES = 30_000;
-export const OVEN_SLOT_COUNT = 2;
-
-/** Initial stock at the start of each day, per bread type. */
+export const DAILY_WAGES_BASE = 30_000;     // base salary for the owner-baker
+export const DAILY_WAGES_PER_ALBA = 25_000;
+export const OVEN_BASE_COUNT = 2;
+export const SHELF_BASE_CAPACITY = 8;       // per-slot stock cap
+export const QUEUE_CAPACITY_BASE = 4;       // visible queue length
 export const STARTING_STOCK = 2;
-/** Maximum stock per slot (shelf capacity). */
-export const MAX_STOCK_PER_SLOT = 8;
+
+// ============================================================================
+// Upgrade catalog — tiered. Buy in order; later tiers unlock as prior tiers
+// are owned.
+// ============================================================================
+
+export type UpgradeCategory = 'oven' | 'shelf' | 'staff' | 'marketing' | 'speed';
+
+export interface UpgradeDef {
+  id: string;
+  category: UpgradeCategory;
+  name: string;
+  description: string;
+  cost: number;
+  /** If non-null, requires this upgrade id to already be owned. */
+  requires?: string;
+  /** Some upgrades stack (alba count); others are one-time switches. */
+  stacks?: boolean;
+  /** For stacking upgrades, the maximum number ownable. */
+  maxStacks?: number;
+}
+
+export const UPGRADES: UpgradeDef[] = [
+  // OVEN — add slot capacity
+  { id: 'oven-3',  category: 'oven',   name: '오븐 3호기',  description: '오븐 슬롯 +1 (총 3개)', cost: 90_000 },
+  { id: 'oven-4',  category: 'oven',   name: '오븐 4호기',  description: '오븐 슬롯 +1 (총 4개)', cost: 180_000, requires: 'oven-3' },
+
+  // SPEED — reduce bake time
+  { id: 'speed-1', category: 'speed',  name: '컨벡션 팬',   description: '모든 오븐 굽기 시간 −20%', cost: 70_000 },
+  { id: 'speed-2', category: 'speed',  name: '스팀 인젝션', description: '모든 오븐 굽기 시간 추가 −20%', cost: 140_000, requires: 'speed-1' },
+
+  // SHELF — raise per-slot capacity
+  { id: 'shelf-1', category: 'shelf',  name: '진열대 확장',   description: '슬롯당 진열 한도 +4 (총 12)', cost: 50_000 },
+  { id: 'shelf-2', category: 'shelf',  name: '쇼케이스 교체', description: '슬롯당 진열 한도 추가 +4 (총 16)', cost: 120_000, requires: 'shelf-1' },
+
+  // STAFF — alba auto-bake
+  {
+    id: 'alba', category: 'staff', name: '알바 채용',
+    description: '6초마다 가장 비어있는 빵을 자동으로 트레이 굽기. 일급 25,000원',
+    cost: 40_000, stacks: true, maxStacks: 2,
+  },
+
+  // MARKETING — boost spawn rate for next day
+  {
+    id: 'mkt-insta', category: 'marketing', name: '인스타 광고',
+    description: '다음 날 손님 트래픽 +30% (1일 한정)', cost: 25_000, stacks: true, maxStacks: 5,
+  },
+  {
+    id: 'mkt-naver', category: 'marketing', name: '네이버 플레이스 광고',
+    description: '다음 날 손님 트래픽 +60% (1일 한정)', cost: 60_000, requires: 'mkt-insta',
+    stacks: true, maxStacks: 5,
+  },
+];
+
+// ============================================================================
+// Daily goals — each tier rewards a cash bonus when revenue target is hit.
+// ============================================================================
+export interface DailyGoal {
+  fromDay: number;
+  toDay: number;
+  label: string;
+  revenueTarget: number;
+  bonus: number;
+}
+
+export const DAILY_GOALS: DailyGoal[] = [
+  { fromDay: 1, toDay: 2,   label: '동교 1주 적응',         revenueTarget:  60_000, bonus: 10_000 },
+  { fromDay: 3, toDay: 5,   label: '연남 단골 만들기',       revenueTarget: 100_000, bonus: 15_000 },
+  { fromDay: 6, toDay: 10,  label: '홍대 입소문',            revenueTarget: 180_000, bonus: 25_000 },
+  { fromDay: 11, toDay: 20, label: '베이커리 인증',          revenueTarget: 280_000, bonus: 40_000 },
+  { fromDay: 21, toDay: 999, label: '솔트빵 본점 명소',       revenueTarget: 400_000, bonus: 60_000 },
+];
+
+export function goalFor(day: number): DailyGoal {
+  for (const g of DAILY_GOALS) {
+    if (day >= g.fromDay && day <= g.toDay) return g;
+  }
+  return DAILY_GOALS[DAILY_GOALS.length - 1];
+}
+
+// ============================================================================
+// State derivation helpers — pure functions of the upgrade map.
+// ============================================================================
+export interface UpgradeState {
+  /** id → count (1 for non-stacking owned, N for stacking). */
+  owned: Record<string, number>;
+  /** Marketing items consumed but pending application on next day. */
+  pendingNextDay: string[];
+}
+
+export function ovenCount(state: UpgradeState): number {
+  return OVEN_BASE_COUNT + (state.owned['oven-3'] ? 1 : 0) + (state.owned['oven-4'] ? 1 : 0);
+}
+export function bakeTimeMultiplier(state: UpgradeState): number {
+  let m = 1;
+  if (state.owned['speed-1']) m *= 0.8;
+  if (state.owned['speed-2']) m *= 0.8;
+  return m;
+}
+export function shelfCapacity(state: UpgradeState): number {
+  return SHELF_BASE_CAPACITY
+    + (state.owned['shelf-1'] ? 4 : 0)
+    + (state.owned['shelf-2'] ? 4 : 0);
+}
+export function albaCount(state: UpgradeState): number {
+  return state.owned['alba'] ?? 0;
+}
+export function dailyWages(state: UpgradeState): number {
+  return DAILY_WAGES_BASE + albaCount(state) * DAILY_WAGES_PER_ALBA;
+}
+/** Spawn rate multiplier from marketing items pending for this day. */
+export function trafficBoost(pending: string[]): number {
+  let m = 1;
+  for (const id of pending) {
+    if (id === 'mkt-insta') m *= 1.3;
+    if (id === 'mkt-naver') m *= 1.6;
+  }
+  return m;
+}
+
+export function isUpgradeAvailable(def: UpgradeDef, state: UpgradeState): boolean {
+  if (def.requires && !state.owned[def.requires]) return false;
+  const count = state.owned[def.id] ?? 0;
+  if (def.stacks) {
+    return count < (def.maxStacks ?? 99);
+  }
+  return count === 0;
+}

@@ -86,17 +86,21 @@ export function formatGameTime(gameMin: number): string {
 }
 
 /**
- * Persona-specific behavior parameters. These give each customer type a
- * distinct feel in play: commuters are impatient but easy to please,
- * tourists buy more, students are picky, etc.
+ * Persona-specific behavior parameters.
+ *
+ * `purchaseQtyRange` — how many breads this persona orders. Commuter grabs
+ * one for the train, tourist tries multiple flavors, evening crowd buys a
+ * gift box. Pricing the bill by qty is what gives different personas
+ * different revenue weight.
  */
 export const PERSONA_PROFILE: Record<Persona, {
   patienceMs: number;
   walkSpeed: number;
   buyDwellMs: number;
+  purchaseQtyRange: [number, number];
 }> = {
-  commuter: { patienceMs: 8000,  walkSpeed: 2.4, buyDwellMs: 1000 },
-  tourist:  { patienceMs: 14000, walkSpeed: 1.4, buyDwellMs: 2000 },
-  student:  { patienceMs: 18000, walkSpeed: 1.2, buyDwellMs: 2500 },
-  evening:  { patienceMs: 11000, walkSpeed: 1.8, buyDwellMs: 1500 },
+  commuter: { patienceMs:  8000, walkSpeed: 2.4, buyDwellMs: 1000, purchaseQtyRange: [1, 1] },
+  tourist:  { patienceMs: 14000, walkSpeed: 1.4, buyDwellMs: 2000, purchaseQtyRange: [2, 3] },
+  student:  { patienceMs: 18000, walkSpeed: 1.2, buyDwellMs: 2500, purchaseQtyRange: [1, 1] },
+  evening:  { patienceMs: 11000, walkSpeed: 1.8, buyDwellMs: 1500, purchaseQtyRange: [2, 4] },
 };

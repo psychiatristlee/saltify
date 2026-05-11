@@ -45,9 +45,15 @@
 .dayBlock {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 3px;
   min-width: 0;
+}
+.dayRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
 }
 .dayPill {
   background: #6d4d2e;
@@ -62,6 +68,56 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
+}
+.goalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 2px;
+}
+.goalLabel {
+  font-size: 10px;
+  color: #6d4d2e;
+  font-weight: 700;
+}
+.goalProgress {
+  font-size: 10px;
+  color: #8a7a5d;
+  font-family: 'Menlo', monospace;
+}
+.goalBar {
+  width: 100%;
+  height: 4px;
+  background: #f0e6cc;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.goalBarFill {
+  height: 100%;
+  background: linear-gradient(to right, #57b85a, #2a8c4a);
+  transition: width 0.2s linear;
+}
+.goalHitBanner {
+  background: #1f7a3a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+.savingToast {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 22, 14, 0.92);
+  color: #ffd9a0;
+  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  z-index: 20;
 }
 .clock {
   font-family: 'Menlo', 'SF Mono', 'Roboto Mono', monospace;
