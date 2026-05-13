@@ -63,6 +63,7 @@ export async function loadJournal(userId: string): Promise<JournalSummary> {
 export interface DayRecord {
   dayNumber: number;
   revenue: number;
+  branchRevenue: number;
   cogs: number;
   wages: number;
   netProfit: number;

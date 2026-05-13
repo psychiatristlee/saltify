@@ -15,6 +15,7 @@ import {
 import {
   BREAD_ECONOMY, QUEUE_CAPACITY_BASE, STARTING_STOCK,
   bakeTimeMultiplier, ovenCount, shelfCapacity, albaCount, dailyWages, trafficBoost,
+  unlockedBreads, branchPassivePerMin,
 } from '../../data/economy';
 import { TycoonState } from '../../state/tycoonState';
 import type { PixiSceneController } from '../PixiCanvas';
@@ -81,6 +82,7 @@ export interface OvenStateView {
 export interface DayResult {
   dayNumber: number;
   revenue: number;
+  branchRevenue: number;
   cogs: number;
   wages: number;
   served: number;
@@ -94,6 +96,8 @@ export interface DayResult {
 export interface StorefrontHandle {
   controller: PixiSceneController;
   bakeTray: (type: BreadType) => boolean;
+  /** True iff the bread is in the unlocked set for the current upgrade state. */
+  isBreadUnlocked: (type: BreadType) => boolean;
   startNextDay: () => void;
   /** Sync upgrade state changes mid-life (e.g., after a between-day shop purchase). */
   refreshUpgrades: () => void;
@@ -102,6 +106,7 @@ export interface StorefrontHandle {
   onCustomerLost: (cb: () => void) => void;
   onCashChange: (cb: (cash: number) => void) => void;
   onOvenChange: (cb: (states: OvenStateView[]) => void) => void;
+  onOvenDone: (cb: () => void) => void;
   onTimeChange: (cb: (gameMin: number, phaseLabel: string, dayNumber: number) => void) => void;
 }
 
@@ -229,7 +234,9 @@ export async function createStorefrontScene(
     })(),
   ]);
 
-  // Place breads on shelf
+  // Place breads on shelf — locked variants start with 0 stock since the
+  // player can't bake them yet.
+  const initialUnlocked = unlockedBreads(state.upgrades);
   const slots: BreadSlot[] = [];
   const COLS = 4;
   const cellW = SHELF_W / COLS;
@@ -247,7 +254,10 @@ export async function createStorefrontScene(
     sprite.y = cy;
     sprite.scale.set((cellW * 0.78) / sprite.width);
     world.addChild(sprite);
-    slots.push({ type, sprite, baseX: cx, baseY: cy, inStock: STARTING_STOCK });
+    slots.push({
+      type, sprite, baseX: cx, baseY: cy,
+      inStock: initialUnlocked.has(type) ? STARTING_STOCK : 0,
+    });
   }
 
   // Stock badges
@@ -380,7 +390,8 @@ export async function createStorefrontScene(
   function drawOvenProgress(o: OvenSlot, idx: number) {
     o.progressBar.clear();
     o.glow.clear();
-    if (!o.baking) {
+    // NB: BreadType.Plain === 0; can't use `!o.baking` as a "idle" check.
+    if (o.baking === null) {
       o.progressLabel.text = '대기 중';
       return;
     }
@@ -416,12 +427,14 @@ export async function createStorefrontScene(
   const onDayEndCbs: Array<(r: DayResult) => void> = [];
   const onCashCbs: Array<(c: number) => void> = [];
   const onOvenCbs: Array<(s: OvenStateView[]) => void> = [];
+  const onOvenDoneCbs: Array<() => void> = [];
   const onTimeChangeCbs: Array<(m: number, phase: string, day: number) => void> = [];
 
   // === Day/sim state ===
   let gameMin = OPEN_MIN;
+  let lastTickGameMin = OPEN_MIN;
   let dayActive = true;
-  let dayStats = { revenue: 0, cogs: 0, served: 0, lost: 0, expected: 0 };
+  let dayStats = { revenue: 0, branchRevenue: 0, cogs: 0, served: 0, lost: 0, expected: 0 };
   let spawnTimer = 0;
   let lastReportedMin = -1;
   let lastPhaseLabel = '';
@@ -450,8 +463,13 @@ export async function createStorefrontScene(
   emitCash();
   emitOvens();
 
+  function isBreadUnlocked(type: BreadType): boolean {
+    return unlockedBreads(state.upgrades).has(type);
+  }
+
   function bakeTray(type: BreadType): boolean {
     if (!dayActive || gameMin >= CLOSE_MIN) return false;
+    if (!isBreadUnlocked(type)) return false;
     if (ovens.some((o) => o.baking === type)) return false;
     const oven = ovens.find((o) => o.baking === null);
     if (!oven) return false;
@@ -482,11 +500,14 @@ export async function createStorefrontScene(
     return true;
   }
 
-  /** Alba: pick the lowest-stock bread we can afford and bake it. */
+  /** Alba: pick the lowest-stock UNLOCKED bread we can afford and bake it. */
   function albaAutoBake() {
-    const baking = new Set(ovens.filter((o) => o.baking).map((o) => o.baking!));
+    const unlocked = unlockedBreads(state.upgrades);
+    const baking = new Set(ovens.filter((o) => o.baking !== null).map((o) => o.baking!));
     const candidate = [...slots]
-      .filter((s) => !baking.has(s.type) && state.cash >= BREAD_ECONOMY[s.type].costPerTray)
+      .filter((s) => unlocked.has(s.type)
+        && !baking.has(s.type)
+        && state.cash >= BREAD_ECONOMY[s.type].costPerTray)
       .sort((a, b) => a.inStock - b.inStock)[0];
     if (candidate) bakeTray(candidate.type);
   }
@@ -500,7 +521,10 @@ export async function createStorefrontScene(
     const phase = phaseAt(gameMin);
     const persona = pickPersona(phase.weights);
     const profile = PERSONA_PROFILE[persona];
-    const wantedType = breadTypes[Math.floor(Math.random() * breadTypes.length)];
+    // Customers only ask for breads the player can actually bake.
+    const unlockedList = breadTypes.filter((t) => unlockedBreads(state.upgrades).has(t));
+    if (unlockedList.length === 0) return;
+    const wantedType = unlockedList[Math.floor(Math.random() * unlockedList.length)];
     const [qLo, qHi] = profile.purchaseQtyRange;
     const wantedQty = Math.floor(qLo + Math.random() * (qHi - qLo + 1));
     dayStats.expected++;
@@ -595,6 +619,7 @@ export async function createStorefrontScene(
     const result: DayResult = {
       dayNumber: state.dayNumber,
       revenue: dayStats.revenue,
+      branchRevenue: dayStats.branchRevenue,
       cogs: dayStats.cogs,
       wages,
       served: dayStats.served,
@@ -612,9 +637,21 @@ export async function createStorefrontScene(
     const dt = tk.deltaMS;
 
     if (dayActive) {
+      lastTickGameMin = gameMin;
       gameMin += (dt / 1000) * TIME_SCALE;
       if (gameMin >= CLOSE_MIN) gameMin = CLOSE_MIN;
       emitTime();
+
+      // Branch passive income — accrues per game-minute that passed this tick.
+      const minutesPassed = gameMin - lastTickGameMin;
+      if (minutesPassed > 0) {
+        const passive = branchPassivePerMin(state.upgrades) * minutesPassed;
+        if (passive > 0) {
+          state.cash += passive;
+          dayStats.branchRevenue += passive;
+          emitCash();
+        }
+      }
 
       const phase = phaseAt(gameMin);
       if (gameMin < CLOSE_MIN) {
@@ -642,7 +679,8 @@ export async function createStorefrontScene(
     let ovenChanged = false;
     for (let i = 0; i < ovens.length; i++) {
       const oven = ovens[i];
-      if (oven.baking) {
+      // NB: BreadType.Plain === 0 so `if (oven.baking)` would be falsy. Use null check.
+      if (oven.baking !== null) {
         oven.remainingMs -= dt;
         if (oven.remainingMs <= 0) {
           const slot = slots.find((s) => s.type === oven.baking);
@@ -660,6 +698,7 @@ export async function createStorefrontScene(
             oven.trayBread = null;
           }
           ovenChanged = true;
+          for (const cb of onOvenDoneCbs) cb();
         }
       }
       drawOvenProgress(oven, i);
@@ -799,18 +838,23 @@ export async function createStorefrontScene(
   return {
     controller,
     bakeTray,
+    isBreadUnlocked,
     startNextDay: () => {
       // Consume marketing items for the now-starting day, then clear pending
       activeTrafficBoost = trafficBoost(state.upgrades.pendingNextDay);
       state.upgrades.pendingNextDay = [];
       buildOvens(ovenCount(state.upgrades));
       gameMin = OPEN_MIN;
+      lastTickGameMin = OPEN_MIN;
       dayActive = true;
-      dayStats = { revenue: 0, cogs: 0, served: 0, lost: 0, expected: 0 };
+      dayStats = { revenue: 0, branchRevenue: 0, cogs: 0, served: 0, lost: 0, expected: 0 };
       spawnTimer = 0;
       lastReportedMin = -1;
       albaTimer = 0;
-      for (const slot of slots) slot.inStock = STARTING_STOCK;
+      const unlockedNow = unlockedBreads(state.upgrades);
+      for (const slot of slots) {
+        slot.inStock = unlockedNow.has(slot.type) ? STARTING_STOCK : 0;
+      }
       refreshStock();
       for (const cu of queue) {
         customerLayer.removeChild(cu.container);
@@ -829,6 +873,7 @@ export async function createStorefrontScene(
     onCustomerLost: (cb) => { onLostCbs.push(cb); },
     onCashChange: (cb) => { onCashCbs.push(cb); },
     onOvenChange: (cb) => { onOvenCbs.push(cb); },
+    onOvenDone: (cb) => { onOvenDoneCbs.push(cb); },
     onTimeChange: (cb) => { onTimeChangeCbs.push(cb); },
   };
 }

@@ -32,3 +32,9 @@ npm-debug.log*
 # Next.js
 blog/.next/
 blog/out/
+
+# Play-test screenshots (do not commit)
+scripts/play-test-shots/
+
+# TypeScript build info
+*.tsbuildinfo

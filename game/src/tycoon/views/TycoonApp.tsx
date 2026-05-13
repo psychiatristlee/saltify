@@ -8,8 +8,12 @@ import { BREAD_DATA, BreadType, getAllBreadTypes } from '../../models/BreadType'
 import { useAuth } from '../../hooks/useAuth';
 import { loadJournal, saveDayResult, JournalSummary } from '../services/tycoonJournal';
 import { formatGameTime } from '../data/dayConfig';
-import { BREAD_ECONOMY, STARTING_CASH, goalFor, UpgradeDef } from '../data/economy';
+import {
+  BREAD_ECONOMY, STARTING_CASH, goalFor, UpgradeDef,
+  unlockedBreads,
+} from '../data/economy';
 import { TycoonState, makeInitialState } from '../state/tycoonState';
+import * as Audio from '../audio';
 import ShopView from './ShopView';
 import styles from './TycoonApp.module.css';
 
@@ -35,12 +39,22 @@ export default function TycoonApp() {
   const [endOfDay, setEndOfDay] = useState<DayResult | null>(null);
   const [showShop, setShowShop] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [muted, setMutedState] = useState(false);
 
   useEffect(() => {
-    if (!user?.id) return;
+    // Always start with a default journal so the canvas can mount even
+    // for unauthenticated visitors / journal load failures (the tycoon
+    // mode is playable in guest mode, just without cross-session save).
+    const fallback = {
+      currentDay: 1, currentCash: STARTING_CASH,
+      totalRevenue: 0, totalServed: 0, totalLost: 0,
+    };
+    if (!user?.id) {
+      setJournal(fallback);
+      return;
+    }
     loadJournal(user.id).then((j) => {
       setJournal(j);
-      // Seed the live state from the journal
       stateRef.current = {
         cash: j.currentCash ?? STARTING_CASH,
         dayNumber: j.currentDay,
@@ -54,10 +68,7 @@ export default function TycoonApp() {
       bumpState();
     }).catch((err) => {
       console.error('[tycoon] journal load failed', err);
-      setJournal({
-        currentDay: 1, currentCash: STARTING_CASH,
-        totalRevenue: 0, totalServed: 0, totalLost: 0,
-      });
+      setJournal(fallback);
     });
   }, [user?.id]);
 
@@ -73,12 +84,17 @@ export default function TycoonApp() {
     handle.onSale((rev) => {
       setRevenue((r) => r + rev);
       setSalesCount((c) => c + 1);
+      Audio.playSale();
     });
     handle.onCustomerLost(() => {
       setLostCount((c) => c + 1);
+      Audio.playAngry();
     });
     handle.onCashChange((c) => setCash(c));
     handle.onOvenChange((s) => setOvens(s));
+    handle.onOvenDone(() => {
+      Audio.playOvenDing();
+    });
     handle.onTimeChange((m, phase, day) => {
       setGameTimeMin(m);
       setPhaseLabel(phase);
@@ -86,6 +102,7 @@ export default function TycoonApp() {
     });
     handle.onDayEnd((result) => {
       setEndOfDay(result);
+      if (result.goalHit) Audio.playUnlock();
     });
     return handle.controller;
   }, [journal]);
@@ -96,7 +113,10 @@ export default function TycoonApp() {
 
   function handlePurchase(def: UpgradeDef) {
     const st = stateRef.current;
-    if (st.cash < def.cost) return;
+    if (st.cash < def.cost) {
+      Audio.playBlocked();
+      return;
+    }
     const cur = st.upgrades.owned[def.id] ?? 0;
     st.cash -= def.cost;
     st.upgrades.owned[def.id] = cur + 1;
@@ -105,6 +125,18 @@ export default function TycoonApp() {
     }
     setCash(st.cash);
     bumpState();
+    // Research unlock is a meaningful event — different chime.
+    if (def.category === 'research' || def.category === 'branch') {
+      Audio.playUnlock();
+    } else {
+      Audio.playPurchase();
+    }
+  }
+
+  function toggleMute() {
+    const next = !muted;
+    Audio.setMuted(next);
+    setMutedState(next);
   }
 
   async function handleStartNextDay() {
@@ -116,13 +148,17 @@ export default function TycoonApp() {
         await saveDayResult(user.id, {
           dayNumber: endOfDay.dayNumber,
           revenue: endOfDay.revenue,
+          branchRevenue: Math.round(endOfDay.branchRevenue),
           cogs: endOfDay.cogs,
           wages: endOfDay.wages,
-          netProfit: endOfDay.revenue - endOfDay.cogs - endOfDay.wages + endOfDay.goalBonus,
+          netProfit: Math.round(
+            endOfDay.revenue + endOfDay.branchRevenue
+            - endOfDay.cogs - endOfDay.wages + endOfDay.goalBonus
+          ),
           served: endOfDay.served,
           lost: endOfDay.lost,
           satisfaction: endOfDay.satisfaction,
-          cashEnd: endOfDay.cashEnd,
+          cashEnd: Math.round(endOfDay.cashEnd),
           goalHit: endOfDay.goalHit,
           goalBonus: endOfDay.goalBonus,
           upgradesOwned: { ...st.upgrades.owned },
@@ -151,18 +187,30 @@ export default function TycoonApp() {
   const breadTypes = getAllBreadTypes();
   const dayProgress = Math.min(1, Math.max(0, (gameTimeMin - 11 * 60) / (8.5 * 60)));
   const goal = goalFor(dayNumber);
-  const goalPct = Math.min(1, revenue / goal.revenueTarget);
+  const totalDayRevenue = revenue;
+  const goalPct = Math.min(1, totalDayRevenue / goal.revenueTarget);
+  const unlocked = unlockedBreads(stateRef.current.upgrades);
   const netProfit = endOfDay
-    ? endOfDay.revenue - endOfDay.cogs - endOfDay.wages + endOfDay.goalBonus
+    ? endOfDay.revenue + endOfDay.branchRevenue - endOfDay.cogs - endOfDay.wages + endOfDay.goalBonus
     : 0;
 
   return (
     <div className={styles.container}>
       {/* TOP HUD */}
       <header className={styles.hud}>
-        <button className={styles.backButton} onClick={() => navigate('/')} aria-label="홈">
-          ←
-        </button>
+        <div className={styles.hudLeft}>
+          <button className={styles.backButton} onClick={() => navigate('/')} aria-label="홈">
+            ←
+          </button>
+          <button
+            className={styles.muteButton}
+            onClick={toggleMute}
+            aria-label={muted ? '소리 켜기' : '소리 끄기'}
+            title={muted ? '소리 켜기' : '소리 끄기'}
+          >
+            {muted ? '🔇' : '🔊'}
+          </button>
+        </div>
         <div className={styles.dayBlock}>
           <div className={styles.dayRow}>
             <span className={styles.dayPill}>DAY {dayNumber}</span>
@@ -226,22 +274,29 @@ export default function TycoonApp() {
         <div className={styles.bakeRow}>
           {breadTypes.map((type) => {
             const econ = BREAD_ECONOMY[type];
+            const isUnlocked = unlocked.has(type);
             const isAlreadyBaking = ovens.some((o) => o.baking === type);
             const noFreeOven = ovens.length > 0 && ovens.every((o) => o.baking !== null);
             const tooPoor = cash < econ.costPerTray;
-            const disabled = isAlreadyBaking || noFreeOven || tooPoor;
+            const disabled = !isUnlocked || isAlreadyBaking || noFreeOven || tooPoor;
             return (
               <BakeButton
                 key={type}
                 type={type}
                 cost={econ.costPerTray}
                 disabled={disabled}
+                locked={!isUnlocked}
                 disabledReason={
+                  !isUnlocked ? '레시피 미해금 — 상점에서 R&D' :
                   isAlreadyBaking ? '굽는 중' :
                   tooPoor ? '현금 부족' :
                   noFreeOven ? '오븐 가득' : ''
                 }
-                onBake={() => handleRef.current?.bakeTray(type)}
+                onBake={() => {
+                  if (!isUnlocked) { Audio.playBlocked(); return; }
+                  const ok = handleRef.current?.bakeTray(type);
+                  if (!ok) Audio.playBlocked();
+                }}
               />
             );
           })}
@@ -264,9 +319,15 @@ export default function TycoonApp() {
 
             <div className={styles.modalSection}>
               <div className={styles.modalRow}>
-                <span>매출</span>
+                <span>본점 매출</span>
                 <span className={styles.posMoney}>+₩{endOfDay.revenue.toLocaleString()}</span>
               </div>
+              {endOfDay.branchRevenue > 0 && (
+                <div className={styles.modalRow}>
+                  <span>분점 수익</span>
+                  <span className={styles.posMoney}>+₩{Math.round(endOfDay.branchRevenue).toLocaleString()}</span>
+                </div>
+              )}
               <div className={styles.modalRow}>
                 <span>재료비</span>
                 <span className={styles.negMoney}>−₩{endOfDay.cogs.toLocaleString()}</span>
@@ -318,6 +379,7 @@ export default function TycoonApp() {
       {showShop && (
         <ShopView
           state={stateRef.current}
+          currentDay={(endOfDay?.dayNumber ?? dayNumber) + 1}
           onPurchase={handlePurchase}
           onClose={() => handleStartNextDay()}
         />
@@ -331,25 +393,27 @@ export default function TycoonApp() {
 }
 
 function BakeButton({
-  type, cost, disabled, disabledReason, onBake,
+  type, cost, disabled, locked, disabledReason, onBake,
 }: {
   type: BreadType;
   cost: number;
   disabled: boolean;
+  locked: boolean;
   disabledReason: string;
   onBake: () => void;
 }) {
   const data = BREAD_DATA[type];
+  // Strip "소금빵" suffix for compact button label — only choco-bun has it.
+  const shortName = data.nameKo.replace(/\s?소금빵$/, '');
   return (
     <button
-      className={`${styles.bakeButton} ${disabled ? styles.bakeButtonDisabled : ''}`}
+      className={`${styles.bakeButton} ${disabled ? styles.bakeButtonDisabled : ''} ${locked ? styles.bakeButtonLocked : ''}`}
       onClick={onBake}
-      disabled={disabled}
       title={disabledReason || data.nameKo}
     >
       <img src={data.image} alt={data.nameKo} className={styles.bakeIcon} />
-      <span className={styles.bakeName}>{data.nameKo}</span>
-      <span className={styles.bakeCost}>₩{cost.toLocaleString()}</span>
+      <span className={styles.bakeName}>{shortName}</span>
+      <span className={styles.bakeCost}>{locked ? '🔒' : `₩${(cost / 1000).toFixed(1)}k`}</span>
     </button>
   );
 }

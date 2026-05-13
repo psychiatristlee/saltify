@@ -43,7 +43,7 @@ export const STARTING_STOCK = 2;
 // are owned.
 // ============================================================================
 
-export type UpgradeCategory = 'oven' | 'shelf' | 'staff' | 'marketing' | 'speed';
+export type UpgradeCategory = 'oven' | 'shelf' | 'staff' | 'marketing' | 'speed' | 'research' | 'branch';
 
 export interface UpgradeDef {
   id: string;
@@ -53,11 +53,36 @@ export interface UpgradeDef {
   cost: number;
   /** If non-null, requires this upgrade id to already be owned. */
   requires?: string;
+  /** Day number at or after which this becomes available. */
+  dayRequirement?: number;
   /** Some upgrades stack (alba count); others are one-time switches. */
   stacks?: boolean;
   /** For stacking upgrades, the maximum number ownable. */
   maxStacks?: number;
 }
+
+/** Breads that are unlocked from Day 1 — others require research. */
+export const STARTING_UNLOCKED_BREADS: BreadType[] = [
+  BreadType.Plain,
+  BreadType.Everything,
+  BreadType.OliveCheese,
+  BreadType.BasilTomato,
+];
+
+/** Research upgrade id → BreadType it unlocks. */
+export const RESEARCH_UNLOCKS: Record<string, BreadType> = {
+  'research-garlic-butter': BreadType.GarlicButter,
+  'research-seed-hotteok':  BreadType.Hotteok,
+  'research-choco-bun':     BreadType.ChocoBun,
+};
+
+/** Branch passive income: per game-minute, per branch tier.
+ * Tuning: branch-2 ≈ ₩102k/day, branch-3 ≈ ₩255k/day — meaningful side income
+ * without making the main storefront irrelevant. */
+export const BRANCH_PASSIVE_PER_MIN: Record<string, number> = {
+  'branch-2': 200,
+  'branch-3': 500,
+};
 
 export const UPGRADES: UpgradeDef[] = [
   // OVEN — add slot capacity
@@ -88,6 +113,35 @@ export const UPGRADES: UpgradeDef[] = [
     id: 'mkt-naver', category: 'marketing', name: '네이버 플레이스 광고',
     description: '다음 날 손님 트래픽 +60% (1일 한정)', cost: 60_000, requires: 'mkt-insta',
     stacks: true, maxStacks: 5,
+  },
+
+  // RESEARCH — unlock additional menu items
+  {
+    id: 'research-garlic-butter', category: 'research', name: '갈릭버터 레시피',
+    description: '갈릭버터 소금빵 메뉴 해금. 인기 메뉴, 객단가 ₩4,300',
+    cost: 40_000, dayRequirement: 3,
+  },
+  {
+    id: 'research-seed-hotteok', category: 'research', name: '씨앗호떡 레시피',
+    description: '씨앗호떡 소금빵 메뉴 해금. 견과+캐러멜, 객단가 ₩4,300',
+    cost: 60_000, dayRequirement: 5,
+  },
+  {
+    id: 'research-choco-bun', category: 'research', name: '초코번 시그니처 R&D',
+    description: '초코번 소금빵 메뉴 해금. 매장 시그니처, 객단가 ₩4,300',
+    cost: 100_000, dayRequirement: 7,
+  },
+
+  // BRANCH — passive income from additional stores
+  {
+    id: 'branch-2', category: 'branch', name: '연남 2호점 출점',
+    description: '분점 1개 추가 — 영업 시간 동안 자동 수익 (₩200 / 게임-분, ≈ ₩100k/day)',
+    cost: 500_000, dayRequirement: 10,
+  },
+  {
+    id: 'branch-3', category: 'branch', name: '성수 3호점 출점',
+    description: '분점 추가 — 자동 수익 (₩500 / 게임-분, ≈ ₩255k/day)',
+    cost: 1_500_000, dayRequirement: 25, requires: 'branch-2',
   },
 ];
 
@@ -157,11 +211,30 @@ export function trafficBoost(pending: string[]): number {
   return m;
 }
 
-export function isUpgradeAvailable(def: UpgradeDef, state: UpgradeState): boolean {
+export function isUpgradeAvailable(def: UpgradeDef, state: UpgradeState, currentDay = 1): boolean {
   if (def.requires && !state.owned[def.requires]) return false;
+  if (def.dayRequirement && currentDay < def.dayRequirement) return false;
   const count = state.owned[def.id] ?? 0;
   if (def.stacks) {
     return count < (def.maxStacks ?? 99);
   }
   return count === 0;
+}
+
+/** Set of bread types the player can currently bake (starting unlocks + researched). */
+export function unlockedBreads(state: UpgradeState): Set<BreadType> {
+  const set = new Set<BreadType>(STARTING_UNLOCKED_BREADS);
+  for (const [id, breadType] of Object.entries(RESEARCH_UNLOCKS)) {
+    if (state.owned[id]) set.add(breadType);
+  }
+  return set;
+}
+
+/** Total passive income per game-minute from all owned branches. */
+export function branchPassivePerMin(state: UpgradeState): number {
+  let total = 0;
+  for (const [id, perMin] of Object.entries(BRANCH_PASSIVE_PER_MIN)) {
+    if (state.owned[id]) total += perMin;
+  }
+  return total;
 }

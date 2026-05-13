@@ -17,6 +17,8 @@ import styles from './ShopView.module.css';
 
 interface Props {
   state: TycoonState;
+  /** Current day number, used to gate dayRequirement upgrades. */
+  currentDay: number;
   onPurchase: (def: UpgradeDef) => void;
   onClose: () => void;
 }
@@ -27,9 +29,11 @@ const CATEGORY_META: Record<UpgradeCategory, { label: string; icon: string }> = 
   shelf:     { label: '진열대',   icon: '🥖' },
   staff:     { label: '직원',     icon: '👨‍🍳' },
   marketing: { label: '마케팅',   icon: '📢' },
+  research:  { label: '레시피',   icon: '📚' },
+  branch:    { label: '분점',     icon: '🏪' },
 };
 
-export default function ShopView({ state, onPurchase, onClose }: Props) {
+export default function ShopView({ state, currentDay, onPurchase, onClose }: Props) {
   const [tab, setTab] = useState<UpgradeCategory>('oven');
   const visibleUpgrades = UPGRADES.filter((u) => u.category === tab);
 
@@ -76,10 +80,11 @@ export default function ShopView({ state, onPurchase, onClose }: Props) {
 
         <div className={styles.list}>
           {visibleUpgrades.map((def) => {
-            const available = isUpgradeAvailable(def, state.upgrades);
+            const available = isUpgradeAvailable(def, state.upgrades, currentDay);
             const affordable = state.cash >= def.cost;
             const summary = ownedSummary(def);
             const reqLocked = def.requires && !state.upgrades.owned[def.requires];
+            const dayLocked = def.dayRequirement && currentDay < def.dayRequirement;
             const disabled = !available || !affordable;
             const reqDef = def.requires ? UPGRADES.find((u) => u.id === def.requires) : null;
             return (
@@ -93,6 +98,9 @@ export default function ShopView({ state, onPurchase, onClose }: Props) {
                   {reqLocked && reqDef && (
                     <div className={styles.cardReq}>🔒 선행: {reqDef.name}</div>
                   )}
+                  {dayLocked && (
+                    <div className={styles.cardReq}>🔒 Day {def.dayRequirement} 이후 해금</div>
+                  )}
                 </div>
                 <button
                   className={`${styles.buyButton} ${disabled ? styles.buyButtonDisabled : ''}`}
@@ -101,7 +109,9 @@ export default function ShopView({ state, onPurchase, onClose }: Props) {
                 >
                   <span className={styles.buyAmount}>₩{def.cost.toLocaleString()}</span>
                   <span className={styles.buyLabel}>
-                    {!available ? '구매 불가' : !affordable ? '현금 부족' : '구매'}
+                    {dayLocked ? `Day ${def.dayRequirement}+` :
+                     !available ? '구매 불가' :
+                     !affordable ? '현금 부족' : '구매'}
                   </span>
                 </button>
               </div>
