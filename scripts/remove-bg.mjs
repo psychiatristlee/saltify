@@ -105,9 +105,28 @@ async function stripBg(inputPath, outputPath) {
 
 async function main() {
   const args = process.argv.slice(2);
+  const mode = args[0];
+  const root = join(__dirname, '..');
+
+  if (mode === '--breads') {
+    // Strip the white background off every bread icon, then mirror the
+    // result from game/ to blog/.
+    const dir = join(root, 'game/public/breads');
+    const blogDir = join(root, 'blog/public/breads');
+    const { readdir, copyFile } = await import('node:fs/promises');
+    const files = (await readdir(dir)).filter((f) => f.endsWith('-icon.png'));
+    for (const f of files) {
+      const inPath = join(dir, f);
+      process.stdout.write(`[${f}] stripping bg... `);
+      await stripBg(inPath, inPath);
+      await copyFile(inPath, join(blogDir, f));
+      console.log('ok');
+    }
+    return;
+  }
+
   if (args.length === 0) {
     // Default: process all customer PNGs in place
-    const root = join(__dirname, '..');
     const dir = join(root, 'game/public/customers');
     const ids = ['commuter', 'tourist', 'student', 'evening'];
     for (const id of ids) {
@@ -119,7 +138,7 @@ async function main() {
     return;
   }
   if (args.length !== 2) {
-    console.error('Usage: node remove-bg.mjs <input> <output>');
+    console.error('Usage: node remove-bg.mjs [<input> <output> | --breads]');
     process.exit(1);
   }
   await stripBg(args[0], args[1]);
