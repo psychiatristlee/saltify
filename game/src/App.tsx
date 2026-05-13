@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { useGameViewModel } from './hooks/useGameViewModel';
 import { useCouponManager } from './hooks/useCouponManager';
@@ -40,8 +40,6 @@ import TermsOfService from './components/TermsOfService';
 import AccountDeletion from './components/AccountDeletion';
 import styles from './App.module.css';
 
-const TycoonApp = lazy(() => import('./tycoon/views/TycoonApp'));
-
 export default function App() {
   return (
     <BrowserRouter>
@@ -50,14 +48,6 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/account-deletion" element={<AccountDeletion />} />
-        <Route
-          path="/tycoon"
-          element={
-            <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}>Loading…</div>}>
-              <TycoonApp />
-            </Suspense>
-          }
-        />
         <Route path="*" element={<MainApp />} />
       </Routes>
     </BrowserRouter>
@@ -67,7 +57,6 @@ export default function App() {
 function MainApp() {
   const { user, isLoading, isAuthenticated, signOut, deleteAccount } = useAuth();
   const { t } = useLanguage();
-  const navigate = useNavigate();
   const couponManager = useCouponManager(user?.id || null);
   const game = useGameViewModel(couponManager.addCrushedBread);
   const referral = useReferral(user?.id || null);
@@ -303,13 +292,6 @@ function MainApp() {
             onClick={() => setShowFriendsView(true)}
           >
             👥
-          </button>
-          <button
-            className={styles.rankingButton}
-            onClick={() => navigate('/tycoon')}
-            title="타이쿤 모드 (베타)"
-          >
-            🏪
           </button>
         </div>
         <img

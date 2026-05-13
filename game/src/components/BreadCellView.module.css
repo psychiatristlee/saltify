@@ -66,31 +66,65 @@
 }
 
 .cell.special {
-  animation: specialPulse 1.5s ease-in-out infinite;
+  animation: bombPulse 1.1s ease-in-out infinite;
+  position: relative;
+  /* white inner halo + outer color glow */
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.75),
+    0 0 16px 2px var(--bomb-glow, rgba(255, 200, 80, 0.85)),
+    0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
-/* Matcha - green glow (smallest explosion) */
+/* Matcha — green CROSS bomb (4-match, cross explosion) */
 .cell.specialMatcha {
-  box-shadow: 0 0 12px rgba(76, 175, 80, 0.6), 0 2px 4px rgba(128, 128, 128, 0.3);
+  --bomb-glow: rgba(118, 198, 115, 0.95);
 }
-
-/* Choco - brown/orange glow (medium explosion) */
+/* Choco — brown BLOCK bomb (5-match, 3×3 explosion) */
 .cell.specialChoco {
-  box-shadow: 0 0 12px rgba(139, 69, 19, 0.6), 0 2px 4px rgba(128, 128, 128, 0.3);
+  --bomb-glow: rgba(255, 140, 60, 0.95);
 }
-
-/* MilkTea - golden glow (largest explosion) */
+/* MilkTea — golden MEGA bomb (6+ match, 5×5 explosion) */
 .cell.specialMilkTea {
-  box-shadow: 0 0 12px rgba(255, 165, 0, 0.6), 0 2px 4px rgba(128, 128, 128, 0.3);
+  --bomb-glow: rgba(255, 200, 80, 1);
 }
 
-@keyframes specialPulse {
+/* Stronger scale-pulse than the old opacity-only version */
+@keyframes bombPulse {
   0%, 100% {
-    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1);
   }
   50% {
-    opacity: 0.8;
+    transform: scale(1.06);
+    filter: brightness(1.15);
   }
+}
+
+/* Bomb-type badge on the top-right corner of the cell */
+.bombBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2em;
+  height: 1.2em;
+  background: #fff;
+  color: #c44d3a;
+  border-radius: 999px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow:
+    0 0 0 2px var(--bomb-glow, rgba(255, 200, 80, 0.95)),
+    0 1px 3px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  animation: badgeSpin 2.4s linear infinite;
+}
+
+@keyframes badgeSpin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .emoji {
