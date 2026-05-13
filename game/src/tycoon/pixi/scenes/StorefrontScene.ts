@@ -29,10 +29,17 @@ const COUNTER = 0x6d4d2e;
 const COUNTER_LIGHT = 0x8e6e44;
 const SHELF_BG = 0xc9a06d;
 const SHELF_TRIM = 0x7a5635;
-const OVEN_BODY = 0x3e3a36;
-const OVEN_DOOR = 0x1f1d1b;
-const OVEN_GLASS_GLOW = 0xff8a3a;
-const OVEN_HANDLE = 0xc0a065;
+// Oven — brushed-steel commercial bakery look
+const OVEN_BODY = 0x4a4744;
+const OVEN_BODY_LIGHT = 0x6b6663;
+const OVEN_BODY_DARK = 0x2a2826;
+const OVEN_TRIM = 0x1a1815;
+const OVEN_GLASS_DARK = 0x0a0807;
+const OVEN_GLASS_GLOW = 0xff7a2a;
+const OVEN_HANDLE = 0xb8b8b8;
+const OVEN_DIGITAL = 0xff5a30;
+const OVEN_KNOB = 0x202020;
+const TRAY = 0x6a6360;
 
 interface BreadSlot {
   type: BreadType;
@@ -44,6 +51,7 @@ interface BreadSlot {
 
 interface Customer {
   container: Container;
+  spriteContainer: Container;  // animated parent of the persona sprite
   patienceFill: Graphics;
   bubbleQtyText: Text | null;
   speed: number;
@@ -56,6 +64,7 @@ interface Customer {
   wantedType: BreadType;
   wantedQty: number;
   persona: Persona;
+  animPhase: number;            // 0..2π, drives idle/walk bob
 }
 
 interface OvenSlot {
@@ -64,11 +73,13 @@ interface OvenSlot {
   remainingMs: number;
   totalMs: number;
   doorContainer: Container;
+  tray: Graphics;                 // metal tray sitting on the rack
   trayBread: Sprite | null;
   glow: Graphics;
+  steam: Container;               // 3 steam puffs animated
+  digital: Text;                  // "READY" / "180°" / countdown
   progressBar: Graphics;
   progressBarBg: Graphics;
-  progressLabel: Text;
   bodyGfx: Graphics;
   labelText: Text;
 }
@@ -300,20 +311,23 @@ export async function createStorefrontScene(
       ovenLayer.removeChild(o.labelText);
       ovenLayer.removeChild(o.glow);
       ovenLayer.removeChild(o.doorContainer);
+      ovenLayer.removeChild(o.tray);
+      ovenLayer.removeChild(o.steam);
+      ovenLayer.removeChild(o.digital);
       ovenLayer.removeChild(o.progressBarBg);
       ovenLayer.removeChild(o.progressBar);
-      ovenLayer.removeChild(o.progressLabel);
       if (o.trayBread) o.trayBread.destroy();
       o.bodyGfx.destroy();
       o.labelText.destroy();
       o.glow.destroy();
+      o.tray.destroy();
+      o.steam.destroy({ children: true });
+      o.digital.destroy();
       o.progressBarBg.destroy();
       o.progressBar.destroy();
-      o.progressLabel.destroy();
     }
     ovens = [];
 
-    // Layout: distribute ovens evenly across the width below the shelf
     const totalW = count * OVEN_W + (count - 1) * 16;
     const startX = (W - totalW) / 2;
 
@@ -322,52 +336,124 @@ export async function createStorefrontScene(
       const oy = OVEN_AREA_Y;
 
       const body = new Graphics();
-      body.roundRect(ox, oy, OVEN_W, OVEN_H, 10).fill(OVEN_BODY);
-      body.roundRect(ox, oy, OVEN_W, OVEN_H, 10).stroke({ color: 0x202020, width: 2 });
-      body.rect(ox + 16, oy + 8, OVEN_W - 32, 6).fill({ color: 0x595550, alpha: 0.7 });
+      // Outer brushed-steel body with a slight gradient (faked with two rects)
+      body.roundRect(ox, oy, OVEN_W, OVEN_H, 8).fill(OVEN_BODY);
+      body.roundRect(ox, oy, OVEN_W, 18, 8).fill(OVEN_BODY_LIGHT);   // top edge highlight
+      body.roundRect(ox, oy + OVEN_H - 14, OVEN_W, 14, 8).fill(OVEN_BODY_DARK); // bottom edge shadow
+      body.roundRect(ox, oy, OVEN_W, OVEN_H, 8).stroke({ color: OVEN_TRIM, width: 2 });
+      // Brushed-steel hatch lines on the top control strip
+      for (let k = 0; k < 6; k++) {
+        body.moveTo(ox + 16 + k * 4, oy + 5)
+          .lineTo(ox + 18 + k * 4, oy + 13)
+          .stroke({ color: 0x8a8581, width: 1, alpha: 0.6 });
+      }
+
+      // Digital display (recessed black panel, top-left of control strip)
+      const ddX = ox + 8;
+      const ddY = oy + 3;
+      const ddW = 56;
+      const ddH = 14;
+      body.roundRect(ddX, ddY, ddW, ddH, 2).fill(0x0a0807);
+      body.roundRect(ddX, ddY, ddW, ddH, 2).stroke({ color: 0x000000, width: 1 });
+
+      // Two control knobs (right side of control strip)
+      for (let k = 0; k < 2; k++) {
+        const kx = ox + OVEN_W - 30 + k * 14;
+        const ky = oy + 10;
+        body.circle(kx, ky, 6).fill(OVEN_KNOB);
+        body.circle(kx, ky, 6).stroke({ color: 0x000000, width: 1 });
+        body.moveTo(kx, ky - 5).lineTo(kx + 3, ky - 1).stroke({ color: 0xff5a30, width: 1.5 });
+      }
+
+      // Door area (the big glass window)
       const doorPad = 10;
       const doorX = ox + doorPad;
-      const doorY = oy + 22;
+      const doorY = oy + 24;
       const doorW = OVEN_W - doorPad * 2;
-      const doorH = OVEN_H - 30;
-      body.roundRect(doorX, doorY, doorW, doorH, 6).fill(OVEN_DOOR);
-      body.roundRect(doorX + 8, doorY + 6, doorW - 16, doorH - 18, 4).fill(0x0c0a09);
-      body.roundRect(doorX + 12, doorY + doorH - 8, doorW - 24, 4, 2).fill(OVEN_HANDLE);
+      const doorH = OVEN_H - 32;
+      body.roundRect(doorX, doorY, doorW, doorH, 5).fill(OVEN_BODY_DARK);
+      body.roundRect(doorX, doorY, doorW, doorH, 5).stroke({ color: OVEN_TRIM, width: 1.5 });
+      // Inner glass
+      const glassX = doorX + 6;
+      const glassY = doorY + 5;
+      const glassW = doorW - 12;
+      const glassH = doorH - 16;
+      body.roundRect(glassX, glassY, glassW, glassH, 3).fill(OVEN_GLASS_DARK);
+      // Inner racks (horizontal lines inside glass) — gives "real oven" feel
+      body.moveTo(glassX + 3, glassY + glassH * 0.45)
+        .lineTo(glassX + glassW - 3, glassY + glassH * 0.45)
+        .stroke({ color: 0x3a3530, width: 1 });
+      body.moveTo(glassX + 3, glassY + glassH * 0.85)
+        .lineTo(glassX + glassW - 3, glassY + glassH * 0.85)
+        .stroke({ color: 0x3a3530, width: 1 });
+      // Bottom handle (chrome bar)
+      body.roundRect(doorX + 12, doorY + doorH - 7, doorW - 24, 4, 2).fill(OVEN_HANDLE);
+      body.roundRect(doorX + 12, doorY + doorH - 7, doorW - 24, 1.5, 1)
+        .fill({ color: 0xffffff, alpha: 0.35 });
+
       ovenLayer.addChild(body);
 
+      // "오븐 N" label sits on the body
       const label = new Text({
-        text: `오븐 ${i + 1}`,
-        style: { fontFamily: 'sans-serif', fontSize: 11, fill: 0xc0a065, fontWeight: 'bold' },
+        text: `OVEN ${i + 1}`,
+        style: { fontFamily: 'sans-serif', fontSize: 9, fill: 0xb8b8b8, fontWeight: 'bold', letterSpacing: 1 },
       });
       label.anchor.set(0, 0);
-      label.x = ox + 12;
-      label.y = oy + 3;
+      label.x = ox + 70;
+      label.y = oy + 6;
       ovenLayer.addChild(label);
 
+      // Digital display text (over the recessed panel)
+      const digital = new Text({
+        text: 'READY',
+        style: {
+          fontFamily: 'Menlo, monospace', fontSize: 11,
+          fill: OVEN_DIGITAL, fontWeight: 'bold', letterSpacing: 1,
+        },
+      });
+      digital.anchor.set(0.5);
+      digital.x = ddX + ddW / 2;
+      digital.y = ddY + ddH / 2;
+      ovenLayer.addChild(digital);
+
+      // Interior glow (orange, while baking)
       const glow = new Graphics();
       ovenLayer.addChild(glow);
 
+      // Metal tray sitting on a rack inside the glass
+      const tray = new Graphics();
+      const trayY = glassY + glassH * 0.65;
+      tray.roundRect(glassX + 4, trayY, glassW - 8, 4, 1.5).fill(TRAY);
+      tray.roundRect(glassX + 4, trayY, glassW - 8, 1.5, 1).fill({ color: 0xffffff, alpha: 0.25 });
+      tray.visible = false;
+      ovenLayer.addChild(tray);
+
+      // Bread sprite holder — sits ON TOP of the tray
       const trayBreadContainer = new Container();
-      trayBreadContainer.x = doorX + doorW / 2;
-      trayBreadContainer.y = doorY + (doorH - 18) / 2 + 4;
+      trayBreadContainer.x = glassX + glassW / 2;
+      trayBreadContainer.y = trayY - 4;
       ovenLayer.addChild(trayBreadContainer);
 
+      // Steam puffs above the oven (visible while baking)
+      const steam = new Container();
+      for (let k = 0; k < 3; k++) {
+        const p = new Graphics();
+        p.circle(0, 0, 6 + k).fill({ color: 0xffffff, alpha: 0.5 });
+        p.x = ox + OVEN_W * 0.3 + k * (OVEN_W * 0.2);
+        p.y = oy - 4;
+        steam.addChild(p);
+      }
+      steam.visible = false;
+      ovenLayer.addChild(steam);
+
+      // Progress bar below the oven
       const pbBg = new Graphics();
-      pbBg.roundRect(ox, oy + OVEN_H + 6, OVEN_W, 8, 4)
+      pbBg.roundRect(ox, oy + OVEN_H + 6, OVEN_W, 5, 2)
         .fill({ color: 0x2e2a26, alpha: 0.85 });
       ovenLayer.addChild(pbBg);
 
       const pb = new Graphics();
       ovenLayer.addChild(pb);
-
-      const pl = new Text({
-        text: '',
-        style: { fontFamily: 'sans-serif', fontSize: 10, fill: 0xfff2d6, fontWeight: 'bold' },
-      });
-      pl.anchor.set(0.5);
-      pl.x = ox + OVEN_W / 2;
-      pl.y = oy + OVEN_H + 10;
-      ovenLayer.addChild(pl);
 
       ovens.push({
         index: i,
@@ -375,11 +461,13 @@ export async function createStorefrontScene(
         remainingMs: 0,
         totalMs: 0,
         doorContainer: trayBreadContainer,
+        tray,
         trayBread: null,
         glow,
+        steam,
+        digital,
         progressBar: pb,
         progressBarBg: pbBg,
-        progressLabel: pl,
         bodyGfx: body,
         labelText: label,
       });
@@ -390,31 +478,57 @@ export async function createStorefrontScene(
   function drawOvenProgress(o: OvenSlot, idx: number) {
     o.progressBar.clear();
     o.glow.clear();
-    // NB: BreadType.Plain === 0; can't use `!o.baking` as a "idle" check.
-    if (o.baking === null) {
-      o.progressLabel.text = '대기 중';
-      return;
-    }
+
     // recompute oven X based on current oven count layout
     const count = ovens.length;
     const totalW = count * OVEN_W + (count - 1) * 16;
     const startX = (W - totalW) / 2;
     const ox = startX + idx * (OVEN_W + 16);
     const oy = OVEN_AREA_Y;
+
+    // BreadType.Plain === 0 — can't use `!o.baking` as idle check.
+    if (o.baking === null) {
+      o.digital.text = 'READY';
+      o.digital.style.fill = OVEN_DIGITAL;
+      o.tray.visible = false;
+      o.steam.visible = false;
+      return;
+    }
+
+    o.tray.visible = true;
+    o.steam.visible = true;
+
     const pct = 1 - o.remainingMs / o.totalMs;
-    o.progressBar.roundRect(ox, oy + OVEN_H + 6, OVEN_W * pct, 8, 4)
+    o.progressBar.roundRect(ox, oy + OVEN_H + 6, OVEN_W * pct, 5, 2)
       .fill({ color: 0xff8a3d });
+
     const remain = Math.ceil(o.remainingMs / 1000);
-    o.progressLabel.text = `${BREAD_DATA[o.baking].nameKo}  ${remain}s`;
-    const t = (Date.now() / 400) % (Math.PI * 2);
-    const intensity = 0.35 + Math.sin(t) * 0.18;
+    o.digital.text = `${remain.toString().padStart(2, '0')}s`;
+    o.digital.style.fill = OVEN_DIGITAL;
+
+    // Pulsing interior glow
     const doorPad = 10;
     const doorX = ox + doorPad;
-    const doorY = oy + 22;
+    const doorY = oy + 24;
     const doorW = OVEN_W - doorPad * 2;
-    const doorH = OVEN_H - 30;
-    o.glow.roundRect(doorX + 10, doorY + 8, doorW - 20, doorH - 22, 3)
+    const doorH = OVEN_H - 32;
+    const glassX = doorX + 6;
+    const glassY = doorY + 5;
+    const glassW = doorW - 12;
+    const glassH = doorH - 16;
+    const t = (Date.now() / 400) % (Math.PI * 2);
+    const intensity = 0.45 + Math.sin(t) * 0.20;
+    o.glow.roundRect(glassX, glassY, glassW, glassH, 3)
       .fill({ color: OVEN_GLASS_GLOW, alpha: intensity });
+
+    // Drift the steam puffs upward + reset on cycle
+    const driftT = (Date.now() / 60) % 100;
+    for (let k = 0; k < o.steam.children.length; k++) {
+      const puff = o.steam.children[k] as Graphics;
+      const phase = (driftT + k * 30) % 100;
+      puff.y = oy - 4 - phase * 0.4;
+      puff.alpha = Math.max(0, 0.6 - phase * 0.012);
+    }
   }
 
   // === Customer queue ===
@@ -531,11 +645,15 @@ export async function createStorefrontScene(
 
     const c = new Container();
 
+    // Inner container holds the persona sprite so we can bob it without
+    // also moving the speech bubble / patience bar.
+    const spriteContainer = new Container();
     const sprite = new Sprite(customerTextures[persona]);
     sprite.anchor.set(0.5, 1);
     sprite.scale.set(210 / sprite.height);
     sprite.y = 0;
-    c.addChild(sprite);
+    spriteContainer.addChild(sprite);
+    c.addChild(spriteContainer);
 
     // Speech bubble
     const bubble = new Container();
@@ -576,6 +694,7 @@ export async function createStorefrontScene(
     const queueIndex = queue.length;
     queue.push({
       container: c,
+      spriteContainer,
       patienceFill,
       bubbleQtyText: qtyText,
       speed: profile.walkSpeed,
@@ -588,6 +707,7 @@ export async function createStorefrontScene(
       wantedType,
       wantedQty,
       persona,
+      animPhase: Math.random() * Math.PI * 2,
     });
   }
 
@@ -708,6 +828,15 @@ export async function createStorefrontScene(
     // Customers
     for (let i = queue.length - 1; i >= 0; i--) {
       const cu = queue[i];
+
+      // Animation: bob & sway. Walking states get a bigger amplitude.
+      cu.animPhase += dt * 0.012;
+      const isWalking = cu.state === 'arriving' || cu.state === 'leaving';
+      const bobAmp = isWalking ? 6 : 2;
+      const bobFreq = isWalking ? 2.0 : 0.8;
+      const swayAmp = isWalking ? 0.06 : 0.02;
+      cu.spriteContainer.y = -Math.abs(Math.sin(cu.animPhase * bobFreq)) * bobAmp;
+      cu.spriteContainer.rotation = Math.sin(cu.animPhase * bobFreq * 0.5) * swayAmp;
 
       if (cu.state === 'arriving') {
         const target = targetXForQueuePos(cu.queueIndex);

@@ -57,14 +57,21 @@ const BREADS = [
     id: 'everything',
     referencePath: 'game/public/breads/everything-naver.jpg',
     prompt:
-      `Draw ${SALT_BREAD_SHAPE} ` +
-      'BUT the ENTIRE TOP ARCH (about 70% of the visible surface) is ' +
-      'completely encrusted with a dense everything-bagel topping mix: a thick ' +
-      'crowd of black sesame seeds, white sesame seeds, poppy seeds, and small ' +
-      'crispy onion flakes packed shoulder-to-shoulder. The dense seed coat is ' +
-      'the dominant visual — barely any bare crust shows through, the top ' +
-      'reads almost-black-with-flecks at a glance. Pale cream underside still ' +
-      'visible for the salt-bread shape cue.',
+      'Draw a single whole elongated salt bread (소금빵), fat little crescent ' +
+      'shape. The bottom half of the loaf is pale cream-white (the natural ' +
+      'underside). The ENTIRE TOP HALF of the loaf is so densely caked with ' +
+      'everything-bagel topping that the bread crust beneath it is barely ' +
+      'visible — the top reads as a near-black, finely-speckled crust. ' +
+      'Topping makeup, in order of visual dominance: ' +
+      '(1) tons of black sesame seeds — these are the dominant element, ' +
+      'covering most of the top surface, ' +
+      '(2) scattered black poppy seeds adding more darkness, ' +
+      '(3) white sesame seeds as bright accents among the black, ' +
+      '(4) a few small dried-onion flakes (pale yellow-tan bits). ' +
+      'No big patches of bare crust, no big patches of pure white — the ' +
+      'seeds are tightly mixed across the whole top. A few chunky white ' +
+      'pearl-salt crystals sit on top of the seed bed. The signature is ' +
+      'the dense, almost-black, fine-textured everything coat.',
   },
   {
     id: 'olive-cheese',
@@ -101,13 +108,18 @@ const BREADS = [
     referencePath: 'game/public/breads/garlic-butter-naver.jpg',
     prompt:
       `Draw ${SALT_BREAD_SHAPE} ` +
-      'BUT the entire top arch is heavily dusted with bright fresh GREEN ' +
-      'PARSLEY flakes — like a thick herby snowfall covering most of the top ' +
-      'crust (the parsley layer is the dominant visual). On top of the parsley, ' +
-      'add small chopped chunks of pale garlic and a few small glossy golden ' +
-      'pools of melted butter pooled along the score lines, with one dramatic ' +
-      'butter drip running down the side of the bread. Brown crust + heavy ' +
-      'green coat + glossy yellow butter is the unmistakable signature combo.',
+      'BUT the entire top crust has a strong, GLOSSY, GLISTENING golden-amber ' +
+      'butter-glaze look — like the loaf has just been brushed with melted ' +
+      'garlic butter, so the surface shows soft highlights and a slight oily ' +
+      'sheen on top of the caramelized brown. Scattered LIGHTLY across the ' +
+      'glossy top (not heavily), small finely-chopped fresh green parsley ' +
+      'flakes — like a moderate sprinkle, NOT a thick coat (the brown bread ' +
+      'underneath is clearly still the dominant color). NO chopped garlic ' +
+      'chunks on the surface, NO yellow butter droplets dripping down the ' +
+      'sides — the butter is all SOAKED IN, only the glaze sheen + a light ' +
+      'parsley sprinkle is visible from the outside. Coarse white salt ' +
+      'crystals on top. The signature is the wet-looking buttery shine on ' +
+      'the bread plus the light parsley confetti.',
   },
   {
     id: 'seed-hotteok',
