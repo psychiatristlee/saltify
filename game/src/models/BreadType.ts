@@ -21,8 +21,10 @@ export interface BreadInfo {
 }
 
 export const BREAD_DATA: Record<BreadType, BreadInfo> = {
-  // Cell-background colors are deliberately spaced across the hue wheel so
-  // adjacent breads on the puzzle grid are easy to tell apart at a glance.
+  // Cell-background colors are deliberately spaced across the hue wheel AND
+  // kept bright/pastel so the puzzle grid reads as a happy candy palette
+  // rather than a dim bakery shelf. Hue carries identity, brightness carries
+  // mood.
   [BreadType.Plain]: {
     id: BreadType.Plain,
     name: 'Plain',
@@ -30,7 +32,7 @@ export const BREAD_DATA: Record<BreadType, BreadInfo> = {
     price: 3000,
     description: '기본에 충실한 담백함과 바삭한 식감',
     image: '/breads/plain-icon.png',
-    color: 'rgb(255, 244, 217)',    // pale cream — bare bread baseline
+    color: 'rgb(255, 240, 200)',    // warm cream
   },
   [BreadType.Everything]: {
     id: BreadType.Everything,
@@ -39,7 +41,7 @@ export const BREAD_DATA: Record<BreadType, BreadInfo> = {
     price: 3500,
     description: '양파,치아시드,참깨,검은깨 등이 토핑된 고소하면서도 담백하게 즐길 수 있는 소금빵',
     image: '/breads/everything-icon.png',
-    color: 'rgb(99, 84, 73)',       // near-black warm gray — dense seeds
+    color: 'rgb(210, 198, 232)',    // soft lavender — bright contrast to the dark seed top
   },
   [BreadType.OliveCheese]: {
     id: BreadType.OliveCheese,
@@ -48,7 +50,7 @@ export const BREAD_DATA: Record<BreadType, BreadInfo> = {
     price: 3800,
     description: '블랙올리브와 치즈의 짭짤고소한 조화',
     image: '/breads/olive-cheese-icon.png',
-    color: 'rgb(218, 178, 100)',    // golden cheese yellow
+    color: 'rgb(255, 226, 110)',    // sunny yellow
   },
   [BreadType.BasilTomato]: {
     id: BreadType.BasilTomato,
@@ -57,7 +59,7 @@ export const BREAD_DATA: Record<BreadType, BreadInfo> = {
     price: 3800,
     description: '직접만든 바질버터와 선드라이 토마토의 향과 산미',
     image: '/breads/basil-tomato-icon.png',
-    color: 'rgb(208, 80, 70)',      // bright tomato red
+    color: 'rgb(255, 162, 156)',    // coral pink
   },
   [BreadType.GarlicButter]: {
     id: BreadType.GarlicButter,
@@ -66,7 +68,7 @@ export const BREAD_DATA: Record<BreadType, BreadInfo> = {
     price: 4300,
     description: '마늘향과 버터소스의 달콤하고 고소함',
     image: '/breads/garlic-butter-icon.png',
-    color: 'rgb(120, 168, 78)',     // parsley green
+    color: 'rgb(184, 232, 138)',    // spring green
   },
   [BreadType.Hotteok]: {
     id: BreadType.Hotteok,
@@ -75,7 +77,7 @@ export const BREAD_DATA: Record<BreadType, BreadInfo> = {
     price: 4300,
     description: '고소한 견과류와 달콤한 시럽이 가득찬 따끈한 호떡을 느낄 수 있는 소금빵',
     image: '/breads/seed-hotteok-icon.png',
-    color: 'rgb(196, 124, 64)',     // amber caramel
+    color: 'rgb(255, 188, 110)',    // peach
   },
   [BreadType.ChocoBun]: {
     id: BreadType.ChocoBun,
@@ -84,7 +86,7 @@ export const BREAD_DATA: Record<BreadType, BreadInfo> = {
     price: 4300,
     description: '소금빵 겉면에 초코번 반죽을 덮어 구운 시그니처. 안에 진한 초코크림이 가득',
     image: '/breads/choco-bun-icon.png',
-    color: 'rgb(78, 49, 35)',       // deep chocolate brown
+    color: 'rgb(228, 178, 145)',    // soft caramel/tan
   },
 };
 
