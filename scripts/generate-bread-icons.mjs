@@ -57,21 +57,21 @@ const BREADS = [
     id: 'everything',
     referencePath: 'game/public/breads/everything-naver.jpg',
     prompt:
-      'Draw a single whole elongated salt bread (소금빵), fat little crescent ' +
-      'shape. The bottom half of the loaf is pale cream-white (the natural ' +
-      'underside). The ENTIRE TOP HALF of the loaf is so densely caked with ' +
-      'everything-bagel topping that the bread crust beneath it is barely ' +
-      'visible — the top reads as a near-black, finely-speckled crust. ' +
-      'Topping makeup, in order of visual dominance: ' +
-      '(1) tons of black sesame seeds — these are the dominant element, ' +
-      'covering most of the top surface, ' +
-      '(2) scattered black poppy seeds adding more darkness, ' +
-      '(3) white sesame seeds as bright accents among the black, ' +
-      '(4) a few small dried-onion flakes (pale yellow-tan bits). ' +
-      'No big patches of bare crust, no big patches of pure white — the ' +
-      'seeds are tightly mixed across the whole top. A few chunky white ' +
-      'pearl-salt crystals sit on top of the seed bed. The signature is ' +
-      'the dense, almost-black, fine-textured everything coat.',
+      `Draw ${SALT_BREAD_SHAPE} ` +
+      'The top of the loaf is covered with everything-bagel topping where ' +
+      'each individual seed is CLEARLY DRAWN as a distinct shape (NOT a ' +
+      'solid black coat — the bread must not look burnt). ' +
+      'The viewer should be able to count individual seeds: roughly equal ' +
+      'amounts of (a) glossy black sesame seeds (small ovals), (b) creamy ' +
+      'white sesame seeds (small ovals), (c) a few tiny dark poppy seeds ' +
+      '(dots), (d) a few pale-yellow chopped onion flakes. The seeds are ' +
+      'scattered closely but you can see the golden-brown caramelized crust ' +
+      'PEEKING THROUGH between the seeds — the bread color is still ' +
+      'recognizable as bread (not a black blob). Visual balance: black ' +
+      'sesame and white sesame should appear in roughly equal amounts so ' +
+      'the topping reads as speckled, not solid. A few chunky white ' +
+      'pearl-salt crystals on top. The signature is the visible variety of ' +
+      'distinct individual seeds on a still-visible salt bread.',
   },
   {
     id: 'olive-cheese',

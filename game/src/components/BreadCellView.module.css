@@ -160,7 +160,34 @@
   /* Boost the bread illustration so it pops off the colored cell —
      the Gemini icons render a bit muted on top of bright backgrounds. */
   filter: saturate(1.18) brightness(1.06) contrast(1.04)
-          drop-shadow(0 2px 1px rgba(0, 0, 0, 0.22));
+          drop-shadow(0 3px 2px rgba(0, 0, 0, 0.25));
+  /* Idle "floating" bob — each cell drifts on its own offset so the
+     board doesn't move in lock-step. The offset is set per-cell via
+     `style={{ animationDelay: '-Xs' }}` from BreadCellView.tsx. */
+  animation: breadFloat 2.6s ease-in-out infinite;
+  will-change: transform, filter;
+}
+
+@keyframes breadFloat {
+  0%, 100% {
+    transform: translateY(0);
+    filter: saturate(1.18) brightness(1.06) contrast(1.04)
+            drop-shadow(0 3px 2px rgba(0, 0, 0, 0.25));
+  }
+  50% {
+    transform: translateY(-4px);
+    /* Shadow stretches + softens at the apex — sells the lift. */
+    filter: saturate(1.18) brightness(1.06) contrast(1.04)
+            drop-shadow(0 6px 4px rgba(0, 0, 0, 0.18));
+  }
+}
+
+/* When the cell is being dragged or matched, suppress the idle float
+   so it doesn't fight the bigger transform animations. */
+.cell.dragging .icon,
+.cell.matched .icon,
+.cell.selected .icon {
+  animation: none;
 }
 
 .name {

@@ -89,6 +89,10 @@ export default memo(function BreadCellView({
   const imageSrc = isSpecial && specialInfo ? specialInfo.image : breadInfo.image;
   const imageAlt = isSpecial && specialInfo ? specialInfo.name : breadInfo.name;
 
+  // Stagger the idle float animation so cells don't bob in unison.
+  // Hash the board position into a negative animation-delay (0 to 2.6s).
+  const phaseOffset = ((cell.row * 7 + cell.col * 13) % 26) / 10;
+
   return (
     <div
       className={className}
@@ -100,7 +104,12 @@ export default memo(function BreadCellView({
         src={imageSrc}
         alt={imageAlt}
         className={styles.icon}
-        style={{ width: cellSize * 0.85, height: cellSize * 0.85, objectFit: 'contain' }}
+        style={{
+          width: cellSize * 0.85,
+          height: cellSize * 0.85,
+          objectFit: 'contain',
+          animationDelay: `-${phaseOffset}s`,
+        }}
         draggable={false}
       />
       {isSpecial && specialInfo && (
