@@ -4,6 +4,7 @@ import { functions } from '../lib/firebase';
 import {
   listOrders, statusLabel, formatPrice, Order, OrderStatus,
 } from '../services/order';
+import OrderTicket from './OrderTicket';
 import styles from './AdminPage.module.css';
 import dashStyles from './OrdersAdminTab.module.css';
 
@@ -44,6 +45,7 @@ export default function OrdersAdminTab() {
   const [loading, setLoading] = useState(true);
   const [pickupDate, setPickupDate] = useState<string>(todayKst());
   const [busy, setBusy] = useState<string | null>(null);
+  const [ticketOrder, setTicketOrder] = useState<Order | null>(null);
 
   const reload = async () => {
     setLoading(true);
@@ -181,6 +183,14 @@ export default function OrdersAdminTab() {
                       </div>
 
                       <div className={dashStyles.actions}>
+                        <button
+                          className={dashStyles.actionBtn}
+                          style={{ background: '#455A64' }}
+                          onClick={() => setTicketOrder(o)}
+                          title="주문표 인쇄"
+                        >
+                          🖨️ 주문표
+                        </button>
                         {o.status === 'paid' && (
                           <button
                             className={dashStyles.actionBtn}
@@ -227,6 +237,14 @@ export default function OrdersAdminTab() {
             )
           ))}
         </div>
+      )}
+
+      {ticketOrder && (
+        <OrderTicket
+          order={ticketOrder}
+          autoPrint
+          onClose={() => setTicketOrder(null)}
+        />
       )}
     </div>
   );

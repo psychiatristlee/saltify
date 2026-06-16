@@ -26,11 +26,16 @@ export const MENU_BREADS: BreadItem[] = [
   { id: 'garlic-butter', nameKey: 'breadGarlicButterName', descKey: 'breadGarlicButterDesc', price: 4300, image: '/breads/garlic-butter-naver.jpg' },
   { id: 'seed-hotteok', nameKey: 'breadHotteokName', descKey: 'breadHotteokDesc', price: 4300, image: '/breads/hotteok-naver.jpg' },
   { id: 'choco-bun', nameKey: 'breadChocoBunName', descKey: 'breadChocoBunDesc', price: 4300, image: '/breads/choco-bun-naver.jpg' },
+  // 신메뉴 — Naver Place 2026-06. Photo asset pending: drop /breads/buldak-cheese-naver.jpg then set `image`.
+  { id: 'buldak-cheese', nameKey: 'breadBuldakCheeseName', descKey: 'breadBuldakCheeseDesc', price: 6500, image: '' },
 ];
 
 // 음료 메뉴
 export const MENU_DRINKS: BreadItem[] = [
-  { id: 'cold-brew', nameKey: 'drinkColdBrewName', descKey: 'drinkColdBrewDesc', price: 5500, image: '/breads/cold-brew-naver.png' },
-  { id: 'cold-brew-latte', nameKey: 'drinkColdBrewLatteName', descKey: 'drinkColdBrewLatteDesc', price: 6000, image: '/breads/cold-brew-latte-naver.png' },
+  { id: 'cold-brew', nameKey: 'drinkColdBrewName', descKey: 'drinkColdBrewDesc', price: 3900, image: '/breads/cold-brew-naver.png' },
+  { id: 'cold-brew-latte', nameKey: 'drinkColdBrewLatteName', descKey: 'drinkColdBrewLatteDesc', price: 4900, image: '/breads/cold-brew-latte-naver.png' },
   { id: 'milk-tea', nameKey: 'drinkMilkTeaName', descKey: 'drinkMilkTeaDesc', price: 7000, image: '/breads/milktea-naver.jpg' },
+  // 신메뉴 — Naver Place 2026-06 (no photo on Naver; cards render text-only)
+  { id: 'zero-cola', nameKey: 'drinkZeroColaName', descKey: 'drinkZeroColaDesc', price: 2900, image: '' },
+  { id: 'peach-iced-tea', nameKey: 'drinkPeachIcedTeaName', descKey: 'drinkPeachIcedTeaDesc', price: 2900, image: '' },
 ];

@@ -223,6 +223,45 @@ const translations = {
     'zh-CN': '不加糖，仅用红茶（伯爵+阿萨姆）与牛奶调和的自制配对饮品。300ml',
     ja: '砂糖を一切使わず、紅茶(アールグレイ+アッサム)とミルクのバランスだけで仕上げた自家製ペアリングドリンク。300ml',
   },
+  // ===== Drink: Zero Cola =====
+  drinkZeroColaName: {
+    ko: '제로 콜라',
+    en: 'Zero Cola',
+    'zh-CN': '零度可乐',
+    ja: 'ゼロコーラ',
+  },
+  drinkZeroColaDesc: {
+    ko: '시원하고 깔끔한 제로 슈가 콜라',
+    en: 'Crisp, refreshing zero-sugar cola',
+    'zh-CN': '清爽无糖的零度可乐',
+    ja: 'すっきり爽やかなゼロシュガーコーラ',
+  },
+  // ===== Drink: Zero Peach Iced Tea =====
+  drinkPeachIcedTeaName: {
+    ko: '제로 복숭아 아이스티',
+    en: 'Zero Peach Iced Tea',
+    'zh-CN': '零糖桃子冰茶',
+    ja: 'ゼロ ピーチアイスティー',
+  },
+  drinkPeachIcedTeaDesc: {
+    ko: '달콤한 복숭아 향이 가득한 제로 슈가 아이스티',
+    en: 'Zero-sugar iced tea bursting with sweet peach aroma',
+    'zh-CN': '充满甜美桃子香气的无糖冰茶',
+    ja: '甘い桃の香りが広がるゼロシュガーアイスティー',
+  },
+  // ===== Bread: Buldak Cheese =====
+  breadBuldakCheeseName: {
+    ko: '불닭치즈',
+    en: 'Buldak Cheese',
+    'zh-CN': '火鸡芝士',
+    ja: 'プルダックチーズ',
+  },
+  breadBuldakCheeseDesc: {
+    ko: '매콤달콤한 불닭 베이스 소스를 바르고 모짜렐라 치즈를 통으로 넣은 소금빵',
+    en: 'Sweet-and-spicy buldak sauce salt bread stuffed with a whole block of mozzarella',
+    'zh-CN': '涂上香甜微辣的火鸡酱，内夹整块马苏里拉芝士的盐面包',
+    ja: '甘辛いプルダックソースを塗り、モッツァレラチーズを丸ごと包んだ塩パン',
+  },
   viewFullMenu: {
     ko: '전체 메뉴 보기',
     en: 'View Full Menu',

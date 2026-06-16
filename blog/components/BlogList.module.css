@@ -1,124 +1,123 @@
 .section {
-  padding: 24px 16px;
-  max-width: 600px;
+  padding: 28px 20px;
+  max-width: 720px;
   margin: 0 auto;
   width: 100%;
 }
 
 .sectionHeader {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .sectionTitle {
-  font-size: 1.25rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  color: #333;
+  color: var(--ink-1);
   margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sectionTitle::before {
-  content: '';
-  width: 4px;
-  height: 20px;
-  background: linear-gradient(180deg, #FF8C00, #FFB347);
-  border-radius: 2px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .viewAll {
   font-size: 0.8125rem;
-  color: #FF8C00;
+  color: var(--ink-3);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
   white-space: nowrap;
+  transition: color 0.12s ease;
 }
 
 .viewAll:hover {
+  color: var(--ink-1);
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .viewAllBtn {
   display: block;
-  margin-top: 14px;
-  padding: 12px;
-  background: rgba(255, 140, 0, 0.08);
-  color: #FF8C00;
+  margin-top: 18px;
+  padding: 13px;
+  background: var(--surface-card);
+  color: var(--ink-1);
   text-align: center;
   text-decoration: none;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   font-size: 0.875rem;
-  font-weight: 700;
-  border: 1.5px dashed rgba(255, 140, 0, 0.3);
-  transition: background 0.15s;
+  font-weight: 600;
+  border: 1px solid var(--hairline-strong);
+  transition: all 0.14s ease;
 }
 
 .viewAllBtn:hover {
-  background: rgba(255, 140, 0, 0.14);
+  border-color: var(--ink-1);
+  background: var(--ink-1);
+  color: var(--ink-on-accent);
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
 }
 
 .card {
   display: flex;
-  gap: 14px;
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 16px;
-  overflow: hidden;
+  gap: 20px;
+  padding: 20px 0;
+  background: transparent;
   text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(255, 140, 0, 0.08);
+  border-bottom: 1px solid var(--hairline);
+  transition: opacity 0.2s ease;
 }
+.card:first-child { padding-top: 0; }
+.card:last-child { border-bottom: none; }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+.card:hover .cardTitle {
+  color: var(--accent);
 }
 
 .cardImage {
-  width: 120px;
-  height: 120px;
+  width: 132px;
+  height: 132px;
   object-fit: cover;
   flex-shrink: 0;
+  border-radius: var(--r-sm);
+  background: var(--surface-sunken);
 }
 
 .cardBody {
-  padding: 12px 14px 12px 0;
   display: flex;
   flex-direction: column;
   min-width: 0;
   flex: 1;
+  padding: 4px 0;
 }
 
-/* Treat as an h3-level heading — was 14px which read as a sub-label. */
 .cardTitle {
-  font-size: 1.0625rem;          /* ≈ 17px */
-  font-weight: 800;
-  color: #2C1810;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--ink-1);
   line-height: 1.35;
-  margin: 0 0 6px;
-  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+  letter-spacing: -0.018em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: keep-all;
+  transition: color 0.14s ease;
 }
 
 .cardDesc {
-  font-size: 0.8125rem;          /* ≈ 13px */
-  color: #6B5D54;
-  line-height: 1.5;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  line-height: 1.55;
   margin-bottom: auto;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -128,9 +127,10 @@
 }
 
 .cardDate {
-  font-size: 0.6875rem;          /* ≈ 11px */
-  color: #B0A299;
-  margin-top: 8px;
+  font-size: 0.6875rem;
+  color: var(--ink-4);
+  margin-top: 12px;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }

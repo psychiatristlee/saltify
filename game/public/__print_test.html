@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"/><title>print test</title></head>
+<body>
+<div id="root"></div>
+<script type="module">
+import React from 'http://localhost:5173/node_modules/.vite/deps/react.js';
+import ReactDOM from 'http://localhost:5173/node_modules/.vite/deps/react-dom_client.js';
+import OrderTicket from 'http://localhost:5173/src/components/OrderTicket.tsx';
+
+const order = {
+  id: 'ORDER_TEST_42',
+  userId: 'u1',
+  userName: '홍길동',
+  userEmail: 'gildong@example.com',
+  customerPhone: '010-1234-5678',
+  items: [
+    { menuItemId: 'plain', name: '플레인 소금빵', price: 3500, qty: 2, image: '/x.png' },
+    { menuItemId: 'latte', name: '콜드브루 라떼', price: 6000, qty: 1, image: '/x.png' },
+    { menuItemId: 'milktea', name: '제로슈가 밀크티', price: 7000, qty: 1, image: '/x.png' },
+  ],
+  itemCount: 4,
+  totalAmount: 20000,
+  status: 'paid',
+  pickupNumber: '0042',
+  pickupDate: '2026-05-16',
+  notes: '갈릭버터 잘 익은 걸로 부탁드려요',
+  createdAt: { toDate: () => new Date('2026-05-16T10:30:00+09:00') },
+  paidAt:    { toDate: () => new Date('2026-05-16T10:31:00+09:00') },
+  readyAt:   null,
+  pickedUpAt: null,
+  cancelledAt: null,
+};
+
+let printed = 0;
+window._origPrint = window.print;
+window.print = () => { printed++; window._lastPrint = Date.now(); };
+window._getPrinted = () => printed;
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(OrderTicket, {
+  order,
+  autoPrint: true,
+  onClose: () => { window._closedAt = Date.now(); },
+}));
+</script>
+</body></html>

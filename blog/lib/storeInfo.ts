@@ -10,16 +10,16 @@ export const STORE = {
   name: '솔트빵',
   englishName: 'Salt,0',
   description:
-    '서울 홍대 연남동의 수제 소금빵 전문 베이커리. 매일 갓 구운 소금빵.',
+    '서울 연남동·홍대 수제 소금빵 전문 베이커리 / Yeonnam-dong & Hongdae artisan salt bread bakery in Seoul. 매일 갓 구운 소금빵.',
 
-  // Address
+  // Address — addressLocality includes Yeonnam-dong for stronger local-SEO geo match.
   streetAddress: '동교로 39길 10 1층',
-  addressLocality: '마포구',
+  addressLocality: '연남동, 마포구',
   addressRegion: '서울특별시',
   postalCode: '03996',
   addressCountry: 'KR',
-  addressFull: '서울 마포구 동교로 39길 10 1층',
-  addressEn: '1F, 10 Donggyo-ro 39-gil, Mapo-gu, Seoul, Republic of Korea',
+  addressFull: '서울특별시 마포구 연남동 동교로 39길 10 1층',
+  addressEn: '1F, 10 Donggyo-ro 39-gil, Yeonnam-dong, Mapo-gu, Seoul, Republic of Korea',
 
   // Coordinates
   lat: 37.5621326,
@@ -38,11 +38,8 @@ export const STORE = {
   naverPlaceUrl: 'https://map.naver.com/p/entry/place/2082452936',
   naverMobileUrl: 'https://m.place.naver.com/restaurant/2082452936/home',
 
-  // Google Maps — search-API URL (place_id-less, but precise via store name + locality).
-  // If you obtain the actual Google Place ID, swap to:
-  // `https://www.google.com/maps/place/?q=place_id:<ID>`
-  googleMapsUrl:
-    'https://www.google.com/maps/search/?api=1&query=Salt%2C0+%EC%97%B0%EB%82%A8%EB%8F%99+%EC%86%94%ED%8A%B8%EB%B9%B5',
+  // Google Maps — official share link for the 솔트빵 (Yeonnam/Hongdae) listing.
+  googleMapsUrl: 'https://share.google/WQi9M04Y8Gqyf7wuH',
 
   // Sites
   websiteUrl: 'https://salt-bbang.com',

@@ -1,14 +1,27 @@
-# Robots.txt for 솔트빵 (Saltify)
-# https://saltify-game.web.app
+# Robots.txt for 솔트빵 (Saltify) — Yeonnam-dong / Hongdae Salt Bread Bakery
+# https://salt-bbang.com
 
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /account-deletion
 
 # Sitemap location
-Sitemap: https://saltify-game.web.app/sitemap.xml
+Sitemap: https://salt-bbang.com/sitemap.xml
 
 # Crawl-delay for polite crawling
 Crawl-delay: 1
 
-# Disallow admin or private paths (if any)
-Disallow: /api/
+# Naver / Yeti
+User-agent: Yeti
+Allow: /
+Crawl-delay: 1
+
+User-agent: NaverBot
+Allow: /
+Crawl-delay: 1
+
+# Google
+User-agent: Googlebot
+Allow: /

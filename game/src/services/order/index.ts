@@ -67,6 +67,10 @@ export async function getOrder(id: string): Promise<Order | null> {
  * Customer-facing list of their own orders, newest first.
  */
 export async function listMyOrders(userId: string, max = 50): Promise<Order[]> {
+  if (import.meta.env.DEV && typeof window !== 'undefined') {
+    const override = (window as unknown as { __MOCK_ORDERS?: Order[] }).__MOCK_ORDERS;
+    if (override) return override;
+  }
   const q = query(
     collection(db, COLLECTION),
     where('userId', '==', userId),

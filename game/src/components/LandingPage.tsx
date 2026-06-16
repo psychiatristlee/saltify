@@ -22,14 +22,14 @@ const LANDING_DRINKS = [
     id: 'cold-brew',
     nameKey: 'drinkColdBrewName' as TranslationKey,
     descKey: 'drinkColdBrewDesc' as TranslationKey,
-    price: 5500,
+    price: 3900,
     image: '/breads/cold-brew-naver.png',
   },
   {
     id: 'cold-brew-latte',
     nameKey: 'drinkColdBrewLatteName' as TranslationKey,
     descKey: 'drinkColdBrewLatteDesc' as TranslationKey,
-    price: 6000,
+    price: 4900,
     image: '/breads/cold-brew-latte-naver.png',
   },
   {
@@ -38,6 +38,33 @@ const LANDING_DRINKS = [
     descKey: 'drinkMilkTeaDesc' as TranslationKey,
     price: 7000,
     image: '/breads/milktea-naver.jpg',
+  },
+  // 신메뉴 — Naver Place 2026-06 (no photo; renders text-only)
+  {
+    id: 'zero-cola',
+    nameKey: 'drinkZeroColaName' as TranslationKey,
+    descKey: 'drinkZeroColaDesc' as TranslationKey,
+    price: 2900,
+    image: '',
+  },
+  {
+    id: 'peach-iced-tea',
+    nameKey: 'drinkPeachIcedTeaName' as TranslationKey,
+    descKey: 'drinkPeachIcedTeaDesc' as TranslationKey,
+    price: 2900,
+    image: '',
+  },
+];
+
+// Landing-only breads not represented as puzzle pieces (the game keeps its 7 types).
+// Photo asset pending: drop /breads/buldak-cheese-naver.jpg then set `image`.
+const LANDING_EXTRA_BREADS = [
+  {
+    id: 'buldak-cheese',
+    nameKey: 'breadBuldakCheeseName' as TranslationKey,
+    descKey: 'breadBuldakCheeseDesc' as TranslationKey,
+    price: 6500,
+    image: '',
   },
 ];
 
@@ -62,54 +89,17 @@ export default function LandingPage({ onStartGame }: Props) {
         />
       </header>
 
-      {/* Game CTA Section */}
+      {/* Order CTA Section */}
       <section className={styles.ctaSection}>
         <div className={styles.ctaCard}>
-          <p className={styles.ctaDesc}>{t('ctaDesc')}</p>
+          <p className={styles.ctaDesc}>매장 픽업으로 갓 구운 솔트빵을 받아보세요</p>
           <button className={styles.ctaButton} onClick={onStartGame}>
-            {t('startGame')}
+            🛒 주문 시작하기
           </button>
+          <p className={styles.ctaHint}>로그인 후 메뉴에서 담아 결제 · 게임으로 쿠폰 적립</p>
         </div>
       </section>
 
-      {/* App Download Section */}
-      <section className={styles.downloadSection}>
-        <h2 className={styles.sectionTitle}>{t('downloadApp')}</h2>
-        <div className={styles.downloadButtons}>
-          <a
-            href="https://apps.apple.com/us/app/%EC%86%94%ED%8A%B8%EB%B9%B5/id6758907825"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.downloadButton}
-          >
-            <svg className={styles.downloadIcon} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-            </svg>
-            <div className={styles.downloadText}>
-              <span className={styles.downloadLabel}>Download on the</span>
-              <span className={styles.downloadStore}>App Store</span>
-            </div>
-          </a>
-          <a
-            href="https://play.google.com/store/apps/details?id=com.saltbbang"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.downloadButton}
-          >
-            <svg className={styles.downloadIcon} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3.18 23.49c-.36-.17-.56-.48-.6-.85L1.06 12.32c-.04-.37.1-.72.38-.95L12 2.5l10.56 8.87c.28.23.42.58.38.95l-1.52 10.32c-.04.37-.24.68-.6.85L12 27.5 3.18 23.49z" opacity="0"/>
-              <path d="M1 2.87L1 21.13C1 21.58 1.15 21.98 1.4 22.27L12.39 11.5L1.4 1.73C1.15 2.02 1 2.42 1 2.87Z" fill="#4285F4"/>
-              <path d="M17.44 15.28L12.39 11.5L17.44 7.72L23.29 11.08C23.72 11.32 24 11.64 24 12C24 12.36 23.72 12.68 23.29 12.92L17.44 15.28Z" fill="#FBBC04"/>
-              <path d="M1.4 22.27C1.72 22.63 2.2 22.82 2.74 22.63L17.44 15.28L12.39 11.5L1.4 22.27Z" fill="#EA4335"/>
-              <path d="M1.4 1.73L12.39 11.5L17.44 7.72L2.74 1.37C2.2 1.18 1.72 1.37 1.4 1.73Z" fill="#34A853"/>
-            </svg>
-            <div className={styles.downloadText}>
-              <span className={styles.downloadLabel}>GET IT ON</span>
-              <span className={styles.downloadStore}>Google Play</span>
-            </div>
-          </a>
-        </div>
-      </section>
 
       {/* Menu Section */}
       <section className={styles.menuSection}>
@@ -133,6 +123,18 @@ export default function LandingPage({ onStartGame }: Props) {
               </div>
             );
           })}
+          {LANDING_EXTRA_BREADS.map((bread) => (
+            <div key={bread.id} className={styles.menuCard}>
+              {bread.image && (
+                <img src={bread.image} alt={t(bread.nameKey)} className={styles.menuImage} />
+              )}
+              <h3 className={styles.menuName}>{t(bread.nameKey)}</h3>
+              <p className={styles.menuDesc}>{t(bread.descKey)}</p>
+              <span className={styles.menuPrice}>
+                {bread.price.toLocaleString()}{t('currencyUnit')}
+              </span>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -142,11 +144,13 @@ export default function LandingPage({ onStartGame }: Props) {
         <div className={styles.menuGrid}>
           {LANDING_DRINKS.map((drink) => (
             <div key={drink.id} className={styles.menuCard}>
-              <img
-                src={drink.image}
-                alt={t(drink.nameKey)}
-                className={styles.menuImage}
-              />
+              {drink.image && (
+                <img
+                  src={drink.image}
+                  alt={t(drink.nameKey)}
+                  className={styles.menuImage}
+                />
+              )}
               <h3 className={styles.menuName}>{t(drink.nameKey)}</h3>
               <p className={styles.menuDesc}>{t(drink.descKey)}</p>
               <span className={styles.menuPrice}>
@@ -175,17 +179,30 @@ export default function LandingPage({ onStartGame }: Props) {
 
       {/* Footer */}
       <footer className={styles.footer}>
-        <a
-          href="https://www.instagram.com/salt_bread_official"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.instagramLink}
-        >
-          <svg className={styles.instagramIcon} viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-          </svg>
-          <span>@salt_bread_official</span>
-        </a>
+        <div className={styles.footerLinks}>
+          <a
+            href="https://www.instagram.com/salt_bread_official"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.instagramLink}
+          >
+            <svg className={styles.instagramIcon} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+            <span>@salt_bread_official</span>
+          </a>
+          <a
+            href="https://share.google/WQi9M04Y8Gqyf7wuH"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.googleMapLink}
+          >
+            <svg className={styles.googleMapIcon} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>
+            </svg>
+            <span>Google Maps</span>
+          </a>
+        </div>
         <p className={styles.footerText}>
           © 2026{' '}
           <a

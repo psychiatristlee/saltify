@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemaps-image/1.1">
 
   <!-- Homepage -->
   <url>
@@ -10,9 +11,13 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://salt-bbang.com/" />
     <xhtml:link rel="alternate" hreflang="zh" href="https://salt-bbang.com/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://salt-bbang.com/" />
-    <lastmod>2026-01-31</lastmod>
+    <lastmod>2026-05-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://salt-bbang.com/brandings/thumbnail.png</image:loc>
+      <image:title>솔트빵 - 연남동 소금빵 베이커리 / Saltify - Yeonnam-dong Salt Bread Bakery</image:title>
+    </image:image>
   </url>
 
   <!-- Menu Section -->
@@ -23,8 +28,8 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://salt-bbang.com/#menu" />
     <xhtml:link rel="alternate" hreflang="zh" href="https://salt-bbang.com/#menu" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://salt-bbang.com/#menu" />
-    <lastmod>2026-01-31</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-05-16</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
@@ -36,22 +41,33 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://salt-bbang.com/#location" />
     <xhtml:link rel="alternate" hreflang="zh" href="https://salt-bbang.com/#location" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://salt-bbang.com/#location" />
-    <lastmod>2026-01-31</lastmod>
+    <lastmod>2026-05-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
-  <!-- Game Section -->
+  <!-- Blog -->
   <url>
-    <loc>https://salt-bbang.com/#game</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://salt-bbang.com/#game" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://salt-bbang.com/#game" />
-    <xhtml:link rel="alternate" hreflang="ja" href="https://salt-bbang.com/#game" />
-    <xhtml:link rel="alternate" hreflang="zh" href="https://salt-bbang.com/#game" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://salt-bbang.com/#game" />
-    <lastmod>2026-01-31</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <loc>https://salt-bbang.com/blog</loc>
+    <lastmod>2026-05-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Privacy -->
+  <url>
+    <loc>https://salt-bbang.com/privacy</loc>
+    <lastmod>2026-05-16</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Terms -->
+  <url>
+    <loc>https://salt-bbang.com/terms</loc>
+    <lastmod>2026-05-16</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 
 </urlset>

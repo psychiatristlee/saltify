@@ -61,6 +61,12 @@ async function deleteImageIfExists(path?: string): Promise<void> {
 // -------- CRUD --------
 
 export async function listMenuItems(opts?: { onlyAvailable?: boolean }): Promise<MenuItem[]> {
+  // Dev-only escape hatch for fixture tests / Storybook-style previews.
+  // Stripped from prod bundles by Vite via `import.meta.env.DEV`.
+  if (import.meta.env.DEV && typeof window !== 'undefined') {
+    const override = (window as unknown as { __MOCK_MENUS?: MenuItem[] }).__MOCK_MENUS;
+    if (override) return override;
+  }
   // Sort client-side by sortOrder to keep one Firestore index sufficient.
   const q = opts?.onlyAvailable
     ? query(collection(db, COLLECTION), where('available', '==', true))

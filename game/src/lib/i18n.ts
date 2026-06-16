@@ -71,18 +71,18 @@ export const translations = {
 
   // Login
   loginTitle: {
-    ko: '솔트, 빵 💥',
-    en: 'Salt Bread 💥',
-    'zh-CN': '盐面包 💥',
-    'zh-TW': '鹽麵包 💥',
-    ja: '塩パン 💥',
+    ko: '솔트빵',
+    en: 'Saltify',
+    'zh-CN': 'Saltify',
+    'zh-TW': 'Saltify',
+    ja: 'Saltify',
   },
   loginSubtitle: {
-    ko: '맛있는 빵을 모아 쿠폰을 받으세요!',
-    en: 'Collect bread and get coupons!',
-    'zh-CN': '收集面包获得优惠券！',
-    'zh-TW': '收集麵包獲得優惠券！',
-    ja: 'パンを集めてクーポンをゲット！',
+    ko: '연남동 소금빵 주문하고 매장에서 픽업하세요',
+    en: 'Order salt bread for pickup at our Yeonnam-dong bakery',
+    'zh-CN': '在线下单，到延南洞店面取货',
+    'zh-TW': '線上下單，到延南洞店面取貨',
+    ja: '延南洞店舗での受け取り注文',
   },
   loginWithGoogle: {
     ko: 'Google로 시작하기',
@@ -113,11 +113,11 @@ export const translations = {
     ja: 'ログイン中...',
   },
   loginNotice: {
-    ko: '로그인하면 게임 기록이 저장됩니다',
-    en: 'Login to save your game progress',
-    'zh-CN': '登录后可保存游戏进度',
-    'zh-TW': '登錄後可保存遊戲進度',
-    ja: 'ログインするとゲームの記録が保存されます',
+    ko: '로그인하면 주문 내역과 쿠폰이 저장됩니다',
+    en: 'Login to save your orders and coupons',
+    'zh-CN': '登录后保存订单与优惠券',
+    'zh-TW': '登錄後保存訂單與優惠券',
+    ja: 'ログインで注文履歴とクーポンを保存',
   },
 
   // Game
@@ -785,6 +785,34 @@ export const translations = {
     'zh-TW': '不加糖，僅用紅茶（伯爵+阿薩姆）與牛奶調和的自製配對飲品。300ml',
     ja: '砂糖を一切使わず、紅茶(アールグレイ+アッサム)とミルクのバランスだけで仕上げた自家製ペアリングドリンク。300ml',
   },
+  drinkZeroColaName: {
+    ko: '제로 콜라',
+    en: 'Zero Cola',
+    'zh-CN': '零度可乐',
+    'zh-TW': '零度可樂',
+    ja: 'ゼロコーラ',
+  },
+  drinkZeroColaDesc: {
+    ko: '시원하고 깔끔한 제로 슈가 콜라',
+    en: 'Crisp, refreshing zero-sugar cola',
+    'zh-CN': '清爽无糖的零度可乐',
+    'zh-TW': '清爽無糖的零度可樂',
+    ja: 'すっきり爽やかなゼロシュガーコーラ',
+  },
+  drinkPeachIcedTeaName: {
+    ko: '제로 복숭아 아이스티',
+    en: 'Zero Peach Iced Tea',
+    'zh-CN': '零糖桃子冰茶',
+    'zh-TW': '零糖桃子冰茶',
+    ja: 'ゼロ ピーチアイスティー',
+  },
+  drinkPeachIcedTeaDesc: {
+    ko: '달콤한 복숭아 향이 가득한 제로 슈가 아이스티',
+    en: 'Zero-sugar iced tea bursting with sweet peach aroma',
+    'zh-CN': '充满甜美桃子香气的无糖冰茶',
+    'zh-TW': '充滿甜美桃子香氣的無糖冰茶',
+    ja: '甘い桃の香りが広がるゼロシュガーアイスティー',
+  },
 
   // Bread names & descriptions (for Landing Page)
   breadPlainName: {
@@ -884,6 +912,20 @@ export const translations = {
     'zh-CN': '内含浓郁巧克力奶油，外层覆盖巧克力球面团烤制的招牌盐面包',
     'zh-TW': '內含濃郁巧克力奶油，外層覆蓋巧克力球麵團烤製的招牌鹽麵包',
     ja: '濃厚なチョコクリームをたっぷり、表面にチョコバン生地をかぶせて焼き上げた看板塩パン',
+  },
+  breadBuldakCheeseName: {
+    ko: '불닭치즈',
+    en: 'Buldak Cheese',
+    'zh-CN': '火鸡芝士',
+    'zh-TW': '火雞起司',
+    ja: 'プルダックチーズ',
+  },
+  breadBuldakCheeseDesc: {
+    ko: '매콤달콤한 불닭 베이스 소스를 바르고 모짜렐라 치즈를 통으로 넣은 소금빵',
+    en: 'Sweet-and-spicy buldak sauce salt bread stuffed with a whole block of mozzarella',
+    'zh-CN': '涂上香甜微辣的火鸡酱，内夹整块马苏里拉芝士的盐面包',
+    'zh-TW': '塗上香甜微辣的火雞醬，內夾整塊馬蘇里拉起司的鹽麵包',
+    ja: '甘辛いプルダックソースを塗り、モッツァレラチーズを丸ごと包んだ塩パン',
   },
 
   allRightsReserved: {

@@ -12,13 +12,20 @@ const BAKERY_JSON_LD = {
   '@type': 'Bakery',
   '@id': `${STORE.websiteUrl}#bakery`,
   name: `${STORE.name} (${STORE.englishName})`,
-  alternateName: [STORE.englishName, STORE.name, 'Salt Bbang'],
+  alternateName: [
+    STORE.englishName,
+    STORE.name,
+    'Salt Bbang',
+    'Yeonnam Salt Bread Bakery',
+    '연남동 솔트빵',
+    'Yeonnam-dong Salt Bread',
+  ],
   description: STORE.description,
   url: STORE.websiteUrl,
   image: `${STORE.websiteUrl}/brandings/thumbnail.png`,
   logo: `${STORE.websiteUrl}/brandings/plain.png`,
   priceRange: '₩₩',
-  servesCuisine: ['Korean Bakery', 'Salt Bread', 'Coffee'],
+  servesCuisine: ['Korean Bakery', 'Salt Bread', 'Shio Pan', 'Coffee'],
   address: {
     '@type': 'PostalAddress',
     streetAddress: STORE.streetAddress,
@@ -27,6 +34,11 @@ const BAKERY_JSON_LD = {
     postalCode: STORE.postalCode,
     addressCountry: STORE.addressCountry,
   },
+  containedInPlace: [
+    { '@type': 'Place', name: 'Yeonnam-dong' },
+    { '@type': 'Place', name: '연남동' },
+    { '@type': 'Place', name: 'Mapo-gu, Seoul' },
+  ],
   geo: {
     '@type': 'GeoCoordinates',
     latitude: STORE.lat,
@@ -42,11 +54,16 @@ const BAKERY_JSON_LD = {
   ],
   sameAs: [STORE.naverPlaceUrl, STORE.googleMapsUrl, STORE.instagramUrl],
   hasMap: [STORE.naverPlaceUrl, STORE.googleMapsUrl],
-  areaServed: { '@type': 'City', name: '서울' },
+  areaServed: [
+    { '@type': 'City', name: 'Seoul' },
+    { '@type': 'City', name: '서울' },
+    { '@type': 'Place', name: 'Yeonnam-dong' },
+    { '@type': 'Place', name: 'Hongdae' },
+  ],
   potentialAction: {
     '@type': 'ViewAction',
     target: STORE.naverPlaceUrl,
-    name: '네이버 플레이스에서 보기',
+    name: '네이버 플레이스에서 보기 · View on Naver Place',
   },
 };
 
