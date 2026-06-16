@@ -6,6 +6,15 @@ dist/
 .next/
 out/
 
+# Mobile / native build artifacts
+build/
+*.xcarchive/
+*.apk
+*.aab
+*.ipa
+*.ait
+salt-bbang-release*.zip
+
 # Environment files
 .env
 .env.local
