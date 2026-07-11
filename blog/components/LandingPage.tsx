@@ -10,8 +10,6 @@ import BlogList, { BlogListItem } from './BlogList';
 import { STORE } from '@/lib/storeInfo';
 import styles from './LandingPage.module.css';
 
-const GAME_URL = 'https://game.salt-bbang.com';
-
 interface Props {
   posts?: BlogListItem[];
 }
@@ -33,16 +31,6 @@ export default function LandingPage({ posts = [] }: Props) {
           priority
         />
       </header>
-
-      {/* Game CTA Section */}
-      <section className={styles.ctaSection}>
-        <div className={styles.ctaCard}>
-          <p className={styles.ctaDesc}>{t('ctaDesc')}</p>
-          <a href={GAME_URL} className={styles.ctaButton}>
-            {t('startGame')}
-          </a>
-        </div>
-      </section>
 
       {/* Menu Section */}
       <section className={styles.menuSection}>
