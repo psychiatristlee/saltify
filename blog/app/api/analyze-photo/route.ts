@@ -139,6 +139,12 @@ export async function POST(req: NextRequest) {
   }
 
   const validIds = new Set([...MENU_BREADS, ...MENU_DRINKS].map((m) => m.id));
+  // Full menu, single source of truth (breadData). Ensures every menu item —
+  // including ones without a reference photo (e.g. buldak-cheese, chapssaltteok) —
+  // is presented to the model and therefore classifiable.
+  const breadList = MENU_BREADS
+    .map((m) => `- ${m.id}: ${t(m.nameKey, 'ko')} — ${t(m.descKey, 'ko')}`)
+    .join('\n');
   const drinkList = MENU_DRINKS
     .map((m) => `- ${m.id}: ${t(m.nameKey, 'ko')}`)
     .join('\n');
@@ -164,10 +170,17 @@ export async function POST(req: NextRequest) {
   parts.push({
     text: `
 
+== 전체 소금빵 메뉴 (참조 이미지가 없는 메뉴도 포함) ==
+${breadList}
+※ 위 id만 사용할 것. 참조 이미지가 없는 메뉴도 아래 힌트로 식별 가능.
+
 == 시각적 식별 힌트 ==
 - choco-bun (초코번 소금빵): 소금빵 위에 갈색/짙은 코코아 색의 부드러운 반죽이 덮여 있어
   표면이 매끈하고 갈색. 단면을 자르면 안에 진한 초코크림이 보임. 일반 소금빵과 같은
   길쭉한 형태.
+- buldak-cheese (불닭치즈 소금빵): 표면에 매콤한 빨간/주황빛 불닭 소스가 발려 있고,
+  단면이나 속에 늘어나는 하얀 모짜렐라 치즈가 보임.
+- chapssaltteok (찹쌀떡 소금빵): 소금빵 안에 쫀득한 흰색 찹쌀떡(모찌)이 들어 있음.
 
 == 음료 ==
 ${drinkList}

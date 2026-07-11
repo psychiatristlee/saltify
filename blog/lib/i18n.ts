@@ -249,6 +249,19 @@ const translations = {
     'zh-CN': '充满甜美桃子香气的无糖冰茶',
     ja: '甘い桃の香りが広がるゼロシュガーアイスティー',
   },
+  // ===== Bread: Chapssaltteok (glutinous rice cake) =====
+  breadChapssaltteokName: {
+    ko: '찹쌀떡 소금빵',
+    en: 'Chapssaltteok Salt Bread',
+    'zh-CN': '糯米糍盐面包',
+    ja: 'チャプサルトク塩パン',
+  },
+  breadChapssaltteokDesc: {
+    ko: '바삭한 소금빵과 쫀득한 찹쌀떡의 조화',
+    en: 'Crispy salt bread paired with chewy glutinous rice cake (mochi)',
+    'zh-CN': '酥脆盐面包与软糯糯米糍的融合',
+    ja: 'サクサクの塩パンと、もちもちのお餅の組み合わせ',
+  },
   // ===== Bread: Buldak Cheese =====
   breadBuldakCheeseName: {
     ko: '불닭치즈',

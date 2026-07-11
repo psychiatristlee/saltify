@@ -26,7 +26,8 @@ export const MENU_BREADS: BreadItem[] = [
   { id: 'garlic-butter', nameKey: 'breadGarlicButterName', descKey: 'breadGarlicButterDesc', price: 4300, image: '/breads/garlic-butter-naver.jpg' },
   { id: 'seed-hotteok', nameKey: 'breadHotteokName', descKey: 'breadHotteokDesc', price: 4300, image: '/breads/hotteok-naver.jpg' },
   { id: 'choco-bun', nameKey: 'breadChocoBunName', descKey: 'breadChocoBunDesc', price: 4300, image: '/breads/choco-bun-naver.jpg' },
-  // 신메뉴 — Naver Place 2026-06. Photo asset pending: drop /breads/buldak-cheese-naver.jpg then set `image`.
+  // 신메뉴 — 매장 메뉴판 기준. Photo assets pending: drop /breads/<id>-naver.jpg then set `image`.
+  { id: 'chapssaltteok', nameKey: 'breadChapssaltteokName', descKey: 'breadChapssaltteokDesc', price: 4300, image: '' },
   { id: 'buldak-cheese', nameKey: 'breadBuldakCheeseName', descKey: 'breadBuldakCheeseDesc', price: 6500, image: '' },
 ];
 

@@ -60,6 +60,13 @@ const LANDING_DRINKS = [
 // Photo asset pending: drop /breads/buldak-cheese-naver.jpg then set `image`.
 const LANDING_EXTRA_BREADS = [
   {
+    id: 'chapssaltteok',
+    nameKey: 'breadChapssaltteokName' as TranslationKey,
+    descKey: 'breadChapssaltteokDesc' as TranslationKey,
+    price: 4300,
+    image: '',
+  },
+  {
     id: 'buldak-cheese',
     nameKey: 'breadBuldakCheeseName' as TranslationKey,
     descKey: 'breadBuldakCheeseDesc' as TranslationKey,

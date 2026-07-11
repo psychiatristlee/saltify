@@ -913,6 +913,20 @@ export const translations = {
     'zh-TW': '內含濃郁巧克力奶油，外層覆蓋巧克力球麵團烤製的招牌鹽麵包',
     ja: '濃厚なチョコクリームをたっぷり、表面にチョコバン生地をかぶせて焼き上げた看板塩パン',
   },
+  breadChapssaltteokName: {
+    ko: '찹쌀떡 소금빵',
+    en: 'Chapssaltteok Salt Bread',
+    'zh-CN': '糯米糍盐面包',
+    'zh-TW': '糯米糍鹽麵包',
+    ja: 'チャプサルトク塩パン',
+  },
+  breadChapssaltteokDesc: {
+    ko: '바삭한 소금빵과 쫀득한 찹쌀떡의 조화',
+    en: 'Crispy salt bread paired with chewy glutinous rice cake (mochi)',
+    'zh-CN': '酥脆盐面包与软糯糯米糍的融合',
+    'zh-TW': '酥脆鹽麵包與軟糯糯米糍的融合',
+    ja: 'サクサクの塩パンと、もちもちのお餅の組み合わせ',
+  },
   breadBuldakCheeseName: {
     ko: '불닭치즈',
     en: 'Buldak Cheese',
