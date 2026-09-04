@@ -1,3 +1,5 @@
+import { STORE } from './storeInfo';
+
 export type Language = 'ko' | 'en' | 'zh-CN' | 'ja';
 
 export const LANGUAGES: { code: Language; name: string; flag: string }[] = [
@@ -9,10 +11,10 @@ export const LANGUAGES: { code: Language; name: string; flag: string }[] = [
 
 const translations = {
   storeName: {
-    ko: '솔트빵',
-    en: 'Salt, 0',
-    'zh-CN': 'Salt, 0',
-    ja: 'ソルトパン',
+    ko: '솔트빵 Salt,θ',
+    en: 'Salt,θ (Salt Bread)',
+    'zh-CN': 'Salt,θ (Salt Bread)',
+    ja: 'ソルトパン Salt,θ (Salt Bread)',
   },
   ctaDesc: {
     ko: '게임을 플레이하고 솔트빵 무료 쿠폰을 받아보세요!',
@@ -62,11 +64,36 @@ const translations = {
     'zh-CN': '首尔麻浦区东桥路39街10号1楼',
     ja: 'ソウル麻浦区東橋路39キル10 1階',
   },
+  // Derived from STORE so the hours are stated in exactly one place.
   storeHours: {
-    ko: '영업시간: 11:00 - 19:30 (일요일 휴무, 소진시 마감)',
-    en: 'Hours: 11:00 - 19:30 (Closed Sundays, until sold out)',
-    'zh-CN': '营业时间: 11:00 - 19:30 (周日休息, 售完即止)',
-    ja: '営業時間: 11:00 - 19:30 (日曜定休, 売り切れ次第終了)',
+    ko: `영업시간: ${STORE.hoursText}`,
+    en: `Hours: ${STORE.hoursTextEn}`,
+    'zh-CN': `营业时间: ${STORE.hoursTextZh}`,
+    ja: `営業時間: ${STORE.hoursTextJa}`,
+  },
+  openEveryDay: {
+    ko: '연중무휴 · 휴무일 없음',
+    en: 'Open 7 days a week — no closing day',
+    'zh-CN': '全年无休 · 无固定休息日',
+    ja: '年中無休 ・ 定休日なし',
+  },
+  storeAddressRoman: {
+    ko: STORE.addressEn,
+    en: STORE.addressEn,
+    'zh-CN': STORE.addressEn,
+    ja: STORE.addressEn,
+  },
+  storePhone: {
+    ko: '전화',
+    en: 'Phone',
+    'zh-CN': '电话',
+    ja: '電話',
+  },
+  gettingHere: {
+    ko: STORE.nearestStation,
+    en: STORE.nearestStationEn,
+    'zh-CN': STORE.nearestStationZh,
+    ja: STORE.nearestStationJa,
   },
   getDirections: {
     ko: '네이버 지도에서 길찾기',
@@ -281,7 +308,7 @@ const translations = {
     'zh-CN': '查看完整菜单',
     ja: 'メニュー全体を見る (PDF)',
   },
-} as const;
+};
 
 export type TranslationKey = keyof typeof translations;
 

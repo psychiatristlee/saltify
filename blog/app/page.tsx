@@ -11,8 +11,9 @@ const BAKERY_JSON_LD = {
   '@context': 'https://schema.org',
   '@type': 'Bakery',
   '@id': `${STORE.websiteUrl}#bakery`,
-  name: `${STORE.name} (${STORE.englishName})`,
+  name: STORE.fullName,
   alternateName: [
+    STORE.englishNameAscii,
     STORE.englishName,
     STORE.name,
     'Salt Bbang',
@@ -22,10 +23,11 @@ const BAKERY_JSON_LD = {
   ],
   description: STORE.description,
   url: STORE.websiteUrl,
-  image: `${STORE.websiteUrl}/brandings/thumbnail.png`,
+  telephone: STORE.telephone,
+  image: STORE.ogImage,
   logo: `${STORE.websiteUrl}/brandings/plain.png`,
   priceRange: '₩₩',
-  servesCuisine: ['Korean Bakery', 'Salt Bread', 'Shio Pan', 'Coffee'],
+  servesCuisine: ['Bakery', 'Korean Bakery', 'Salt Bread', 'Shio Pan', 'Coffee'],
   address: {
     '@type': 'PostalAddress',
     streetAddress: STORE.streetAddress,
@@ -44,12 +46,13 @@ const BAKERY_JSON_LD = {
     latitude: STORE.lat,
     longitude: STORE.lng,
   },
+  // Open every day — there is no closing day. Sunday must stay in this list.
   openingHoursSpecification: [
     {
       '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-      opens: '11:00',
-      closes: '19:30',
+      dayOfWeek: STORE.openDays,
+      opens: STORE.opens,
+      closes: STORE.closes,
     },
   ],
   sameAs: [STORE.naverPlaceUrl, STORE.googleMapsUrl, STORE.instagramUrl],

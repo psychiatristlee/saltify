@@ -72,10 +72,10 @@ export const translations = {
   // Login
   loginTitle: {
     ko: '솔트빵',
-    en: 'Saltify',
-    'zh-CN': 'Saltify',
-    'zh-TW': 'Saltify',
-    ja: 'Saltify',
+    en: 'Salt,θ (Salt Bread)',
+    'zh-CN': 'Salt,θ (Salt Bread)',
+    'zh-TW': 'Salt,θ (Salt Bread)',
+    ja: 'ソルトパン Salt,θ (Salt Bread)',
   },
   loginSubtitle: {
     ko: '연남동 소금빵 주문하고 매장에서 픽업하세요',
@@ -440,11 +440,11 @@ export const translations = {
     ja: 'アクセス',
   },
   storeName: {
-    ko: '솔트빵',
-    en: 'Salt, 0',
-    'zh-CN': 'Salt, 0',
-    'zh-TW': 'Salt, 0',
-    ja: '塩パン',
+    ko: '솔트빵 Salt,θ',
+    en: 'Salt,θ (Salt Bread)',
+    'zh-CN': 'Salt,θ (Salt Bread)',
+    'zh-TW': 'Salt,θ (Salt Bread)',
+    ja: 'ソルトパン Salt,θ (Salt Bread)',
   },
   storeAddress: {
     ko: '서울 마포구 동교로 39길 10 1층',
@@ -454,11 +454,11 @@ export const translations = {
     ja: 'ソウル麻浦区東橋路39キル10 1階',
   },
   storeHours: {
-    ko: '영업시간: 11:00 - 21:00 (일요일 휴무)',
-    en: 'Hours: 11:00 - 21:00 (Closed Sundays)',
-    'zh-CN': '营业时间: 11:00 - 21:00 (周日休息)',
-    'zh-TW': '營業時間: 11:00 - 21:00 (週日休息)',
-    ja: '営業時間: 11:00 - 21:00 (日曜定休)',
+    ko: '영업시간: 매일 11:00 – 19:30 (L.O. 19:00 / 소진 시 조기 마감)',
+    en: 'Hours: Open daily 11:00 – 19:30 (last order 19:00, may close early once sold out)',
+    'zh-CN': '营业时间: 每天 11:00 – 19:30 (最后点单 19:00 / 售完即止)',
+    'zh-TW': '營業時間: 每天 11:00 – 19:30 (最後點餐 19:00 / 售完即止)',
+    ja: '営業時間: 毎日 11:00 – 19:30 (ラストオーダー 19:00 / 売り切れ次第終了)',
   },
   getDirections: {
     ko: '네이버 지도에서 길찾기',

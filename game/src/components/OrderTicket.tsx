@@ -42,7 +42,7 @@ export default function OrderTicket({ order, autoPrint = true, onClose }: Props)
 
         <article className={styles.ticket} data-ticket="order">
           <header className={styles.head}>
-            <div className={styles.shopName}>솔트빵 Saltify</div>
+            <div className={styles.shopName}>솔트빵 Salt,θ</div>
             <div className={styles.shopSub}>YEONNAM-DONG · HONGDAE</div>
             <div className={styles.shopRule} />
           </header>

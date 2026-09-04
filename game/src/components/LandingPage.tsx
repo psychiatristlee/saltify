@@ -216,7 +216,7 @@ export default function LandingPage({ onStartGame }: Props) {
             className={styles.adminTrigger}
             href="/admin"
           >
-            Saltify
+            솔트빵 Salt,θ
           </a>
           {t('allRightsReserved')}
         </p>

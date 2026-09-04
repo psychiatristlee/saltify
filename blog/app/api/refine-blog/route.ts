@@ -3,15 +3,12 @@ import {
   callGemini, getGeminiModel, urlToImagePart, stripJsonFence, GeminiError, MODEL_NAME,
 } from '@/lib/server/gemini';
 import { applyMarkdown } from '@/lib/markdown';
+import { STORE_INFO_BY_LANG } from '@/lib/storePrompt';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const STORE_INFO = `## 매장 정보
-- 매장명: 솔트빵 (Salt,0)
-- 위치: 서울 마포구 동교로 39길 10 1층 (연남동, 홍대입구역 도보 5분)
-- 영업시간: 11:00 - 19:30 (일요일 휴무, 소진시 마감)
-- Instagram: @salt_bread_official`;
+const STORE_INFO = STORE_INFO_BY_LANG.ko;
 
 interface Post {
   title: string;
@@ -42,7 +39,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 
-  const prompt = `당신은 솔트빵(Salt,0) 베이커리의 블로그 에디터입니다.
+  const prompt = `당신은 솔트빵 Salt,θ (Salt Bread) 베이커리의 블로그 에디터입니다.
 
 ## 현재 블로그 초안 (JSON)
 ${JSON.stringify(current, null, 2)}

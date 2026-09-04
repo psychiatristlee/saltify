@@ -252,3 +252,52 @@
   cursor: pointer;
   user-select: none;
 }
+
+.storeAddressRoman {
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+.storeOpenEveryDay {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.storeAccess {
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+.storePhone {
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  text-decoration: none;
+  margin-top: 2px;
+}
+
+.storePhone:hover {
+  text-decoration: underline;
+}
+
+.langLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.langLinks a {
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.langLinks a:hover {
+  color: var(--ink-1);
+  border-bottom-color: var(--ink-1);
+}

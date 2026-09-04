@@ -143,10 +143,14 @@ export async function fetchNaverPlaceContext(
  */
 export function naverContextToPrompt(ctx: NaverPlaceContext): string {
   if (ctx.menus.length === 0 && ctx.reviewSnippets.length === 0) return '';
-  const lines: string[] = ['== 네이버 플레이스 라이브 데이터 (단일 진실 원천) =='];
-  if (ctx.storeName) lines.push(`매장명: ${ctx.storeName}`);
+  const lines: string[] = ['== 네이버 플레이스 라이브 데이터 (메뉴·리뷰 기준 데이터) =='];
+  // Store NAME and HOURS are deliberately NOT forwarded to the model. They are
+  // owned by blog/lib/storePrompt.ts, which is injected alongside this block.
+  // Naver Place has carried a stale "일요일 휴무" and a stale brand spelling, and
+  // this section used to be labelled the single source of truth — so whatever
+  // Naver said would win and get written straight back into published posts.
+  // Menu and reviews are still the reason we scrape; those stay.
   if (ctx.address) lines.push(`주소: ${ctx.address}`);
-  if (ctx.hours) lines.push(`영업시간: ${ctx.hours}`);
   if (ctx.menus.length > 0) {
     lines.push('', '메뉴 (네이버에 등록된 실제 판매 메뉴):');
     ctx.menus.slice(0, 30).forEach((m) => {

@@ -49,14 +49,22 @@ async function main() {
 
   // 1. Title
   const title = await page.title();
-  check('title contains "Yeonnam Salt Bread Bakery"', title.includes('Yeonnam Salt Bread Bakery'), `got: ${title}`);
+  check('title contains "Yeonnam Salt Bread"', title.includes('Yeonnam Salt Bread'), `got: ${title}`);
   check('title contains "솔트빵"', title.includes('솔트빵'));
-  check('title contains "Saltify"', title.includes('Saltify'));
+  // Foreign visitors cannot type "θ", so the mark always ships with the ASCII form.
+  check('title contains "Salt,θ"', title.includes('Salt,\u03b8'), `got: ${title}`);
+  // "Saltify" is the legal entity name, not the brand — it must not reach a customer.
+  check('title does NOT contain "Saltify"', !title.includes('Saltify'), `got: ${title}`);
 
   // 2. Meta description
   const desc = await page.$eval('meta[name="description"]', (el) => el.content);
-  check('meta description mentions Yeonnam-dong', /Yeonnam-dong/.test(desc));
-  check('meta description mentions Hongdae', /Hongdae/.test(desc) || /연남동·홍대/.test(desc));
+  check('meta description mentions Yeonnam-dong', /Yeonnam-dong/.test(desc) || /연남동/.test(desc));
+  check('meta description mentions the Hongdae station walk',
+    /Hongdae/.test(desc) || /Hongik/.test(desc) || /홍대/.test(desc));
+  // Regression guard: the shop is open every day.
+  check('meta description states no closing day',
+    !/일요일\s*휴무|Closed Sunday|closed Sun|日曜定休|周日休息/.test(desc), `got: ${desc}`);
+  check('meta description states 11:00-19:30', /11:00[–\-~]19:30/.test(desc), `got: ${desc}`);
 
   // 3. Canonical
   const canonical = await page.$eval('link[rel="canonical"]', (el) => el.href);

@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // 솔트빵 네이버 플레이스 ID
 const STORE_PLACE_ID = '2082452936';
-const STORE_NAMES = ['솔트빵', 'salt,0', 'salt, 0', 'saltbbang', '솔트, 빵'];
+// Matcher only — legacy spellings stay so older Naver listings still match.
+// This is detection input, not a consumer-facing brand surface.
+const STORE_NAMES = ['솔트빵', 'salt,θ', 'salt, θ', 'salt bread', 'salt,0', 'salt, 0', 'saltbbang', '솔트, 빵'];
 
 interface PlaceItem {
   id: string;

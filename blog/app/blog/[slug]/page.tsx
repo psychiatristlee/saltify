@@ -98,7 +98,7 @@ export default async function BlogPostPage({ params }: Props) {
     dateModified: post.updatedAt?.toISOString(),
     author: {
       '@type': 'Organization',
-      name: `${STORE.name} ${STORE.englishName}`,
+      name: STORE.fullName,
       url: STORE.websiteUrl,
       sameAs: [STORE.naverPlaceUrl, STORE.googleMapsUrl, STORE.instagramUrl],
     },
@@ -122,8 +122,21 @@ export default async function BlogPostPage({ params }: Props) {
     // Google to associate the post with the store's Google Maps entity.
     about: {
       '@type': 'Bakery',
-      name: STORE.name,
+      // Same @id as the homepage node — without it every post publishes an
+      // anonymous second bakery for Google to reconcile.
+      '@id': `${STORE.websiteUrl}#bakery`,
+      name: STORE.fullName,
+      alternateName: [STORE.englishNameAscii, STORE.englishName, STORE.name],
       url: STORE.websiteUrl,
+      telephone: STORE.telephone,
+      openingHoursSpecification: [
+        {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: STORE.openDays,
+          opens: STORE.opens,
+          closes: STORE.closes,
+        },
+      ],
       address: {
         '@type': 'PostalAddress',
         streetAddress: STORE.streetAddress,
@@ -148,7 +161,7 @@ export default async function BlogPostPage({ params }: Props) {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: '솔트빵', item: STORE.websiteUrl },
-      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${STORE.websiteUrl}/#blog` },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${STORE.websiteUrl}/blog` },
       { '@type': 'ListItem', position: 3, name: post.title, item: url },
     ],
   };
@@ -189,10 +202,15 @@ export default async function BlogPostPage({ params }: Props) {
         {/* Store info + map links — every blog post anchors to the same
             local business, which boosts NAP consistency for local SEO. */}
         <footer className={styles.footer}>
-          <section className={styles.storeCard} itemScope itemType="https://schema.org/Bakery">
+          <section
+            className={styles.storeCard}
+            itemScope
+            itemType="https://schema.org/Bakery"
+            itemID={`${STORE.websiteUrl}#bakery`}
+          >
             <h2 className={styles.storeHeader}>
               <span itemProp="name">{STORE.name}</span>
-              <span className={styles.storeSub} itemProp="alternateName">{STORE.englishName}</span>
+              <span className={styles.storeSub} itemProp="alternateName">{STORE.englishNameFull}</span>
             </h2>
 
             <address
@@ -201,11 +219,28 @@ export default async function BlogPostPage({ params }: Props) {
               itemScope
               itemType="https://schema.org/PostalAddress"
             >
-              <span itemProp="streetAddress">{STORE.addressFull}</span>
+              {/* One readable line for people; the parts a crawler needs as meta,
+                  rather than the whole address stuffed into streetAddress. */}
+              <span>{STORE.addressFull}</span>
+              <meta itemProp="streetAddress" content={STORE.streetAddress} />
+              <meta itemProp="addressLocality" content={STORE.addressLocality} />
+              <meta itemProp="addressRegion" content={STORE.addressRegion} />
+              <meta itemProp="postalCode" content={STORE.postalCode} />
+              <meta itemProp="addressCountry" content={STORE.addressCountry} />
             </address>
 
-            <p className={styles.hours} itemProp="openingHours" content="Mo-Sa 11:00-19:30">
+            <p
+              className={styles.hours}
+              itemProp="openingHours"
+              content={STORE.openingHoursMicrodata}
+            >
               🕐 {STORE.hoursText}
+            </p>
+
+            <p className={styles.hours}>
+              ☎ <a href={`tel:${STORE.telephone}`} itemProp="telephone">
+                {STORE.telephoneDisplay}
+              </a>
             </p>
 
             <div className={styles.mapButtons}>
@@ -249,7 +284,7 @@ export default async function BlogPostPage({ params }: Props) {
           </p>
 
           <p className={styles.copyright}>
-            &copy; 2026 <Link href="/admin" className={styles.adminLink}>Saltify</Link>. All rights reserved.
+            &copy; 2026 <Link href="/admin" className={styles.adminLink}>솔트빵 Salt,θ</Link>. All rights reserved.
           </p>
         </footer>
       </article>

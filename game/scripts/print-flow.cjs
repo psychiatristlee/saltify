@@ -61,7 +61,7 @@ async function main() {
   check('renders notes label & content', /요청사항/.test(text) && /갈릭버터 잘 익은/.test(text));
   check('renders order id', /ORDER_TEST_42/.test(text));
   check('renders pickup hint', /픽업.*번호를 알려/.test(text));
-  check('renders shop branding 솔트빵 Saltify', /솔트빵 Saltify/.test(text));
+  check('renders shop branding 솔트빵 Salt,\u03b8', /솔트빵 Salt,\u03b8/.test(text));
 
   const printed = await page.evaluate(() => window._printed || 0);
   check('window.print() invoked >=1 time on mount (got ' + printed + ')', printed >= 1);

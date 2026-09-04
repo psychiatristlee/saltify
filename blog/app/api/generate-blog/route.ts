@@ -4,53 +4,33 @@ import {
 } from '@/lib/server/gemini';
 import { applyMarkdown } from '@/lib/markdown';
 import { fetchNaverPlaceContext, naverContextToPrompt } from '@/lib/server/naverPlace';
+import { STORE_INFO_BY_LANG } from '@/lib/storePrompt';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const STORE_INFO_BY_LANG: Record<string, string> = {
-  ko: `## 매장 정보 (필요시 자연스럽게 포함)
-- 매장명: 솔트빵 (Salt,0)
-- 위치: 서울 마포구 동교로 39길 10 1층 (연남동, 홍대입구역 도보 5분)
-- 영업시간: 11:00 - 19:30 (일요일 휴무, 소진시 마감)
-- Instagram: @salt_bread_official`,
-  en: `## Store Info (weave in naturally if relevant)
-- Name: Salt,0 (솔트빵)
-- Location: 1F, 10 Donggyo-ro 39-gil, Mapo-gu, Seoul (Yeonnam-dong, 5 min walk from Hongik Univ. Stn)
-- Hours: 11:00 - 19:30 (Closed Sundays / sells out daily)
-- Instagram: @salt_bread_official`,
-  ja: `## 店舗情報 (自然に織り交ぜて)
-- 店名: ソルトパン Salt,0
-- 所在地: ソウル特別市 麻浦区 東橋路39キル 10 1F (延南洞、弘大入口駅から徒歩5分)
-- 営業時間: 11:00〜19:30 (日曜定休、売り切れ次第終了)
-- Instagram: @salt_bread_official`,
-  'zh-CN': `## 门店信息 (自然融入)
-- 店名: Salt,0 (솔트빵)
-- 地址: 首尔特别市 麻浦区 东桥路39街 10号 1层 (延南洞,弘大入口站步行5分钟)
-- 营业时间: 11:00 - 19:30 (周日休息,售完即止)
-- Instagram: @salt_bread_official`,
-};
+// Store facts + brand rules live in one place — see blog/lib/storePrompt.ts
 
 const TONE_BY_LANG: Record<string, string> = {
   ko: `## 톤 & 스타일 (반드시 준수)
-- **솔트빵 파티시에가 직접 손님에게 메뉴를 소개하는 느낌**으로 캐주얼하게 작성
+- **솔트빵 Salt,θ 파티시에가 직접 손님에게 메뉴를 소개하는 느낌**으로 캐주얼하게 작성
 - 1인칭 시점으로 자연스럽게 ("오늘은 ~을 만들어봤어요", "사실 이 빵은~", "꼭 ~해보세요")
 - 너무 광고스럽거나 격식 차린 표현 금지 (예: "프리미엄", "최고의", "신선한 재료로~" X)
 - 친한 단골에게 말하듯 편안하게, 빵에 대한 애정과 디테일이 묻어나도록
 - 마크다운 문법 적극 활용: **굵은 글씨**, *기울임*, > 인용, - 리스트, ## 헤더 등`,
   en: `## Tone & Style (mandatory)
-- Write in **first-person voice as the Salt,0 patissier introducing each bread**
+- Write in **first-person voice as the Salt,θ (Salt Bread) patissier introducing each bread**
 - Casual, warm, like chatting with a regular customer
 - Avoid sales-y phrasing ("premium", "the finest", "freshest ingredients" — banned)
 - Use markdown freely: **bold**, *italic*, > quote, - list, ## heading
 - Keep cultural notes light — readers may not be in Korea yet`,
   ja: `## トーン&スタイル (必須)
-- **ソルトパンのパティシエが直接お客様にパンを紹介する1人称**で、親しみやすく
+- **ソルトパン Salt,θ のパティシエが直接お客様にパンを紹介する1人称**で、親しみやすく
 - 「今日は〜を焼いてみました」「実はこのパン〜」のように自然な口調で
 - 広告的・かしこまった表現は禁止 (「プレミアム」「最高級」「厳選素材」など NG)
 - マークダウン文法を活用: **太字**、*斜体*、> 引用、- リスト、## 見出し`,
   'zh-CN': `## 语气与风格 (必须遵守)
-- 以**Salt,0 烘焙师亲自向顾客介绍面包**的第一人称语气书写
+- 以**Salt,θ (Salt Bread) 烘焙师亲自向顾客介绍面包**的第一人称语气书写
 - 像跟熟客聊天一样自然亲切
 - 避免广告化、生硬的措辞 (如"高级"、"顶级"、"精选食材"等)
 - 灵活使用 Markdown: **粗体**、*斜体*、> 引用、- 列表、## 标题`,
@@ -136,7 +116,7 @@ export async function POST(req: NextRequest) {
     console.warn('[generate-blog] naver fetch failed', err);
   }
 
-  const prompt = `You are the patissier at Salt,0 (솔트빵), a salt bread bakery in Seoul.
+  const prompt = `You are the patissier at Salt,θ (Salt Bread) / 솔트빵, a salt bread bakery in Seoul.
 
 ⚠️ WRITE THE ENTIRE BLOG POST IN ${LANG_NAME[lang]}. All title, description, content, and tags must be in ${LANG_NAME[lang]}.
 

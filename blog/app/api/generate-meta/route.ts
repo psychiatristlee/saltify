@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     .trim()
     .slice(0, 4000);
 
-  const prompt = `당신은 솔트빵(Salt,0) 베이커리 블로그의 SEO 담당입니다. 아래 본문을 읽고 SEO 메타데이터를 생성해주세요.
+  const prompt = `당신은 솔트빵 Salt,θ (Salt Bread) 베이커리 블로그의 SEO 담당입니다. 아래 본문을 읽고 SEO 메타데이터를 생성해주세요.
 
 == 본문 (HTML 태그 제거된 텍스트) ==
 ${text}

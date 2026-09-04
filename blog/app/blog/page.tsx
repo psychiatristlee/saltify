@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     siteName: '솔트빵',
-    images: [{ url: `${STORE.websiteUrl}/brandings/thumbnail.png`, width: 1200, height: 630 }],
+    images: [{ url: `${STORE.websiteUrl}/brandings/thumbnail.png`, width: 1024, height: 1024 }],
     locale: 'ko_KR',
   },
   twitter: {

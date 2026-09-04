@@ -1,21 +1,26 @@
 import type { Metadata } from 'next';
 import styles from './page.module.css';
 import Link from 'next/link';
+import { STORE } from '@/lib/storeInfo';
 
 export const metadata: Metadata = {
-  title: 'メニュー | ソルトパン Salt,0 - 弘大の手作り塩パン専門店',
+  title: 'メニュー | ソルトパン Salt,θ (Salt Bread) - 延南洞・弘大の塩パン専門店',
   description:
-    'ソウル弘大・延南洞の手作り塩パン専門店ソルトパンのメニュー。プレーン、ガーリックバター、看板チョコバンなど全7種、コールドブリュー・ミルクティーも。弘大入口駅から徒歩5分。',
+    'ソウル延南洞・弘大の塩パン専門店ソルトパン Salt,θ (Salt Bread) のメニュー。フランス産発酵バターとマルドン塩で焼く塩パン、プレーン・ガーリックバター・看板チョコバンなど全9種、コールドブリュー・ミルクティーも。毎日 11:00–19:30 営業 (年中無休)、弘大入口駅から徒歩5分。',
+  alternates: { canonical: `${STORE.websiteUrl}/menu/jp` },
   openGraph: {
-    title: 'メニュー | ソルトパン Salt,0',
-    description: 'ソウル弘大の手作り塩パン専門店のフルメニュー',
+    title: 'メニュー | ソルトパン Salt,θ (Salt Bread)',
+    description:
+      'ソウル延南洞・弘大の塩パン専門店のフルメニュー。毎日 11:00–19:30 営業 (年中無休)。',
+    url: `${STORE.websiteUrl}/menu/jp`,
+    images: [{ url: STORE.ogImage, width: 1000, height: 1000 }],
     locale: 'ja_JP',
   },
 };
 
 export default function JapaneseMenu() {
   return (
-    <div className={styles.container}>
+    <div className={styles.container} lang="ja">
       <div className={styles.inner}>
         <div className={styles.header}>
           <Link href="/" className={styles.backButton}>←</Link>

@@ -3,8 +3,12 @@ import styles from './page.module.css';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: '개인정보 처리방침 - 솔트빵',
-  description: '솔트빵 서비스 개인정보 처리방침',
+  title: '개인정보 처리방침 - 솔트빵 Salt,θ',
+  description: '솔트빵 Salt,θ 서비스 개인정보 처리방침',
+  // Without its own `alternates`, this page inherits the root layout's
+  // canonical (the homepage) and points every hreflang at the info pages.
+  alternates: { canonical: '/privacy' },
+  robots: { index: true, follow: true },
 };
 
 export default function PrivacyPolicy() {

@@ -6,6 +6,7 @@ import {
 } from '@/lib/server/gemini';
 import { applyMarkdown } from '@/lib/markdown';
 import { fetchNaverPlaceContext, naverContextToPrompt } from '@/lib/server/naverPlace';
+import { STORE_INFO_ONELINE_BY_LANG } from '@/lib/storePrompt';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // up to 5min for the whole batch
@@ -30,18 +31,14 @@ const LANG_NAME: Record<string, string> = {
   'zh-CN': '简体中文 (Simplified Chinese)',
 };
 
-const STORE_INFO_BY_LANG: Record<string, string> = {
-  ko: `매장명: 솔트빵 (Salt,0). 위치: 서울 마포구 동교로 39길 10 1층 (연남동, 홍대입구역 도보 5분). 영업시간: 11:00-19:30 (일요일 휴무). Instagram: @salt_bread_official`,
-  en: `Salt,0 Bakery, 1F 10 Donggyo-ro 39-gil, Mapo-gu, Seoul (Yeonnam-dong, 5 min from Hongik Univ. Stn). Hours: 11:00-19:30 (closed Sun). IG: @salt_bread_official`,
-  ja: `ソルトパン Salt,0、ソウル特別市 麻浦区 東橋路39キル 10 1F (延南洞、弘大入口駅から徒歩5分)。営業時間: 11:00-19:30 (日曜定休)。Instagram: @salt_bread_official`,
-  'zh-CN': `Salt,0 (솔트빵)，首尔特别市麻浦区东桥路39街10号1层 (延南洞，弘大入口站步行5分钟)。营业时间: 11:00-19:30 (周日休息)。Instagram: @salt_bread_official`,
-};
+// Store facts + brand rules live in one place — see blog/lib/storePrompt.ts
+const STORE_INFO_BY_LANG = STORE_INFO_ONELINE_BY_LANG;
 
 const TONE_BY_LANG: Record<string, string> = {
-  ko: `Salt,0 파티시에가 손님에게 메뉴를 직접 소개하는 1인칭 캐주얼톤. 광고 표현 금지.`,
-  en: `First-person Salt,0 patissier voice introducing breads casually. No sales-y phrasing.`,
-  ja: `Salt,0のパティシエが直接お客様にパンを紹介する1人称・カジュアルな口調。広告的な表現は避ける。`,
-  'zh-CN': `Salt,0 烘焙师以第一人称亲切介绍面包，避免广告化措辞。`,
+  ko: `솔트빵 Salt,θ 파티시에가 손님에게 메뉴를 직접 소개하는 1인칭 캐주얼톤. 광고 표현 금지.`,
+  en: `First-person Salt,θ (Salt Bread) patissier voice introducing breads casually. No sales-y phrasing.`,
+  ja: `ソルトパン Salt,θ のパティシエが直接お客様にパンを紹介する1人称・カジュアルな口調。広告的な表現は避ける。`,
+  'zh-CN': `Salt,θ (Salt Bread) 烘焙师以第一人称亲切介绍面包，避免广告化措辞。`,
 };
 
 function fixImageUrls(html: string, providedUrls: string[]): string {
@@ -76,7 +73,7 @@ async function generatePostForLanguage(lang: Lang, urls: string[], naverContext:
   const parts = await Promise.all(urls.slice(0, 8).map((u) => urlToImagePart(u)));
   const imageParts = parts.map((p) => p.part);
 
-  const prompt = `You are the patissier at Salt,0 (솔트빵), a salt bread bakery.
+  const prompt = `You are the patissier at Salt,θ (Salt Bread) / 솔트빵, a salt bread bakery.
 
 ⚠️ Write the entire post in ${LANG_NAME[lang]}. Title, description, body, and tags must be in ${LANG_NAME[lang]}.
 
@@ -113,7 +110,7 @@ Output (pure JSON only, no markdown fence):
     post = JSON.parse(raw);
   } catch {
     post = {
-      title: 'Salt,0 새 포스트',
+      title: '솔트빵 Salt,θ 새 포스트',
       slug: `post-${Date.now().toString(36)}`,
       description: '솔트빵의 새로운 소식',
       content: `<p>${raw}</p>`,

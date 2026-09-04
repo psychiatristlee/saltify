@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
   const parts: Array<{ text: string } | { inlineData: { data: string; mimeType: string } }> = [];
 
   parts.push({
-    text: `당신은 솔트빵(Salt,0) 베이커리의 사진 분류 전문가입니다.
+    text: `당신은 솔트빵 Salt,θ (Salt Bread) 베이커리의 사진 분류 전문가입니다.
 
 먼저 솔트빵의 메뉴 참조 이미지들을 보여드리겠습니다. 각 이미지 다음에 메뉴 ID와 설명이 있습니다. 이 이미지들을 잘 보고 시각적 특징을 학습한 후, 마지막에 제시된 사진을 분류해야 합니다.
 

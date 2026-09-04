@@ -20,20 +20,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   }));
 
+  // Every locale entry advertises the same alternate set — hreflang is only
+  // honoured when the annotations are reciprocal across all URLs.
+  const LANGUAGES = {
+    ko: `${BASE}/`,
+    en: `${BASE}/en`,
+    ja: `${BASE}/ja`,
+    'zh-Hans': `${BASE}/zh`,
+    'x-default': `${BASE}/`,
+  };
+
+  const localeEntries: MetadataRoute.Sitemap = (['en', 'ja', 'zh'] as const).map(
+    (code) => ({
+      url: `${BASE}/${code}`,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+      alternates: { languages: LANGUAGES },
+    })
+  );
+
   return [
     {
       url: `${BASE}/`,
       changeFrequency: 'weekly',
       priority: 1.0,
-      alternates: {
-        languages: {
-          ko: `${BASE}/`,
-          en: `${BASE}/`,
-          ja: `${BASE}/`,
-          zh: `${BASE}/`,
-        },
-      },
+      alternates: { languages: LANGUAGES },
     },
+    ...localeEntries,
     {
       url: `${BASE}/blog`,
       lastModified:

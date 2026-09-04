@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { STORE } from '@/lib/storeInfo';
 
 const NAVER_MAPS_CLIENT_ID = 'k1qdvycmmu';
 const STORE_LOCATION = { lat: 37.5621326, lng: 126.9237369 };
@@ -63,7 +64,7 @@ export default function NaverMap() {
         mapDataControl: false,
         scaleControl: false,
       });
-      new window.naver.maps.Marker({ position: location, map, title: 'salt, 0' });
+      new window.naver.maps.Marker({ position: location, map, title: STORE.fullName });
     });
     return () => { mounted = false; };
   }, []);

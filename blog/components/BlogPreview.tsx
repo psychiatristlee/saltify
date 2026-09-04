@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { STORE } from '@/lib/storeInfo';
 import styles from './BlogPreview.module.css';
 
 interface Props {
@@ -70,9 +71,9 @@ export default function BlogPreview({
 
             <footer className={styles.footer}>
               <div className={styles.storeCard}>
-                <h3>솔트빵 Salt,0</h3>
-                <p>서울 마포구 동교로 39길 10 1층</p>
-                <p>영업시간 11:00 - 19:30 (일요일 휴무)</p>
+                <h3>{STORE.fullName}</h3>
+                <p>{STORE.addressFull}</p>
+                <p>{STORE.hoursText}</p>
                 <a href="https://www.instagram.com/salt_bread_official" target="_blank" rel="noopener noreferrer">
                   @salt_bread_official
                 </a>
