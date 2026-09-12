@@ -21,8 +21,6 @@ const REFERENCE_MENU = [
   { id: 'garlic-butter', name: '갈릭버터 (마늘과 버터, 광택)', file: 'breads/garlic-butter-naver.jpg' },
   { id: 'seed-hotteok', name: '씨앗호떡 (견과류 토핑)', file: 'breads/hotteok-naver.jpg' },
   { id: 'choco-bun', name: '초코번 소금빵 (초콜릿 반죽이 표면을 덮은 길쭉한 소금빵)', file: 'breads/choco-bun-naver.jpg' },
-  // Drinks
-  { id: 'milk-tea', name: '제로슈가 밀크티 (밀크티 컵)', file: 'breads/milktea-naver.jpg' },
 ];
 
 interface RefPart {
@@ -140,7 +138,7 @@ export async function POST(req: NextRequest) {
 
   const validIds = new Set([...MENU_BREADS, ...MENU_DRINKS].map((m) => m.id));
   // Full menu, single source of truth (breadData). Ensures every menu item —
-  // including ones without a reference photo (e.g. buldak-cheese, chapssaltteok) —
+  // including ones without a reference photo (e.g. corn-cheese, jalapeno-ham-cheese) —
   // is presented to the model and therefore classifiable.
   const breadList = MENU_BREADS
     .map((m) => `- ${m.id}: ${t(m.nameKey, 'ko')} — ${t(m.descKey, 'ko')}`)
@@ -178,9 +176,9 @@ ${breadList}
 - choco-bun (초코번 소금빵): 소금빵 위에 갈색/짙은 코코아 색의 부드러운 반죽이 덮여 있어
   표면이 매끈하고 갈색. 단면을 자르면 안에 진한 초코크림이 보임. 일반 소금빵과 같은
   길쭉한 형태.
-- buldak-cheese (불닭치즈 소금빵): 표면에 매콤한 빨간/주황빛 불닭 소스가 발려 있고,
-  단면이나 속에 늘어나는 하얀 모짜렐라 치즈가 보임.
-- chapssaltteok (찹쌀떡 소금빵): 소금빵 안에 쫀득한 흰색 찹쌀떡(모찌)이 들어 있음.
+- corn-cheese (콘치즈 소금빵): 노란 옥수수 알갱이와 녹은 치즈가 표면이나 단면에 보임.
+- jalapeno-ham-cheese (할라피뇨 햄치즈 소금빵): 초록색 할라피뇨 조각, 햄, 녹은 치즈가
+  표면이나 단면에 보임.
 
 == 음료 ==
 ${drinkList}

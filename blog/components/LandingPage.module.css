@@ -100,7 +100,7 @@
   color: var(--ink-1);
 }
 
-.pdfMenuLink {
+.menuBoardLink {
   display: block;
   margin-top: 14px;
   padding: 13px;
@@ -114,7 +114,7 @@
   font-weight: 600;
   transition: all 0.14s ease;
 }
-.pdfMenuLink:hover {
+.menuBoardLink:hover {
   border-color: var(--ink-1);
   background: var(--ink-1);
   color: var(--ink-on-accent);

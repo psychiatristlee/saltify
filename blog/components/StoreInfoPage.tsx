@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { STORE } from '@/lib/storeInfo';
 import { MENU_BREADS, MENU_DRINKS } from '@/lib/breadData';
 import { t, type Language } from '@/lib/i18n';
+import { menuSections } from '@/lib/menuSchema';
 import styles from './StoreInfoPage.module.css';
 
 /**
@@ -160,28 +161,7 @@ export default function StoreInfoPage({ lang }: { lang: Lang }) {
     ],
     hasMenu: {
       '@type': 'Menu',
-      hasMenuSection: [
-        {
-          '@type': 'MenuSection',
-          name: c.sectionMenu,
-          hasMenuItem: MENU_BREADS.map((b) => ({
-            '@type': 'MenuItem',
-            name: tr(b.nameKey),
-            description: tr(b.descKey),
-            offers: { '@type': 'Offer', price: b.price, priceCurrency: 'KRW' },
-          })),
-        },
-        {
-          '@type': 'MenuSection',
-          name: c.sectionDrinks,
-          hasMenuItem: MENU_DRINKS.map((d) => ({
-            '@type': 'MenuItem',
-            name: tr(d.nameKey),
-            description: tr(d.descKey),
-            offers: { '@type': 'Offer', price: d.price, priceCurrency: 'KRW' },
-          })),
-        },
-      ],
+      hasMenuSection: menuSections(lang, { breads: c.sectionMenu, drinks: c.sectionDrinks }),
     },
     hasMap: [STORE.naverPlaceUrl, STORE.googleMapsUrl],
     sameAs: [STORE.naverPlaceUrl, STORE.googleMapsUrl, STORE.instagramUrl],
@@ -282,6 +262,12 @@ export default function StoreInfoPage({ lang }: { lang: Lang }) {
             </li>
           ))}
         </ul>
+        {/* Japanese is the one foreign language with a full menu board page. */}
+        {lang === 'ja' && (
+          <Link href="/menu/jp" className={styles.boardLink}>
+            {tr('viewFullMenu')} →
+          </Link>
+        )}
       </section>
 
       <section className={styles.section}>

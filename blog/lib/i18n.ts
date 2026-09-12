@@ -116,7 +116,7 @@ const translations = {
   },
   breadPlainDesc: {
     ko: '기본에 충실한 담백함과 바삭한 식감',
-    en: 'Classic simplicity with a light, crispy texture',
+    en: 'Clean and crisp — the classic',
     'zh-CN': '忠于基本的清淡口感和酥脆质地',
     ja: '基本に忠実。淡白な味わいと、外はパリッ、中はしっとりの食感',
   },
@@ -128,10 +128,23 @@ const translations = {
     ja: 'エブリシング',
   },
   breadEverythingDesc: {
-    ko: '양파, 치아시드, 참깨, 검은깨 등이 토핑된 고소하면서도 담백하게 즐길 수 있는 소금빵',
-    en: 'Salt bread topped with onion, chia seeds, sesame, and black sesame for a savory yet light flavor',
-    'zh-CN': '撒上洋葱、奇亚籽、芝麻、黑芝麻等配料的咸香面包',
-    ja: '玉ねぎ、チアシード、白ごま、黒ごまをトッピング。香ばしく、淡白に楽しめる一つ',
+    ko: '양파 · 치아시드 · 참깨 · 검은깨 토핑',
+    en: 'Onion, chia and sesame',
+    'zh-CN': '洋葱 · 奇亚籽 · 白芝麻 · 黑芝麻配料',
+    ja: '玉ねぎ・チアシード・白ごま・黒ごまをトッピング',
+  },
+  // ===== Bread: Corn Cheese =====
+  breadCornCheeseName: {
+    ko: '콘치즈',
+    en: 'Corn Cheese',
+    'zh-CN': '玉米芝士',
+    ja: 'コーンチーズ',
+  },
+  breadCornCheeseDesc: {
+    ko: '옥수수가 톡톡 씹히는 고소하고 달큰한 소금빵',
+    en: 'Sweet corn and melted cheese',
+    'zh-CN': '玉米粒颗颗弹牙，香浓微甜的盐面包',
+    ja: 'プチッと弾けるコーンが香ばしく、ほんのり甘い塩パン',
   },
   // ===== Bread: Olive Cheese =====
   breadOliveCheeseName: {
@@ -142,7 +155,7 @@ const translations = {
   },
   breadOliveCheeseDesc: {
     ko: '블랙올리브와 치즈의 짭짤고소한 조화',
-    en: 'A savory harmony of black olives and cheese',
+    en: 'Black olive and cheese',
     'zh-CN': '黑橄榄与芝士的咸香完美搭配',
     ja: 'ブラックオリーブとチーズの、しょっぱくて香ばしいハーモニー',
   },
@@ -154,10 +167,10 @@ const translations = {
     ja: 'バジルトマト',
   },
   breadBasilTomatoDesc: {
-    ko: '직접 만든 바질버터와 선드라이 토마토의 향과 산미',
-    en: 'Homemade basil butter with sun-dried tomato aroma and acidity',
-    'zh-CN': '自制罗勒黄油与半干番茄的香气和酸味',
-    ja: '自家製バジルバターと、サンドライトマトの香りと酸味',
+    ko: '직접 만든 바질버터와 선드라이 토마토',
+    en: 'House basil butter, sun-dried tomato',
+    'zh-CN': '自制罗勒黄油与半干番茄',
+    ja: '自家製バジルバターとサンドライトマト',
   },
   // ===== Bread: Garlic Butter =====
   breadGarlicButterName: {
@@ -168,22 +181,22 @@ const translations = {
   },
   breadGarlicButterDesc: {
     ko: '마늘향과 버터소스의 달콤하고 고소함',
-    en: 'Sweet and savory garlic aroma with butter sauce',
+    en: 'Garlic and sweet butter sauce',
     'zh-CN': '蒜香与黄油酱的甜美浓郁风味',
     ja: 'ガーリックの香りと、バターソースの甘く香ばしい味わい',
   },
   // ===== Bread: Choco Bun (covered with chocolate-bun dough) =====
   breadChocoBunName: {
-    ko: '초코번 소금빵',
-    en: 'Choco-Bun Salt Bread',
+    ko: '초코번',
+    en: 'Choco Bun',
     'zh-CN': '巧克力球盐面包',
-    ja: 'チョコバン塩パン',
+    ja: 'チョコバン',
   },
   breadChocoBunDesc: {
-    ko: '달콤하고 꾸덕한 초코크림이 가득. 소금빵 겉면에 초코번 반죽을 덮어 구운 시그니처',
-    en: 'Salt bread loaded with rich chocolate cream and wrapped in a glossy choco-bun crust',
-    'zh-CN': '内含浓郁巧克力奶油，外层覆盖巧克力球面团烤制的招牌盐面包',
-    ja: '濃厚なチョコクリームをたっぷり、表面にチョコバン生地をかぶせて焼き上げた看板塩パン',
+    ko: '달콤하고 꾸덕한 초코크림이 가득',
+    en: 'Rich chocolate cream',
+    'zh-CN': '满满香甜浓郁的巧克力奶油',
+    ja: '甘く濃厚なチョコクリームがたっぷり',
   },
   // ===== Bread: Matcha Cream =====
   breadMatchaName: {
@@ -201,20 +214,33 @@ const translations = {
   // ===== Bread: Seed Hotteok =====
   breadHotteokName: {
     ko: '씨앗호떡',
-    en: 'Seed Hotteok',
+    en: 'Hotteok',
     'zh-CN': '坚果糖饼',
     ja: 'シアッホットク',
   },
   breadHotteokDesc: {
-    ko: '한국 전통 간식 호떡을 소금빵에. 고소한 견과류와 달콤한 시럽이 따끈하게 퍼집니다',
-    en: 'Korean traditional hotteok in salt bread. Savory nuts and sweet syrup spread warmly inside',
-    'zh-CN': '韩国传统小吃糖饼与盐面包的结合。香脆坚果和甜蜜糖浆温暖地融化其中',
-    ja: '韓国伝統おやつ「ホットク」を塩パンに。香ばしいナッツと甘いシロップが温かく広がります',
+    ko: '고소한 견과류와 달콤한 시럽이 가득',
+    en: 'Nuts and sweet syrup, hotteok style',
+    'zh-CN': '满满香脆坚果与甜蜜糖浆，韩式糖饼风味',
+    ja: '香ばしいナッツと甘いシロップがたっぷり。韓国のおやつ「ホットク」風',
+  },
+  // ===== Bread: Jalapeño Ham Cheese =====
+  breadJalapenoHamCheeseName: {
+    ko: '할라피뇨 햄치즈',
+    en: 'Jalapeño Ham Cheese',
+    'zh-CN': '墨西哥辣椒火腿芝士',
+    ja: 'ハラペーニョハムチーズ',
+  },
+  breadJalapenoHamCheeseDesc: {
+    ko: '느끼할 틈 없는 단짠',
+    en: 'Sweet, salty, a little heat',
+    'zh-CN': '甜咸交织，带一点辣，一点也不腻',
+    ja: '甘じょっぱさにピリッと辛み。最後まで飽きない味',
   },
   // ===== Drink: Cold Brew =====
   drinkColdBrewName: {
     ko: '콜드브루 커피',
-    en: 'Cold Brew Coffee',
+    en: 'Cold Brew',
     'zh-CN': '冷萃咖啡',
     ja: 'コールドブリューコーヒー',
   },
@@ -237,18 +263,18 @@ const translations = {
     'zh-CN': '醇厚冷萃配满满牛奶，与盐面包绝配',
     ja: 'まろやかで濃いコールドブリューに、ミルクをたっぷりと。塩パンとの相性は抜群',
   },
-  // ===== Drink: Zero Sugar Milk Tea =====
-  drinkMilkTeaName: {
-    ko: '제로슈가 밀크티',
-    en: 'Zero Sugar Milk Tea',
-    'zh-CN': '零糖奶茶',
-    ja: 'ゼロシュガーミルクティー',
+  // ===== Drink: Cold Brew Bottle =====
+  drinkColdBrewBottleName: {
+    ko: '콜드브루 보틀',
+    en: 'Cold Brew Bottle',
+    'zh-CN': '瓶装冷萃咖啡',
+    ja: 'コールドブリューボトル',
   },
-  drinkMilkTeaDesc: {
-    ko: '설탕 없이, 홍차(얼그레이+아쌈)와 우유의 밸런스만으로 완성한 자체 페어링 음료. 300ml',
-    en: 'Zero sugar, balanced with Earl Grey + Assam black tea and milk. House-made pairing drink. 300ml',
-    'zh-CN': '不加糖，仅用红茶（伯爵+阿萨姆）与牛奶调和的自制配对饮品。300ml',
-    ja: '砂糖を一切使わず、紅茶(アールグレイ+アッサム)とミルクのバランスだけで仕上げた自家製ペアリングドリンク。300ml',
+  drinkColdBrewBottleDesc: {
+    ko: '솔트빵 콜드브루를 그대로 보틀에 담았어요',
+    en: 'Our cold brew, bottled',
+    'zh-CN': '本店冷萃咖啡的瓶装版',
+    ja: '当店のコールドブリューをボトルに詰めて',
   },
   // ===== Drink: Zero Cola =====
   drinkZeroColaName: {
@@ -276,37 +302,11 @@ const translations = {
     'zh-CN': '充满甜美桃子香气的无糖冰茶',
     ja: '甘い桃の香りが広がるゼロシュガーアイスティー',
   },
-  // ===== Bread: Chapssaltteok (glutinous rice cake) =====
-  breadChapssaltteokName: {
-    ko: '찹쌀떡 소금빵',
-    en: 'Chapssaltteok Salt Bread',
-    'zh-CN': '糯米糍盐面包',
-    ja: 'チャプサルトク塩パン',
-  },
-  breadChapssaltteokDesc: {
-    ko: '바삭한 소금빵과 쫀득한 찹쌀떡의 조화',
-    en: 'Crispy salt bread paired with chewy glutinous rice cake (mochi)',
-    'zh-CN': '酥脆盐面包与软糯糯米糍的融合',
-    ja: 'サクサクの塩パンと、もちもちのお餅の組み合わせ',
-  },
-  // ===== Bread: Buldak Cheese =====
-  breadBuldakCheeseName: {
-    ko: '불닭치즈',
-    en: 'Buldak Cheese',
-    'zh-CN': '火鸡芝士',
-    ja: 'プルダックチーズ',
-  },
-  breadBuldakCheeseDesc: {
-    ko: '매콤달콤한 불닭 베이스 소스를 바르고 모짜렐라 치즈를 통으로 넣은 소금빵',
-    en: 'Sweet-and-spicy buldak sauce salt bread stuffed with a whole block of mozzarella',
-    'zh-CN': '涂上香甜微辣的火鸡酱，内夹整块马苏里拉芝士的盐面包',
-    ja: '甘辛いプルダックソースを塗り、モッツァレラチーズを丸ごと包んだ塩パン',
-  },
   viewFullMenu: {
-    ko: '전체 메뉴 보기',
-    en: 'View Full Menu',
-    'zh-CN': '查看完整菜单',
-    ja: 'メニュー全体を見る (PDF)',
+    ko: '메뉴판 보기',
+    en: 'View Menu Board',
+    'zh-CN': '查看菜单',
+    ja: 'メニュー表を見る',
   },
 };
 

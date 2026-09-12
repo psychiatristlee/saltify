@@ -56,10 +56,13 @@ export default function LandingPage({ posts = [] }: Props) {
           ))}
         </div>
 
-        {/* Japanese PDF Menu Link */}
-        {language === 'ja' && (
-          <Link href="/menu/jp" className={styles.pdfMenuLink}>
-            📄 {t('viewFullMenu')}
+        {/* Menu board — published in Korean (/menu) and Japanese (/menu/jp) */}
+        {(language === 'ko' || language === 'ja') && (
+          <Link
+            href={language === 'ja' ? '/menu/jp' : '/menu'}
+            className={styles.menuBoardLink}
+          >
+            📋 {t('viewFullMenu')}
           </Link>
         )}
       </section>

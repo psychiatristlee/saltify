@@ -78,6 +78,9 @@ export const STORE = {
     return `每天 ${this.opens} – ${this.closes} (最后点单 ${this.lastOrder} / 售完即止)`;
   },
 
+  /** Batch bake times printed on the in-store menu board ("FRESH FROM THE OVEN"). */
+  bakeTimes: ['11:00', '13:00', '16:00'],
+
   // Transit
   nearestStation: '홍대입구역 3번 출구 도보 5분',
   nearestStationEn: '5-minute walk from Hongik Univ. Station (Line 2 / AREX) Exit 3',

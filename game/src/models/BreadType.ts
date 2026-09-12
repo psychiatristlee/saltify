@@ -47,7 +47,7 @@ export const BREAD_DATA: Record<BreadType, BreadInfo> = {
     id: BreadType.OliveCheese,
     name: 'Olive Cheese',
     nameKo: '올리브 치즈',
-    price: 3800,
+    price: 3900,
     description: '블랙올리브와 치즈의 짭짤고소한 조화',
     image: '/breads/olive-cheese-icon.png',
     color: 'rgb(255, 226, 110)',    // sunny yellow
@@ -56,7 +56,7 @@ export const BREAD_DATA: Record<BreadType, BreadInfo> = {
     id: BreadType.BasilTomato,
     name: 'Basil Tomato',
     nameKo: '바질 토마토',
-    price: 3800,
+    price: 3900,
     description: '직접만든 바질버터와 선드라이 토마토의 향과 산미',
     image: '/breads/basil-tomato-icon.png',
     color: 'rgb(255, 162, 156)',    // coral pink

@@ -163,6 +163,19 @@
   color: var(--ink-2);
 }
 
+.boardLink {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.boardLink:hover {
+  text-decoration: underline;
+}
+
 .body {
   margin: 0 0 12px;
   font-size: 0.9375rem;

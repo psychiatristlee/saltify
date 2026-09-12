@@ -4,7 +4,7 @@ import { STORE } from '@/lib/storeInfo';
 import { MENU_BREADS } from '@/lib/breadData';
 import { t } from '@/lib/i18n';
 
-const URL = `${STORE.websiteUrl}/menu/jp`;
+const URL = `${STORE.websiteUrl}/menu`;
 
 // The menu board is published in Korean and Japanese; hreflang annotations
 // must be reciprocal between the two.
@@ -15,11 +15,11 @@ const LANGUAGES = {
 };
 
 // Built from breadData so the snippet cannot go stale when the menu changes.
-const BREADS = MENU_BREADS.map((b) => t(b.nameKey, 'ja')).join('・');
+const BREADS = MENU_BREADS.map((b) => t(b.nameKey, 'ko')).join('·');
 const FROM = Math.min(...MENU_BREADS.map((b) => b.price)).toLocaleString('en-US');
 
-const TITLE = 'メニュー | ソルトパン Salt,θ (Salt Bread) — ソウル延南洞・弘大の塩パン専門店';
-const DESCRIPTION = `ソウル延南洞の塩パン専門店ソルトパン Salt,θ (Salt Bread) の日本語メニュー表。塩パン全${MENU_BREADS.length}種（${BREADS}）₩${FROM}から、コールドブリューなどのドリンクも。毎日 ${STORE.opens}–${STORE.closes} 営業・年中無休、弘大入口駅3番出口から徒歩5分。`;
+const TITLE = '메뉴 | 솔트빵 Salt,θ — 연남동 소금빵 전문점';
+const DESCRIPTION = `연남동 소금빵 전문점 솔트빵 Salt,θ 메뉴판. 소금빵 ${MENU_BREADS.length}종 (${BREADS}) ${FROM}원부터, 콜드브루 음료까지. 매일 ${STORE.opens}–${STORE.closes} (L.O. ${STORE.lastOrder}, 연중무휴), 홍대입구역 도보 5분.`;
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -31,12 +31,12 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     images: [{ url: STORE.ogImage, width: 1000, height: 1000 }],
-    locale: 'ja_JP',
+    locale: 'ko_KR',
     siteName: STORE.fullName,
   },
   robots: { index: true, follow: true },
 };
 
 export default function Page() {
-  return <MenuBoard lang="ja" />;
+  return <MenuBoard lang="ko" />;
 }

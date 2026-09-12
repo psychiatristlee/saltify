@@ -39,6 +39,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   );
 
+  // The menu board is published in Korean and Japanese only.
+  const MENU_LANGUAGES = {
+    ko: `${BASE}/menu`,
+    ja: `${BASE}/menu/jp`,
+    'x-default': `${BASE}/menu`,
+  };
+
+  const menuEntries: MetadataRoute.Sitemap = (['/menu', '/menu/jp'] as const).map(
+    (path) => ({
+      url: `${BASE}${path}`,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+      alternates: { languages: MENU_LANGUAGES },
+    })
+  );
+
   return [
     {
       url: `${BASE}/`,
@@ -54,11 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily',
       priority: 0.9,
     },
-    {
-      url: `${BASE}/menu/jp`,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
+    ...menuEntries,
     {
       url: `${BASE}/privacy`,
       changeFrequency: 'yearly',

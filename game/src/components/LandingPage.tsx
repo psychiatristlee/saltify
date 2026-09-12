@@ -16,30 +16,30 @@ const BREAD_I18N: Record<BreadType, { name: TranslationKey; desc: TranslationKey
   [BreadType.ChocoBun]: { name: 'breadChocoBunName', desc: 'breadChocoBunDesc' },
 };
 
-// Landing-page drink menu (not part of the puzzle game).
+// Landing-page drink menu (not part of the puzzle game). Follows the in-store
+// menu board (2026-09); items without a photo render text-only.
 const LANDING_DRINKS = [
   {
     id: 'cold-brew',
     nameKey: 'drinkColdBrewName' as TranslationKey,
     descKey: 'drinkColdBrewDesc' as TranslationKey,
-    price: 3900,
+    price: 4400,
     image: '/breads/cold-brew-naver.png',
+  },
+  {
+    id: 'cold-brew-bottle',
+    nameKey: 'drinkColdBrewBottleName' as TranslationKey,
+    descKey: 'drinkColdBrewBottleDesc' as TranslationKey,
+    price: 5200,
+    image: '',
   },
   {
     id: 'cold-brew-latte',
     nameKey: 'drinkColdBrewLatteName' as TranslationKey,
     descKey: 'drinkColdBrewLatteDesc' as TranslationKey,
-    price: 4900,
+    price: 5400,
     image: '/breads/cold-brew-latte-naver.png',
   },
-  {
-    id: 'milk-tea',
-    nameKey: 'drinkMilkTeaName' as TranslationKey,
-    descKey: 'drinkMilkTeaDesc' as TranslationKey,
-    price: 7000,
-    image: '/breads/milktea-naver.jpg',
-  },
-  // 신메뉴 — Naver Place 2026-06 (no photo; renders text-only)
   {
     id: 'zero-cola',
     nameKey: 'drinkZeroColaName' as TranslationKey,
@@ -57,20 +57,20 @@ const LANDING_DRINKS = [
 ];
 
 // Landing-only breads not represented as puzzle pieces (the game keeps its 7 types).
-// Photo asset pending: drop /breads/buldak-cheese-naver.jpg then set `image`.
+// Photo assets pending: drop /breads/<id>-naver.jpg then set `image`.
 const LANDING_EXTRA_BREADS = [
   {
-    id: 'chapssaltteok',
-    nameKey: 'breadChapssaltteokName' as TranslationKey,
-    descKey: 'breadChapssaltteokDesc' as TranslationKey,
-    price: 4300,
+    id: 'corn-cheese',
+    nameKey: 'breadCornCheeseName' as TranslationKey,
+    descKey: 'breadCornCheeseDesc' as TranslationKey,
+    price: 3900,
     image: '',
   },
   {
-    id: 'buldak-cheese',
-    nameKey: 'breadBuldakCheeseName' as TranslationKey,
-    descKey: 'breadBuldakCheeseDesc' as TranslationKey,
-    price: 6500,
+    id: 'jalapeno-ham-cheese',
+    nameKey: 'breadJalapenoHamCheeseName' as TranslationKey,
+    descKey: 'breadJalapenoHamCheeseDesc' as TranslationKey,
+    price: 4500,
     image: '',
   },
 ];

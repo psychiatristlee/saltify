@@ -10,8 +10,8 @@ import './globals.css';
 // The hours are spelled out here rather than interpolated because these are
 // prose search snippets, not data. blog/lib/storeInfo.ts holds the canonical
 // values — change them there first, then update the wording here, in
-// blog/app/{en,ja,zh}/page.tsx, blog/app/menu/jp/page.tsx and
-// blog/public/manifest.json.
+// blog/app/{en,ja,zh}/page.tsx and blog/public/manifest.json. (The /menu
+// pages interpolate hours and menu straight from the data modules.)
 const SITE_TITLE = '솔트빵 Salt,θ | 연남동 소금빵 전문점 Yeonnam Salt Bread';
 const SITE_DESCRIPTION =
   '프랑스산 발효버터와 말돈 소금으로 만드는 연남동 소금빵 전문점 솔트빵 Salt,θ (Salt Bread). 매일 11:00–19:30 영업 (L.O. 19:00 / 소진 시 조기 마감), 홍대입구역 도보 5분. Yeonnam-dong salt bread bakery in Seoul made with French cultured butter and Maldon salt — open daily 11:00–19:30, 5 minutes from Hongik Univ. Station.';
