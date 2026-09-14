@@ -16,24 +16,6 @@ const translations = {
     'zh-CN': 'Salt,θ (Salt Bread)',
     ja: 'ソルトパン Salt,θ (Salt Bread)',
   },
-  ctaDesc: {
-    ko: '게임을 플레이하고 솔트빵 무료 쿠폰을 받아보세요!',
-    en: 'Play the game and get free Salt Bread coupons!',
-    'zh-CN': '玩游戏获取免费盐面包优惠券！',
-    ja: 'ゲームをプレイして無料塩パンクーポンをゲット！',
-  },
-  startGame: {
-    ko: '게임 시작하기',
-    en: 'Start Game',
-    'zh-CN': '开始游戏',
-    ja: 'ゲームを始める',
-  },
-  downloadApp: {
-    ko: '앱 다운로드',
-    en: 'Download App',
-    'zh-CN': '下载应用',
-    ja: 'アプリをダウンロード',
-  },
   menu: {
     ko: '메뉴',
     en: 'Menu',

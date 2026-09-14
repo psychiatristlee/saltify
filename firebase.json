@@ -1,13 +1,13 @@
 {
   "firestore": {
-    "rules": "game/firestore.rules",
-    "indexes": "game/firestore.indexes.json"
+    "rules": "firebase/firestore.rules",
+    "indexes": "firebase/firestore.indexes.json"
   },
   "storage": {
-    "rules": "game/storage.rules"
+    "rules": "firebase/storage.rules"
   },
   "hosting": {
-    "public": "game/dist",
+    "public": "firebase/hosting",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -15,23 +15,20 @@
     ],
     "redirects": [
       {
-        "source": "**",
-        "destination": "https://game.salt-bbang.com/:splat",
-        "type": 301,
-        "regex": false,
-        "host": "www.game.salt-bbang.com"
-      }
-    ],
-    "rewrites": [
+        "source": "/privacy",
+        "destination": "https://salt-bbang.com/privacy",
+        "type": 301
+      },
       {
         "source": "**",
-        "destination": "/index.html"
+        "destination": "https://salt-bbang.com/",
+        "type": 301
       }
     ]
   },
   "functions": [
     {
-      "source": "game/functions",
+      "source": "firebase/functions",
       "codebase": "default",
       "disallowLegacyRuntimeConfig": true,
       "ignore": [

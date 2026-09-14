@@ -21,10 +21,15 @@ export default function PrivacyPolicy() {
         </div>
 
         <div className={styles.content}>
+          <p>
+            「솔트, 빵」 게임·픽업 주문 앱 서비스는 종료되었으며, 회사는 더 이상 새로
+            개인정보를 수집하지 않습니다. 아래 내용은 서비스 운영 중 수집된 정보의 처리 기준입니다.
+          </p>
+
           <h2 className={styles.sectionTitle}>1. 개인정보의 수집 및 이용 목적</h2>
           <p>
-            솔트빵(이하 &quot;회사&quot;)은 「솔트, 빵」 서비스(이하 &quot;서비스&quot;) 제공을 위해
-            다음과 같은 목적으로 개인정보를 수집·이용합니다.
+            솔트빵(이하 &quot;회사&quot;)은 「솔트, 빵」 서비스(이하 &quot;서비스&quot;) 운영 중
+            다음과 같은 목적으로 개인정보를 수집·이용하였습니다.
           </p>
           <ul>
             <li>회원 식별 및 가입 관리</li>
@@ -77,7 +82,7 @@ export default function PrivacyPolicy() {
             단, 관련 법령에 의해 보존이 필요한 경우 해당 기간 동안 보관합니다.
           </p>
           <ul>
-            <li>회원 탈퇴 시: 즉시 파기</li>
+            <li>회원 탈퇴 또는 삭제 요청 시: 즉시 파기</li>
             <li>전자상거래 관련 기록: 5년 (전자상거래법)</li>
             <li>접속 로그 기록: 3개월 (통신비밀보호법)</li>
           </ul>
@@ -118,8 +123,9 @@ export default function PrivacyPolicy() {
             <li>개인정보 처리 정지 요청</li>
           </ul>
           <p>
-            회원 탈퇴는 서비스 내 프로필 메뉴에서 직접 진행할 수 있으며,
-            탈퇴 시 모든 개인정보 및 게임 데이터가 즉시 삭제됩니다.
+            서비스 종료로 앱 내 회원 탈퇴 메뉴는 더 이상 제공되지 않습니다. 계정 및 게임 데이터
+            삭제를 원하시면 아래 개인정보 보호 책임자 이메일로 요청해 주시기 바랍니다.
+            확인 후 지체 없이 삭제합니다.
           </p>
 
           <h2 className={styles.sectionTitle}>7. 개인정보의 파기 절차 및 방법</h2>
@@ -130,10 +136,10 @@ export default function PrivacyPolicy() {
 
           <h2 className={styles.sectionTitle}>8. 쿠키(Cookie) 및 자동 수집 장치</h2>
           <p>
-            회사는 서비스 이용 분석 및 보안을 위해 Google Analytics와
-            reCAPTCHA를 사용하며, 이 과정에서 쿠키가 사용될 수 있습니다.
-            이용자는 브라우저 설정을 통해 쿠키 저장을 거부할 수 있으나,
-            일부 서비스 이용에 제한이 있을 수 있습니다.
+            서비스 운영 중에는 이용 분석 및 보안을 위해 앱에서 Google Analytics와 reCAPTCHA를
+            사용하였습니다. 현재 웹사이트는 방문자 분석용 쿠키를 사용하지 않으며, 페이지에 포함된
+            지도 등 외부 서비스가 자체 쿠키를 사용할 수 있습니다. 이용자는 브라우저 설정을 통해
+            쿠키 저장을 거부할 수 있습니다.
           </p>
 
           <h2 className={styles.sectionTitle}>9. 개인정보 보호 책임자</h2>
@@ -145,10 +151,10 @@ export default function PrivacyPolicy() {
           <h2 className={styles.sectionTitle}>10. 개인정보 처리방침 변경</h2>
           <p>
             본 개인정보 처리방침은 법령·정책 또는 서비스 변경에 따라 수정될 수 있으며,
-            변경 시 서비스 내 공지를 통해 안내합니다.
+            변경 시 웹사이트를 통해 안내합니다.
           </p>
 
-          <p className={styles.effectiveDate}>시행일: 2026년 2월 8일</p>
+          <p className={styles.effectiveDate}>시행일: 2026년 9월 14일 (이전 시행일: 2026년 2월 8일)</p>
         </div>
       </div>
     </div>

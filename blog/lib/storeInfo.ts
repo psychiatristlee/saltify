@@ -31,8 +31,8 @@ export const STORE = {
   streetAddress: '동교로 39길 10 1층',
   addressLocality: '연남동, 마포구',
   addressRegion: '서울특별시',
-  // NOTE: unverified. Repo previously held three different values
-  // (03996 here, 04030 in game/index.html). Left as-is pending owner confirmation.
+  // NOTE: unverified. Repo previously held three different values (03996 here,
+  // 04030 on the since-retired game host). Left as-is pending owner confirmation.
   postalCode: '03996',
   addressCountry: 'KR',
   addressFull: '서울특별시 마포구 연남동 동교로 39길 10 1층',
@@ -101,7 +101,6 @@ export const STORE = {
 
   // Sites
   websiteUrl: 'https://salt-bbang.com',
-  gameUrl: 'https://game.salt-bbang.com',
   /** Representative image — salt bread close-up, used for OG/schema. */
   ogImage: 'https://salt-bbang.com/breads/plain-naver.jpg',
 };

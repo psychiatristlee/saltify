@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is admin via custom claims
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Admins collection (fallback admin check by uid, read by the blog /admin page)
+    match /admins/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Blog posts - public read (published posts rendered on website), admin write
+    match /blogPosts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Media items metadata - admin-only
+    match /mediaItems/{itemId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Tracked keywords for Naver rank - admin-only
+    match /trackedKeywords/{keywordId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Blog config (daily counts per language) - admin-only
+    match /blogConfig/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Everything else falls through to deny, including data left behind by the
+    // retired game and pickup-order apps (users, coupons, gameRecords, orders,
+    // ...). Only server code using the Admin SDK can still reach it.
+  }
+}
