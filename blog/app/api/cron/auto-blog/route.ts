@@ -14,7 +14,7 @@ export const maxDuration = 300; // up to 5min for the whole batch
 const CRON_SECRET = process.env.CRON_SECRET || '';
 const PHOTOS_PER_POST = 4;
 
-type Lang = 'ko' | 'en' | 'zh-CN' | 'ja';
+type Lang = 'ko' | 'en' | 'zh-CN' | 'zh-Hant' | 'ja';
 
 interface MediaDoc {
   id: string;
@@ -29,6 +29,7 @@ const LANG_NAME: Record<string, string> = {
   en: 'English',
   ja: '日本語 (Japanese)',
   'zh-CN': '简体中文 (Simplified Chinese)',
+  'zh-Hant': '繁體中文 (Traditional Chinese, Taiwan/HK)',
 };
 
 // Store facts + brand rules live in one place — see blog/lib/storePrompt.ts
@@ -39,6 +40,7 @@ const TONE_BY_LANG: Record<string, string> = {
   en: `First-person Salt,θ (Salt Bread) patissier voice introducing breads casually. No sales-y phrasing.`,
   ja: `ソルトパン Salt,θ のパティシエが直接お客様にパンを紹介する1人称・カジュアルな口調。広告的な表現は避ける。`,
   'zh-CN': `Salt,θ (Salt Bread) 烘焙师以第一人称亲切介绍面包，避免广告化措辞。`,
+  'zh-Hant': `Salt,θ (Salt Bread) 烘焙師以第一人稱親切介紹麵包，避免廣告化措辭。鹽麵包請寫「鹽可頌」。`,
 };
 
 function fixImageUrls(html: string, providedUrls: string[]): string {
@@ -164,7 +166,7 @@ export async function POST(req: NextRequest) {
 
   let dailyCounts: Record<Lang, number>;
   if (langsParam) {
-    const validLangs: Lang[] = ['ko', 'en', 'zh-CN', 'ja'];
+    const validLangs: Lang[] = ['ko', 'en', 'zh-CN', 'zh-Hant', 'ja'];
     const requested = langsParam.split(',').map((s) => s.trim()) as Lang[];
     const count = countParam ? Math.max(1, Math.min(5, parseInt(countParam, 10) || 1)) : 1;
     dailyCounts = {} as Record<Lang, number>;

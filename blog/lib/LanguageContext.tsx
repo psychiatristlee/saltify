@@ -17,6 +17,11 @@ function getDefaultLanguage(): Language {
   if (saved) return saved as Language;
   const nav = navigator.language.toLowerCase();
   if (nav.startsWith('ja')) return 'ja';
+  // Taiwan/HK/Macau read Traditional characters; only mainland and Singapore
+  // use Simplified. Matching all of `zh` to zh-CN served Taiwanese visitors
+  // mainland-styled copy, which is the single biggest tell that a page was
+  // not written for them.
+  if (/^zh(-|_)?(hant|tw|hk|mo)/.test(nav)) return 'zh-Hant';
   if (nav.startsWith('zh')) return 'zh-CN';
   if (nav.startsWith('en')) return 'en';
   return 'ko';

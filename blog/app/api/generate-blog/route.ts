@@ -34,6 +34,12 @@ const TONE_BY_LANG: Record<string, string> = {
 - 像跟熟客聊天一样自然亲切
 - 避免广告化、生硬的措辞 (如"高级"、"顶级"、"精选食材"等)
 - 灵活使用 Markdown: **粗体**、*斜体*、> 引用、- 列表、## 标题`,
+  'zh-Hant': `## 語氣與風格 (必須遵守)
+- 以**Salt,θ (Salt Bread) 烘焙師親自向顧客介紹麵包**的第一人稱語氣書寫
+- 像跟熟客聊天一樣自然親切
+- 避免廣告化、生硬的措辭 (如「高級」、「頂級」、「精選食材」等)
+- 靈活使用 Markdown: **粗體**、*斜體*、> 引用、- 列表、## 標題
+- 讀者多為台灣/香港旅客。鹽麵包請寫「鹽可頌」，起司不要寫成芝士，奶油不要寫成黃油`,
 };
 
 const LANG_NAME: Record<string, string> = {
@@ -41,6 +47,7 @@ const LANG_NAME: Record<string, string> = {
   en: 'English',
   ja: '日本語 (Japanese)',
   'zh-CN': '简体中文 (Simplified Chinese)',
+  'zh-Hant': '繁體中文 (Traditional Chinese, Taiwan/HK)',
 };
 
 function fallback(text: string) {

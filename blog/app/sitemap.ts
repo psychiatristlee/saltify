@@ -27,10 +27,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     en: `${BASE}/en`,
     ja: `${BASE}/ja`,
     'zh-Hans': `${BASE}/zh`,
+    'zh-Hant': `${BASE}/zh-hant`,
     'x-default': `${BASE}/`,
   };
 
-  const localeEntries: MetadataRoute.Sitemap = (['en', 'ja', 'zh'] as const).map(
+  const localeEntries: MetadataRoute.Sitemap = (['en', 'ja', 'zh', 'zh-hant'] as const).map(
     (code) => ({
       url: `${BASE}/${code}`,
       changeFrequency: 'monthly',

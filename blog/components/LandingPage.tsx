@@ -153,6 +153,7 @@ export default function LandingPage({ posts = [] }: Props) {
           <Link href="/en" hrefLang="en">English</Link>
           <Link href="/ja" hrefLang="ja">日本語</Link>
           <Link href="/zh" hrefLang="zh-Hans">简体中文</Link>
+          <Link href="/zh-hant" hrefLang="zh-Hant">繁體中文</Link>
         </nav>
         <p className={styles.footerText}>
           &copy; 2026 <a href="/admin" className={styles.adminLink}>{STORE.fullName}</a>{t('allRightsReserved')}

@@ -11,6 +11,7 @@ const LANGUAGES = {
   en: `${STORE.websiteUrl}/en`,
   ja: `${STORE.websiteUrl}/ja`,
   'zh-Hans': `${STORE.websiteUrl}/zh`,
+  'zh-Hant': `${STORE.websiteUrl}/zh-hant`,
   'x-default': `${STORE.websiteUrl}/`,
 };
 

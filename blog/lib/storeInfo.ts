@@ -77,6 +77,11 @@ export const STORE = {
   get hoursTextZh() {
     return `每天 ${this.opens} – ${this.closes} (最后点单 ${this.lastOrder} / 售完即止)`;
   },
+  /** Traditional Chinese (Taiwan/HK) — not a script conversion of hoursTextZh:
+   *  "最後點餐" and "售完為止" are the natural wordings there. */
+  get hoursTextZhHant() {
+    return `每天 ${this.opens} – ${this.closes} (最後點餐 ${this.lastOrder} / 售完為止)`;
+  },
 
   /** Batch bake times printed on the in-store menu board ("FRESH FROM THE OVEN"). */
   bakeTimes: ['11:00', '13:00', '16:00'],
@@ -86,6 +91,7 @@ export const STORE = {
   nearestStationEn: '5-minute walk from Hongik Univ. Station (Line 2 / AREX) Exit 3',
   nearestStationJa: '弘大入口駅 (2号線 / 空港鉄道) 3番出口から徒歩5分',
   nearestStationZh: '弘大入口站 (2号线 / 机场铁路) 3号出口步行5分钟',
+  nearestStationZhHant: '弘大入口站 (2號線 / 機場鐵路) 3號出口步行5分鐘',
 
   // Social / external
   instagram: '@salt_bread_official',

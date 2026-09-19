@@ -36,6 +36,13 @@ const BRAND_RULES_ZH = `## 名称规则 (必须遵守)
 - "Salt,θ" 必须与可输入的 "Salt Bread" 并列书写
 - 本店全年无休。绝对不要写 "周日休息" 或任何休息日`;
 
+const BRAND_RULES_ZH_HANT = `## 名稱規則 (必須遵守)
+- 店名只寫 "Salt,θ (Salt Bread)" 或 "솔트빵"
+- 絕對不要寫 "Saltify" — 那是公司名稱，不是品牌名
+- "Salt,θ" 必須與可輸入的 "Salt Bread" 並列書寫
+- 本店全年無休。絕對不要寫 "週日公休" 或任何公休日
+- 鹽麵包在台灣/香港稱為「鹽可頌」，請優先使用此說法`;
+
 /** Multi-line store block for the long-form blog generator. */
 export const STORE_INFO_BY_LANG: Record<string, string> = {
   ko: `## 매장 정보 (필요시 자연스럽게 포함)
@@ -77,6 +84,16 @@ ${BRAND_RULES_JA}`,
 - Instagram: @salt_bread_official
 
 ${BRAND_RULES_ZH}`,
+
+  'zh-Hant': `## 門市資訊 (自然融入)
+- 店名: Salt,θ (Salt Bread) · 솔트빵
+- 地址: 首爾特別市 麻浦區 東橋路39街 10號 1樓 (延南洞，弘大入口站3號出口步行5分鐘)
+- 營業時間: ${STORE.hoursTextZhHant}
+- 公休日: 無 (全年無休)
+- 電話: ${STORE.telephone}
+- Instagram: @salt_bread_official
+
+${BRAND_RULES_ZH_HANT}`,
 };
 
 /** One-line variant for the cron generator, whose prompt budget is tighter. */
@@ -85,4 +102,5 @@ export const STORE_INFO_ONELINE_BY_LANG: Record<string, string> = {
   en: `Salt,θ (Salt Bread) bakery, 1F 10 Donggyo-ro 39-gil, Mapo-gu, Seoul (Yeonnam-dong, 5 min from Hongik Univ. Stn). Hours: ${STORE.hoursTextEn}, no closing day. Tel ${STORE.telephone}. IG: @salt_bread_official. Naming rules: never write "Saltify"; always pair "Salt,θ" with "Salt Bread"; never mention a closing day.`,
   ja: `ソルトパン Salt,θ (Salt Bread)、ソウル特別市 麻浦区 東橋路39キル 10 1F (延南洞、弘大入口駅から徒歩5分)。営業時間: ${STORE.hoursTextJa}、年中無休。電話 ${STORE.telephone}。Instagram: @salt_bread_official。表記ルール: 「Saltify」使用禁止、「Salt,θ」には必ず「Salt Bread」を併記、定休日に言及しないこと。`,
   'zh-CN': `Salt,θ (Salt Bread) · 솔트빵，首尔特别市麻浦区东桥路39街10号1层 (延南洞，弘大入口站步行5分钟)。营业时间: ${STORE.hoursTextZh}，全年无休。电话 ${STORE.telephone}。Instagram: @salt_bread_official。名称规则: 禁止使用 "Saltify"，"Salt,θ" 必须并列 "Salt Bread"，不要提及休息日。`,
+  'zh-Hant': `Salt,θ (Salt Bread) · 솔트빵，首爾特別市麻浦區東橋路39街10號1樓 (延南洞，弘大入口站步行5分鐘)。營業時間: ${STORE.hoursTextZhHant}，全年無休。電話 ${STORE.telephone}。Instagram: @salt_bread_official。名稱規則: 禁止使用 "Saltify"，"Salt,θ" 必須並列 "Salt Bread"，不要提及公休日，鹽麵包請寫「鹽可頌」。`,
 };

@@ -39,7 +39,7 @@ export const metadata: Metadata = {
       },
     ],
     locale: 'ko_KR',
-    alternateLocale: ['en_US', 'ja_JP', 'zh_CN'],
+    alternateLocale: ['en_US', 'ja_JP', 'zh_CN', 'zh_TW'],
     siteName: '솔트빵 Salt,θ',
   },
   twitter: {
@@ -58,6 +58,7 @@ export const metadata: Metadata = {
       en: `${STORE.websiteUrl}/en`,
       ja: `${STORE.websiteUrl}/ja`,
       'zh-Hans': `${STORE.websiteUrl}/zh`,
+      'zh-Hant': `${STORE.websiteUrl}/zh-hant`,
       'x-default': `${STORE.websiteUrl}/`,
     },
   },

@@ -104,6 +104,27 @@ const COPY: Record<Lang, Copy> = {
     backHome: '← 首页',
     otherLangs: '其他语言',
   },
+  'zh-Hant': {
+    heading: 'Salt,θ (Salt Bread) — 首爾延南洞',
+    intro:
+      '位於首爾延南洞的鹽可頌（鹽麵包 / shio-pan）專賣店，距弘大入口站步行5分鐘。所有麵包都使用法國發酵奶油與馬爾頓海鹽，在店內每日現烤。',
+    sectionInfo: '門市資訊',
+    sectionMenu: '鹽可頌',
+    sectionDrinks: '飲品',
+    sectionAccess: '交通方式',
+    labelName: '店名',
+    labelAddress: '地址',
+    labelAddressRoman: '地址（羅馬拼音）',
+    labelHours: '營業時間',
+    labelClosed: '公休日',
+    labelPhone: '電話',
+    labelInstagram: 'Instagram',
+    accessBody:
+      '搭乘地鐵2號線或機場鐵路至弘大入口站，從3號出口出站後往延南洞方向步行約5分鐘，本店位於一樓。麵包全天分批出爐，人氣品項可能在打烊前售完。',
+    showDriver: '可將此地址出示給計程車司機:',
+    backHome: '← 首頁',
+    otherLangs: '其他語言',
+  },
 };
 
 /** BCP-47 tag for the `lang` attribute (and `<html lang>` via the inline script). */
@@ -111,6 +132,7 @@ const HTML_LANG: Record<Lang, string> = {
   en: 'en',
   ja: 'ja',
   'zh-CN': 'zh-Hans',
+  'zh-Hant': 'zh-Hant',
 };
 
 const LANG_LINKS: { code: Language; href: string; label: string; hrefLang: string }[] = [
@@ -118,6 +140,7 @@ const LANG_LINKS: { code: Language; href: string; label: string; hrefLang: strin
   { code: 'en', href: '/en', label: 'English', hrefLang: 'en' },
   { code: 'ja', href: '/ja', label: '日本語', hrefLang: 'ja' },
   { code: 'zh-CN', href: '/zh', label: '简体中文', hrefLang: 'zh-Hans' },
+  { code: 'zh-Hant', href: '/zh-hant', label: '繁體中文', hrefLang: 'zh-Hant' },
 ];
 
 export default function StoreInfoPage({ lang }: { lang: Lang }) {
