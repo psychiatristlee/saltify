@@ -1,7 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { defineString } from "firebase-functions/params";
-
-const GENAI_API_KEY = defineString("GOOGLE_GENAI_API_KEY", { default: "" });
+import { GOOGLE_GENAI_API_KEY as GENAI_API_KEY } from "../params.js";
 
 export interface SearchResult {
   title: string;

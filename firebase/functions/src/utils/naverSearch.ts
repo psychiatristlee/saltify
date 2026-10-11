@@ -1,8 +1,5 @@
-import { defineString } from "firebase-functions/params";
 import { SearchResult } from "./googleSearch.js";
-
-const NAVER_CLIENT_ID = defineString("NAVER_CLIENT_ID", { default: "" });
-const NAVER_CLIENT_SECRET = defineString("NAVER_CLIENT_SECRET", { default: "" });
+import { NAVER_CLIENT_ID, NAVER_CLIENT_SECRET } from "../params.js";
 
 interface NaverSearchItem {
   title: string;

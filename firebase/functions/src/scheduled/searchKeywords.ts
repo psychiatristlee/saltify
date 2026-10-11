@@ -6,6 +6,7 @@ import { searchBaidu, searchYahooJapan } from "../utils/serpApiSearch.js";
 import { generateSuggestedReply, checkTravelRelevance } from "../utils/aiReply.js";
 import { sendAlertEmail } from "../utils/mailer.js";
 import { scrapePages } from "../utils/scraper.js";
+import { KEYWORD_ALERT_SECRETS } from "../params.js";
 
 interface AlertCardInfo {
   id: string;
@@ -22,6 +23,9 @@ export const searchKeywordsScheduled = onSchedule(
     region: "us-central1",
     maxInstances: 1,
     timeoutSeconds: 540,
+    // Every util this function reaches reads one of these; an unbound secret
+    // throws at runtime, not at deploy.
+    secrets: KEYWORD_ALERT_SECRETS,
   },
   async () => {
     const db = admin.firestore();

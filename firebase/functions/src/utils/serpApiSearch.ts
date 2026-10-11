@@ -1,7 +1,5 @@
-import { defineString } from "firebase-functions/params";
 import { SearchResult } from "./googleSearch.js";
-
-const SERPAPI_KEY = defineString("SERPAPI_KEY", { default: "" });
+import { SERPAPI_KEY } from "../params.js";
 
 interface SerpApiOrganicResult {
   title: string;

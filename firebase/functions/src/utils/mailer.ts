@@ -1,8 +1,5 @@
 import * as nodemailer from "nodemailer";
-import { defineString } from "firebase-functions/params";
-
-const GMAIL_USER = defineString("GMAIL_USER", { default: "" });
-const GMAIL_APP_PASSWORD = defineString("GMAIL_APP_PASSWORD", { default: "" });
+import { GMAIL_USER, GMAIL_APP_PASSWORD } from "../params.js";
 
 interface AlertCardInfo {
   id: string;
