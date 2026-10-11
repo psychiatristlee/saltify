@@ -47,3 +47,9 @@ scripts/play-test-shots/
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Claude Code — machine-local permission allowlist (launch.json is shared)
+.claude/settings.local.json
+
+# Local work output (business documents) — this repo is public, keep them out
+outputs/
