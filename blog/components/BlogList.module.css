@@ -1,6 +1,6 @@
 .section {
-  padding: 28px 20px;
-  max-width: 720px;
+  padding: 36px 20px 8px;
+  max-width: var(--content-max);
   margin: 0 auto;
   width: 100%;
 }
@@ -16,12 +16,12 @@
 }
 
 .sectionTitle {
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: var(--ink-1);
   margin: 0;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 
 .viewAll {
@@ -47,9 +47,9 @@
   color: var(--ink-1);
   text-align: center;
   text-decoration: none;
-  border-radius: var(--r-sm);
-  font-size: 0.875rem;
-  font-weight: 600;
+  border-radius: var(--r-md);
+  font-size: 0.9375rem;
+  font-weight: 700;
   border: 1px solid var(--hairline-strong);
   transition: all 0.14s ease;
 }

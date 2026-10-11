@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/LanguageContext';
 import LanguageSelector from './LanguageSelector';
-import { MENU_BREADS, MENU_DRINKS } from '@/lib/breadData';
+import { MENU_BREADS, MENU_DRINKS, type BreadItem } from '@/lib/breadData';
 import NaverMap, { openNaverMapPlace } from './NaverMap';
 import BlogList, { BlogListItem } from './BlogList';
 import { STORE } from '@/lib/storeInfo';
@@ -14,108 +14,318 @@ interface Props {
   posts?: BlogListItem[];
 }
 
+/* ---------- small inline icons (kept local — no icon library) ---------- */
+
+function IconClock() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
+function IconPin() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 21s-6-5.4-6-11a6 6 0 0 1 12 0c0 5.6-6 11-6 11z" />
+      <circle cx="12" cy="10" r="2.2" />
+    </svg>
+  );
+}
+
+function IconTrain() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="5" y="3" width="14" height="14" rx="3" />
+      <path d="M5 10h14M9 21l1.5-3M15 21l-1.5-3" />
+      <circle cx="9" cy="14" r="1" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="14" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function IconPhone() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />
+    </svg>
+  );
+}
+
+function IconCalendar() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+    </svg>
+  );
+}
+
+function IconArrow() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+function IconInstagram() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+/** Placeholder for menu items whose photo hasn't been shot yet. */
+function BreadPlaceholder() {
+  return (
+    <svg className={styles.placeholderIcon} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path
+        d="M10 40c-4-8 6-20 22-20s26 12 22 20c-2 4-8 6-22 6S12 44 10 40z"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinejoin="round"
+      />
+      <path d="M26 24c-2 5-2 10 0 16M38 24c2 5 2 10 0 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="22" cy="30" r="1.4" fill="currentColor" />
+      <circle cx="44" cy="31" r="1.4" fill="currentColor" />
+      <circle cx="33" cy="26" r="1.4" fill="currentColor" />
+    </svg>
+  );
+}
+
+/* ---------- menu card ---------- */
+
+function MenuCard({ item }: { item: BreadItem }) {
+  const { t } = useLanguage();
+  return (
+    <article className={styles.menuCard}>
+      <div className={styles.menuMedia}>
+        {item.image ? (
+          <Image
+            src={item.image}
+            alt={t(item.nameKey)}
+            width={480}
+            height={480}
+            sizes="(max-width: 640px) 50vw, 240px"
+            className={styles.menuImage}
+          />
+        ) : (
+          <div className={styles.menuPlaceholder}>
+            <BreadPlaceholder />
+          </div>
+        )}
+        {item.signature && <span className={styles.signatureBadge}>{t('signatureBadge')}</span>}
+      </div>
+      <div className={styles.menuBody}>
+        <div className={styles.menuRow}>
+          <h3 className={styles.menuName}>{t(item.nameKey)}</h3>
+          <span className={styles.menuPrice}>
+            {item.price.toLocaleString()}
+            <span className={styles.menuUnit}>{t('currencyUnit')}</span>
+          </span>
+        </div>
+        <p className={styles.menuDesc}>{t(item.descKey)}</p>
+      </div>
+    </article>
+  );
+}
+
+/* ---------- page ---------- */
+
 export default function LandingPage({ posts = [] }: Props) {
-  const { language, setLanguage, t } = useLanguage();
+  const { language, t } = useLanguage();
+  const taglineLines = t('heroTagline').split('\n');
+  const menuBoardHref = language === 'ja' ? '/menu/jp' : '/menu';
+  const showMenuBoard = language === 'ko' || language === 'ja';
 
   return (
     <div className={styles.container}>
-      {/* Hero Header */}
-      <header className={styles.heroHeader}>
+      {/* Top bar */}
+      <header className={styles.topBar}>
+        <Link href="/" className={styles.brand} aria-label={t('storeName')}>
+          <Image
+            src="/brandings/plain.png"
+            alt=""
+            width={36}
+            height={36}
+            className={styles.brandMark}
+            priority
+          />
+          <span className={styles.brandName}>{t('storeName')}</span>
+        </Link>
         <LanguageSelector />
-        <Image
-          src="/brandings/horizontal-thumbnail.png"
-          alt={t('storeName')}
-          width={430}
-          height={430}
-          className={styles.heroHeaderImage}
-          priority
-        />
       </header>
 
-      {/* Menu Section */}
-      <section className={styles.menuSection}>
-        <h2 className={styles.sectionTitle}>{t('menu')}</h2>
+      {/* Hero */}
+      <section className={styles.hero}>
+        <div className={styles.heroArt}>
+          <Image
+            src="/brandings/horizontal-thumbnail.png"
+            alt={t('storeName')}
+            width={1536}
+            height={1024}
+            sizes="(max-width: 760px) 100vw, 720px"
+            className={styles.heroImage}
+            priority
+          />
+        </div>
+        <div className={styles.heroCopy}>
+          <p className={styles.eyebrow}>{t('heroEyebrow')}</p>
+          <h1 className={styles.heroTitle}>{t('storeName')}</h1>
+          <p className={styles.heroTagline}>
+            {taglineLines.map((line, i) => (
+              <span key={i}>
+                {line}
+                {i < taglineLines.length - 1 && <br />}
+              </span>
+            ))}
+          </p>
+          <ul className={styles.chips} aria-label="Quick facts">
+            <li className={styles.chip}>
+              <IconClock />
+              {t('heroHoursChip')}
+            </li>
+            <li className={styles.chip}>
+              <IconCalendar />
+              {t('heroNoClosingChip')}
+            </li>
+            <li className={styles.chip}>
+              <IconTrain />
+              {t('heroStationChip')}
+            </li>
+          </ul>
+          <div className={styles.heroActions}>
+            <a href="#menu" className={styles.btnPrimary}>
+              {t('heroCtaMenu')}
+              <IconArrow />
+            </a>
+            <button type="button" className={styles.btnSecondary} onClick={openNaverMapPlace}>
+              <IconPin />
+              {t('heroCtaDirections')}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Bake times */}
+      <section className={styles.bakeStrip} aria-labelledby="bake-title">
+        <div className={styles.bakeText}>
+          <h2 id="bake-title" className={styles.bakeTitle}>{t('bakeTimesTitle')}</h2>
+          <p className={styles.bakeNote}>{t('bakeTimesNote')}</p>
+        </div>
+        <ol className={styles.bakeTimes}>
+          {STORE.bakeTimes.map((time) => (
+            <li key={time} className={styles.bakeTime}>{time}</li>
+          ))}
+        </ol>
+      </section>
+
+      {/* Menu */}
+      <section className={styles.section} id="menu">
+        <header className={styles.sectionHead}>
+          <h2 className={styles.sectionTitle}>{t('menu')}</h2>
+          <p className={styles.sectionSub}>{t('menuSubtitle')}</p>
+        </header>
         <div className={styles.menuGrid}>
           {MENU_BREADS.map((bread) => (
-            <div key={bread.id} className={styles.menuCard}>
-              {bread.image && (
-                <Image
-                  src={bread.image}
-                  alt={t(bread.nameKey)}
-                  width={90}
-                  height={90}
-                  className={styles.menuImage}
-                />
-              )}
-              <h3 className={styles.menuName}>{t(bread.nameKey)}</h3>
-              <p className={styles.menuDesc}>{t(bread.descKey)}</p>
-              <span className={styles.menuPrice}>
-                {bread.price.toLocaleString()}{t('currencyUnit')}
-              </span>
-            </div>
+            <MenuCard key={bread.id} item={bread} />
           ))}
         </div>
-
         {/* Menu board — published in Korean (/menu) and Japanese (/menu/jp) */}
-        {(language === 'ko' || language === 'ja') && (
-          <Link
-            href={language === 'ja' ? '/menu/jp' : '/menu'}
-            className={styles.menuBoardLink}
-          >
-            📋 {t('viewFullMenu')}
+        {showMenuBoard && (
+          <Link href={menuBoardHref} className={styles.menuBoardLink}>
+            {t('viewFullMenu')}
+            <IconArrow />
           </Link>
         )}
       </section>
 
-      {/* Drinks Section */}
-      <section className={styles.menuSection}>
-        <h2 className={styles.sectionTitle}>{t('drinks')}</h2>
+      {/* Drinks */}
+      <section className={styles.section}>
+        <header className={styles.sectionHead}>
+          <h2 className={styles.sectionTitle}>{t('drinks')}</h2>
+          <p className={styles.sectionSub}>{t('drinksSubtitle')}</p>
+        </header>
         <div className={styles.menuGrid}>
           {MENU_DRINKS.map((drink) => (
-            <div key={drink.id} className={styles.menuCard}>
-              <h3 className={styles.menuName}>{t(drink.nameKey)}</h3>
-              <p className={styles.menuDesc}>{t(drink.descKey)}</p>
-              <span className={styles.menuPrice}>
-                {drink.price.toLocaleString()}{t('currencyUnit')}
-              </span>
-            </div>
+            <MenuCard key={drink.id} item={drink} />
           ))}
         </div>
       </section>
 
-      {/* Blog Section */}
+      {/* Blog */}
       <BlogList posts={posts} />
 
-      {/* Map Section */}
-      <section className={styles.mapSection}>
-        <h2 className={styles.sectionTitle}>{t('findUs')}</h2>
+      {/* Find us */}
+      <section className={styles.section} id="find-us">
+        <header className={styles.sectionHead}>
+          <h2 className={styles.sectionTitle}>{t('findUs')}</h2>
+          <p className={styles.sectionSub}>{t('findUsSubtitle')}</p>
+        </header>
         <div className={styles.mapCard}>
-          <NaverMap />
-          <div className={styles.storeInfo}>
-            <span className={styles.storeName}>{t('storeName')}</span>
-            <span className={styles.storeAddress}>{t('storeAddress')}</span>
-            {/* Romanised address — foreign visitors show this to a taxi driver. */}
-            {language !== 'ko' && (
-              <span className={styles.storeAddressRoman}>{t('storeAddressRoman')}</span>
-            )}
-            <span className={styles.storeHours}>{t('storeHours')}</span>
-            <span className={styles.storeOpenEveryDay}>{t('openEveryDay')}</span>
-            <span className={styles.storeAccess}>{t('gettingHere')}</span>
-            <a className={styles.storePhone} href={`tel:${STORE.telephone}`}>
-              ☎ {t('storePhone')} {STORE.telephoneDisplay}
-            </a>
+          <div className={styles.mapFrame}>
+            <NaverMap />
           </div>
+          <dl className={styles.infoList}>
+            <div className={styles.infoRow}>
+              <dt className={styles.infoLabel}>
+                <IconPin />
+                {t('labelAddress')}
+              </dt>
+              <dd className={styles.infoValue}>
+                {t('storeAddress')}
+                {/* Romanised address — foreign visitors show this to a taxi driver. */}
+                {language !== 'ko' && (
+                  <span className={styles.infoMuted}>{t('storeAddressRoman')}</span>
+                )}
+              </dd>
+            </div>
+            <div className={styles.infoRow}>
+              <dt className={styles.infoLabel}>
+                <IconClock />
+                {t('labelHours')}
+              </dt>
+              <dd className={styles.infoValue}>
+                {t('hoursDetail')}
+                <span className={styles.infoStrong}>{t('openEveryDay')}</span>
+              </dd>
+            </div>
+            <div className={styles.infoRow}>
+              <dt className={styles.infoLabel}>
+                <IconTrain />
+                {t('labelAccess')}
+              </dt>
+              <dd className={styles.infoValue}>{t('gettingHere')}</dd>
+            </div>
+            <div className={styles.infoRow}>
+              <dt className={styles.infoLabel}>
+                <IconPhone />
+                {t('storePhone')}
+              </dt>
+              <dd className={styles.infoValue}>
+                <a href={`tel:${STORE.telephone}`} className={styles.infoLink}>
+                  {STORE.telephoneDisplay}
+                </a>
+              </dd>
+            </div>
+          </dl>
           <div className={styles.mapButtons}>
-            <button className={styles.mapButton} onClick={openNaverMapPlace}>
-              📍 {t('getDirections')}
+            <button type="button" className={styles.btnPrimary} onClick={openNaverMapPlace}>
+              <IconPin />
+              {t('getDirections')}
             </button>
             <a
               href={STORE.googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={styles.googleMapButton}
+              className={styles.btnSecondary}
             >
-              🗺️ Google Maps
+              Google Maps
             </a>
           </div>
         </div>
@@ -123,27 +333,36 @@ export default function LandingPage({ posts = [] }: Props) {
 
       {/* Footer */}
       <footer className={styles.footer}>
+        <div className={styles.footerBrand}>
+          <Image src="/brandings/plain.png" alt="" width={44} height={44} className={styles.footerMark} />
+          <span className={styles.footerName}>{STORE.fullName}</span>
+        </div>
         <div className={styles.footerLinks}>
           <a
             href={STORE.instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className={styles.instagramLink}
+            className={styles.pill}
           >
-            <svg className={styles.instagramIcon} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-            </svg>
+            <IconInstagram />
             <span>{STORE.instagram}</span>
+          </a>
+          <a
+            href={STORE.naverPlaceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.pill}
+          >
+            <IconPin />
+            <span>Naver</span>
           </a>
           <a
             href={STORE.googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className={styles.googleMapLink}
+            className={styles.pill}
           >
-            <svg className={styles.googleMapIcon} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
-            </svg>
+            <IconPin />
             <span>Google Maps</span>
           </a>
         </div>

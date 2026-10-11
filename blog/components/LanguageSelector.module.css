@@ -1,20 +1,20 @@
 .wrapper {
-  position: absolute;
-  top: 22px;
-  right: 22px;
+  position: relative;
   z-index: 100;
+  flex-shrink: 0;
 }
 
 .trigger {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--hairline-strong);
   background: var(--surface-card);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: var(--shadow-xs);
   transition: all 0.16s ease;
 }
 

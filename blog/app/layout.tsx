@@ -95,7 +95,13 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-        <meta name="theme-color" content="#FF8C00" />
+        {/* Pretendard — globals.css names it as the body face; the dynamic
+            subset only downloads the glyph ranges a page actually uses. */}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+        <meta name="theme-color" content="#FAF7F2" />
       </head>
       <body>
         <ToastProvider>
