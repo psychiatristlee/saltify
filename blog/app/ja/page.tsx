@@ -1,19 +1,12 @@
 import type { Metadata } from 'next';
 import StoreInfoPage from '@/components/StoreInfoPage';
 import { STORE } from '@/lib/storeInfo';
+import { hreflangAlternates } from '@/lib/locales';
 
 const URL = `${STORE.websiteUrl}/ja`;
 
-// Every locale points at the same set of alternates, which is what Google
-// requires for hreflang to be honoured — the annotations must be reciprocal.
-const LANGUAGES = {
-  ko: `${STORE.websiteUrl}/`,
-  en: `${STORE.websiteUrl}/en`,
-  ja: `${STORE.websiteUrl}/ja`,
-  'zh-Hans': `${STORE.websiteUrl}/zh`,
-  'zh-Hant': `${STORE.websiteUrl}/zh-hant`,
-  'x-default': `${STORE.websiteUrl}/`,
-};
+// Shared, reciprocal hreflang set — see lib/locales.ts.
+const LANGUAGES = hreflangAlternates();
 
 export const metadata: Metadata = {
   title: 'ソルトパン Salt,θ (Salt Bread) — ソウル延南洞の塩パン専門店 | 솔트빵',

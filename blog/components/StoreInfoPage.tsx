@@ -4,6 +4,10 @@ import { STORE } from '@/lib/storeInfo';
 import { MENU_BREADS, MENU_DRINKS } from '@/lib/breadData';
 import { t, type Language } from '@/lib/i18n';
 import { menuSections } from '@/lib/menuSchema';
+import { LOCALES, getLocale } from '@/lib/locales';
+import { EXTRA_BUNDLES } from '@/lib/translations';
+import type { InfoCopy } from '@/lib/translations/types';
+import type { BreadItem } from '@/lib/breadData';
 import styles from './StoreInfoPage.module.css';
 
 /**
@@ -20,27 +24,15 @@ type Lang = Exclude<Language, 'ko'>;
 /** Local path form of STORE.ogImage — the same salt-bread close-up. */
 const HERO_IMAGE = new URL(STORE.ogImage).pathname;
 
-interface Copy {
-  heading: string;
-  intro: string;
-  sectionInfo: string;
-  sectionMenu: string;
-  sectionDrinks: string;
-  sectionAccess: string;
-  labelName: string;
-  labelAddress: string;
-  labelAddressRoman: string;
-  labelHours: string;
-  labelClosed: string;
-  labelPhone: string;
-  labelInstagram: string;
-  accessBody: string;
-  showDriver: string;
-  backHome: string;
-  otherLangs: string;
-}
-
-const COPY: Record<Lang, Copy> = {
+// Copy for the original four foreign languages lives here; the newer ones
+// come from lib/translations/<code>.ts.
+const COPY: Record<Lang, InfoCopy> = {
+  vi: EXTRA_BUNDLES.vi.info,
+  th: EXTRA_BUNDLES.th.info,
+  id: EXTRA_BUNDLES.id.info,
+  es: EXTRA_BUNDLES.es.info,
+  fr: EXTRA_BUNDLES.fr.info,
+  ru: EXTRA_BUNDLES.ru.info,
   en: {
     heading: 'Salt,θ (Salt Bread) — Yeonnam-dong, Seoul',
     intro:
@@ -127,22 +119,6 @@ const COPY: Record<Lang, Copy> = {
   },
 };
 
-/** BCP-47 tag for the `lang` attribute (and `<html lang>` via the inline script). */
-const HTML_LANG: Record<Lang, string> = {
-  en: 'en',
-  ja: 'ja',
-  'zh-CN': 'zh-Hans',
-  'zh-Hant': 'zh-Hant',
-};
-
-const LANG_LINKS: { code: Language; href: string; label: string; hrefLang: string }[] = [
-  { code: 'ko', href: '/', label: '한국어', hrefLang: 'ko' },
-  { code: 'en', href: '/en', label: 'English', hrefLang: 'en' },
-  { code: 'ja', href: '/ja', label: '日本語', hrefLang: 'ja' },
-  { code: 'zh-CN', href: '/zh', label: '简体中文', hrefLang: 'zh-Hans' },
-  { code: 'zh-Hant', href: '/zh-hant', label: '繁體中文', hrefLang: 'zh-Hant' },
-];
-
 export default function StoreInfoPage({ lang }: { lang: Lang }) {
   const c = COPY[lang];
   const tr = (key: Parameters<typeof t>[0]) => t(key, lang);
@@ -190,8 +166,37 @@ export default function StoreInfoPage({ lang }: { lang: Lang }) {
     sameAs: [STORE.naverPlaceUrl, STORE.googleMapsUrl, STORE.instagramUrl],
   };
 
+  const htmlLang = getLocale(lang).htmlLang;
+  const current = getLocale(lang);
+
+  const menuItem = (item: BreadItem) => (
+    <li key={item.id} className={styles.menuItem}>
+      <div className={styles.menuThumb}>
+        {item.image ? (
+          <Image src={item.image} alt={tr(item.nameKey)} width={160} height={160} className={styles.menuImg} />
+        ) : (
+          <span className={styles.menuThumbEmpty} aria-hidden="true">
+            {item.nameKey.startsWith('drink') ? '☕' : '🥐'}
+          </span>
+        )}
+      </div>
+      <div className={styles.menuText}>
+        <span className={styles.menuName}>
+          {tr(item.nameKey)}
+          {item.signature && <span className={styles.badge}>{tr('signatureBadge')}</span>}
+        </span>
+        {/* The Korean name is what staff read — visitors can point at it. */}
+        <span className={styles.menuKo} lang="ko">
+          {t(item.nameKey, 'ko')}
+        </span>
+        <span className={styles.menuDesc}>{tr(item.descKey)}</span>
+      </div>
+      <span className={styles.menuPrice}>₩{item.price.toLocaleString('en-US')}</span>
+    </li>
+  );
+
   return (
-    <div className={styles.container} lang={HTML_LANG[lang]}>
+    <div className={styles.container} lang={htmlLang}>
       {/* The root layout hardcodes <html lang="ko">. A nested layout cannot
           override it — only a second root layout in its own route group could,
           which would mean restructuring every existing route (and reworking
@@ -200,50 +205,90 @@ export default function StoreInfoPage({ lang }: { lang: Lang }) {
           document element for screen readers and for Bing. */}
       <script
         dangerouslySetInnerHTML={{
-          __html: `document.documentElement.lang=${JSON.stringify(HTML_LANG[lang])}`,
+          __html: `document.documentElement.lang=${JSON.stringify(htmlLang)}`,
         }}
       />
 
-      <nav className={styles.topNav}>
-        <Link href="/">{c.backHome}</Link>
-        <div className={styles.langSwitch} aria-label={c.otherLangs}>
-          {LANG_LINKS.filter((l) => l.code !== lang).map((l) => (
-            <Link key={l.code} href={l.href} hrefLang={l.hrefLang}>
-              {l.label}
-            </Link>
-          ))}
-        </div>
+      <nav className={styles.topBar}>
+        <Link href="/" className={styles.brand} aria-label={c.backHome}>
+          <Image src="/brandings/plain.png" alt="" width={34} height={34} className={styles.brandMark} />
+          <span className={styles.brandName}>{STORE.englishNameFull}</span>
+        </Link>
+        {/* <details> keeps the language menu working without client JS. */}
+        <details className={styles.langMenu}>
+          <summary className={styles.langTrigger} aria-label={c.otherLangs}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z" />
+            </svg>
+            <span className={styles.langName}>{current.nativeName}</span>
+            <span className={styles.langShort}>{current.short}</span>
+          </summary>
+          <div className={styles.langList}>
+            {LOCALES.map((l) => (
+              <Link
+                key={l.code}
+                href={l.path}
+                hrefLang={l.hreflang}
+                lang={l.htmlLang}
+                className={l.code === lang ? styles.langActive : undefined}
+                aria-current={l.code === lang ? 'page' : undefined}
+              >
+                {l.nativeName}
+              </Link>
+            ))}
+          </div>
+        </details>
       </nav>
 
       <header className={styles.hero}>
-        <Image
-          src={HERO_IMAGE}
-          alt={c.heading}
-          width={640}
-          height={640}
-          className={styles.heroImage}
-          priority
-        />
-        <h1 className={styles.title}>{c.heading}</h1>
-        <p className={styles.intro}>{c.intro}</p>
+        <div className={styles.heroArt}>
+          <Image
+            src={HERO_IMAGE}
+            alt={c.heading}
+            width={640}
+            height={640}
+            sizes="(max-width: 860px) 100vw, 420px"
+            className={styles.heroImage}
+            priority
+          />
+        </div>
+        <div className={styles.heroCopy}>
+          <p className={styles.eyebrow}>{tr('heroEyebrow')}</p>
+          <h1 className={styles.title}>{c.heading}</h1>
+          <p className={styles.intro}>{c.intro}</p>
+          <ul className={styles.chips}>
+            <li>🕚 {tr('heroHoursChip')}</li>
+            <li>📅 {tr('heroNoClosingChip')}</li>
+            <li>🚇 {tr('heroStationChip')}</li>
+          </ul>
+          <div className={styles.actions}>
+            <a href={STORE.googleMapsUrl} target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
+              📍 Google Maps
+            </a>
+            <a href={STORE.naverPlaceUrl} target="_blank" rel="noopener noreferrer" className={styles.btnSecondary}>
+              Naver Map
+            </a>
+          </div>
+        </div>
       </header>
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{c.sectionInfo}</h2>
-        <dl className={styles.infoList}>
+        <dl className={styles.card}>
           <div className={styles.infoRow}>
             <dt>{c.labelName}</dt>
             <dd>
-              {tr('storeName')} · {STORE.name}
+              {tr('storeName')} · <span lang="ko">{STORE.name}</span>
             </dd>
           </div>
           <div className={styles.infoRow}>
             <dt>{c.labelAddress}</dt>
             <dd>{tr('storeAddress')}</dd>
           </div>
-          {/* On /en the localised address is already romanised, so the extra
-              row would just repeat itself. */}
-          {lang !== 'en' && (
+          {/* Where the localised address is already romanised, the extra row
+              would just repeat itself. */}
+          {!tr('storeAddress').includes('Donggyo-ro') && (
             <div className={styles.infoRow}>
               <dt>{c.labelAddressRoman}</dt>
               <dd>{STORE.addressEn}</dd>
@@ -251,7 +296,7 @@ export default function StoreInfoPage({ lang }: { lang: Lang }) {
           )}
           <div className={styles.infoRow}>
             <dt>{c.labelHours}</dt>
-            <dd>{tr('storeHours')}</dd>
+            <dd>{tr('hoursDetail')}</dd>
           </div>
           <div className={styles.infoRow}>
             <dt>{c.labelClosed}</dt>
@@ -276,15 +321,8 @@ export default function StoreInfoPage({ lang }: { lang: Lang }) {
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{c.sectionMenu}</h2>
-        <ul className={styles.menuList}>
-          {MENU_BREADS.map((bread) => (
-            <li key={bread.id} className={styles.menuRow}>
-              <span className={styles.menuName}>{tr(bread.nameKey)}</span>
-              <span className={styles.menuDots} aria-hidden="true" />
-              <span className={styles.menuPrice}>₩{bread.price.toLocaleString()}</span>
-            </li>
-          ))}
-        </ul>
+        <p className={styles.tip}>💡 {tr('orderTip')}</p>
+        <ul className={styles.menuList}>{MENU_BREADS.map(menuItem)}</ul>
         {/* Japanese is the one foreign language with a full menu board page. */}
         {lang === 'ja' && (
           <Link href="/menu/jp" className={styles.boardLink}>
@@ -295,44 +333,49 @@ export default function StoreInfoPage({ lang }: { lang: Lang }) {
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{c.sectionDrinks}</h2>
-        <ul className={styles.menuList}>
-          {MENU_DRINKS.map((drink) => (
-            <li key={drink.id} className={styles.menuRow}>
-              <span className={styles.menuName}>{tr(drink.nameKey)}</span>
-              <span className={styles.menuDots} aria-hidden="true" />
-              <span className={styles.menuPrice}>₩{drink.price.toLocaleString()}</span>
-            </li>
-          ))}
-        </ul>
+        <ul className={styles.menuList}>{MENU_DRINKS.map(menuItem)}</ul>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{c.sectionAccess}</h2>
-        <p className={styles.body}>{tr('gettingHere')}</p>
-        <p className={styles.body}>{c.accessBody}</p>
-        <p className={styles.driverNote}>
-          {c.showDriver}
-          <strong className={styles.driverAddress}>{STORE.addressFull}</strong>
-        </p>
-        <div className={styles.mapButtons}>
-          <a href={STORE.googleMapsUrl} target="_blank" rel="noopener noreferrer">
-            🗺️ Google Maps
-          </a>
-          <a href={STORE.naverPlaceUrl} target="_blank" rel="noopener noreferrer">
-            📍 Naver Map
-          </a>
+        <div className={styles.card}>
+          <p className={styles.bodyStrong}>🚇 {tr('gettingHere')}</p>
+          <p className={styles.body}>{c.accessBody}</p>
+          <div className={styles.taxi}>
+            <p className={styles.taxiLabel}>🚕 {c.showDriver}</p>
+            <p className={styles.taxiAddress} lang="ko">
+              {STORE.addressFull}
+            </p>
+            <p className={styles.taxiName} lang="ko">
+              {STORE.fullName} · {STORE.telephoneDisplay}
+            </p>
+          </div>
+          <div className={styles.actions}>
+            <a href={STORE.googleMapsUrl} target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
+              📍 Google Maps
+            </a>
+            <a href={STORE.naverPlaceUrl} target="_blank" rel="noopener noreferrer" className={styles.btnSecondary}>
+              Naver Map
+            </a>
+          </div>
         </div>
       </section>
 
       <footer className={styles.footer}>
-        <nav className={styles.langSwitch} aria-label={c.otherLangs}>
-          {LANG_LINKS.map((l) => (
-            <Link key={l.code} href={l.href} hrefLang={l.hrefLang}>
-              {l.label}
+        <Link href="/" className={styles.homeLink}>
+          {c.backHome}
+        </Link>
+        <nav className={styles.footerLangs} aria-label={c.otherLangs}>
+          {LOCALES.map((l) => (
+            <Link key={l.code} href={l.path} hrefLang={l.hreflang} lang={l.htmlLang}>
+              {l.nativeName}
             </Link>
           ))}
         </nav>
-        <p className={styles.copyright}>&copy; 2026 {STORE.fullName}. All rights reserved.</p>
+        <p className={styles.copyright}>
+          &copy; 2026 {STORE.fullName}
+          {tr('allRightsReserved')}
+        </p>
       </footer>
 
       <script

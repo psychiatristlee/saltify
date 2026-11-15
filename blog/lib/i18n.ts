@@ -1,8 +1,14 @@
 import { STORE } from './storeInfo';
+import { EXTRA_TRANSLATIONS, type ExtraLanguage } from './translations';
 
-export type Language = 'ko' | 'en' | 'zh-CN' | 'zh-Hant' | 'ja';
+/** The five original locales keep their copy inline below; the newer ones
+ *  live in lib/translations/<code>.ts, each typed to require every key. */
+type CoreLanguage = 'ko' | 'en' | 'zh-CN' | 'zh-Hant' | 'ja';
+export type Language = CoreLanguage | ExtraLanguage;
 
-export const LANGUAGES: { code: Language; name: string; flag: string }[] = [
+/** Languages the blog generator writes in (used by /admin). The site itself
+ *  supports every entry in lib/locales.ts. */
+export const LANGUAGES: { code: CoreLanguage; name: string; flag: string }[] = [
   { code: 'ko', name: '한국어', flag: '🇰🇷' },
   { code: 'en', name: 'English', flag: '🇺🇸' },
   { code: 'zh-CN', name: '简体中文', flag: '🇨🇳' },
@@ -461,11 +467,50 @@ const translations = {
     'zh-Hant': `${STORE.opens} – ${STORE.closes} · 最後點餐 ${STORE.lastOrder} · 售完為止`,
     ja: `${STORE.opens} – ${STORE.closes} ・ ラストオーダー ${STORE.lastOrder} ・ 売り切れ次第終了`,
   },
+  // ===== Foreign-visitor helpers =====
+  taxiTitle: {
+    ko: '택시 기사님께 보여주세요',
+    en: 'Show this to your taxi driver',
+    'zh-CN': '请出示给出租车司机',
+    'zh-Hant': '請出示給計程車司機',
+    ja: 'タクシーの運転手さんに見せてください',
+  },
+  copyAddress: {
+    ko: '주소 복사',
+    en: 'Copy address',
+    'zh-CN': '复制地址',
+    'zh-Hant': '複製地址',
+    ja: '住所をコピー',
+  },
+  copied: {
+    ko: '복사됨',
+    en: 'Copied',
+    'zh-CN': '已复制',
+    'zh-Hant': '已複製',
+    ja: 'コピーしました',
+  },
+  orderTip: {
+    ko: '',
+    en: 'Tip: point to the Korean name on each item when you order.',
+    'zh-CN': '小提示：点餐时指一下每个品项上的韩文名称即可。',
+    'zh-Hant': '小提醒：點餐時指一下每個品項上的韓文名稱就可以了。',
+    ja: 'ヒント：注文の際は、各商品の韓国語名を指さすだけでOKです。',
+  },
+  languageLabel: {
+    ko: '언어',
+    en: 'Language',
+    'zh-CN': '语言',
+    'zh-Hant': '語言',
+    ja: '言語',
+  },
 };
 
 export type TranslationKey = keyof typeof translations;
 
 export function t(key: TranslationKey, lang: Language = 'ko'): string {
-  const entry = translations[key];
-  return entry[lang] || entry['ko'];
+  const core = translations[key] as Partial<Record<Language, string>>;
+  const direct = core[lang] ?? EXTRA_TRANSLATIONS[lang as ExtraLanguage]?.[key];
+  if (direct !== undefined) return direct;
+  // A foreign visitor is better served by English than by Korean.
+  return core.en ?? core.ko ?? '';
 }

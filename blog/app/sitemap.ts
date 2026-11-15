@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { getPublishedPostsServer } from '@/lib/services/blogServer';
+import { LOCALES, hreflangAlternates } from '@/lib/locales';
 
 const BASE = 'https://salt-bbang.com';
 
@@ -22,18 +23,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Every locale entry advertises the same alternate set — hreflang is only
   // honoured when the annotations are reciprocal across all URLs.
-  const LANGUAGES = {
-    ko: `${BASE}/`,
-    en: `${BASE}/en`,
-    ja: `${BASE}/ja`,
-    'zh-Hans': `${BASE}/zh`,
-    'zh-Hant': `${BASE}/zh-hant`,
-    'x-default': `${BASE}/`,
-  };
+  const LANGUAGES = hreflangAlternates(BASE);
 
-  const localeEntries: MetadataRoute.Sitemap = (['en', 'ja', 'zh', 'zh-hant'] as const).map(
-    (code) => ({
-      url: `${BASE}/${code}`,
+  const localeEntries: MetadataRoute.Sitemap = LOCALES.filter((l) => l.code !== 'ko').map(
+    (l) => ({
+      url: `${BASE}${l.path}`,
       changeFrequency: 'monthly',
       priority: 0.9,
       alternates: { languages: LANGUAGES },

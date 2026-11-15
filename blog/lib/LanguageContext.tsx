@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { Language, t as translate, TranslationKey } from './i18n';
+import { LOCALES, detectLanguage } from './locales';
 
 interface LanguageContextType {
   language: Language;
@@ -10,29 +11,34 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
+const STORAGE_KEY = 'saltify_lang';
 
-function getDefaultLanguage(): Language {
-  if (typeof window === 'undefined') return 'ko';
-  const saved = localStorage.getItem('saltify_lang');
-  if (saved) return saved as Language;
-  const nav = navigator.language.toLowerCase();
-  if (nav.startsWith('ja')) return 'ja';
-  // Taiwan/HK/Macau read Traditional characters; only mainland and Singapore
-  // use Simplified. Matching all of `zh` to zh-CN served Taiwanese visitors
-  // mainland-styled copy, which is the single biggest tell that a page was
-  // not written for them.
-  if (/^zh(-|_)?(hant|tw|hk|mo)/.test(nav)) return 'zh-Hant';
-  if (nav.startsWith('zh')) return 'zh-CN';
-  if (nav.startsWith('en')) return 'en';
-  return 'ko';
+function readSavedLanguage(): Language | null {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved && LOCALES.some((l) => l.code === saved) ? (saved as Language) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLangState] = useState<Language>(getDefaultLanguage);
+  // Always start as Korean so the client's first render matches the server
+  // HTML; the visitor's language is applied right after hydration.
+  const [language, setLangState] = useState<Language>('ko');
+
+  useEffect(() => {
+    const preferred = readSavedLanguage() ?? detectLanguage(navigator.language || 'ko');
+    if (preferred !== 'ko') setLangState(preferred);
+  }, []);
 
   const setLanguage = useCallback((lang: Language) => {
     setLangState(lang);
-    localStorage.setItem('saltify_lang', lang);
+    try {
+      localStorage.setItem(STORAGE_KEY, lang);
+    } catch {
+      /* private mode — the choice just won't persist */
+    }
   }, []);
 
   const t = useCallback((key: TranslationKey) => translate(key, language), [language]);

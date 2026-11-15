@@ -1,19 +1,12 @@
 import type { Metadata } from 'next';
 import StoreInfoPage from '@/components/StoreInfoPage';
 import { STORE } from '@/lib/storeInfo';
+import { hreflangAlternates } from '@/lib/locales';
 
 const URL = `${STORE.websiteUrl}/zh-hant`;
 
-// Every locale points at the same set of alternates, which is what Google
-// requires for hreflang to be honoured — the annotations must be reciprocal.
-const LANGUAGES = {
-  ko: `${STORE.websiteUrl}/`,
-  en: `${STORE.websiteUrl}/en`,
-  ja: `${STORE.websiteUrl}/ja`,
-  'zh-Hans': `${STORE.websiteUrl}/zh`,
-  'zh-Hant': `${STORE.websiteUrl}/zh-hant`,
-  'x-default': `${STORE.websiteUrl}/`,
-};
+// Shared, reciprocal hreflang set — see lib/locales.ts.
+const LANGUAGES = hreflangAlternates();
 
 // Taiwanese and Hong Kong visitors search for 鹽可頌 — the term that came in
 // with Japanese 塩パン — far more than 鹽麵包, so the title leads with it.

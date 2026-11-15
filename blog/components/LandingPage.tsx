@@ -2,7 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
+import { t as translate } from '@/lib/i18n';
+import { LOCALES, getLocale } from '@/lib/locales';
 import LanguageSelector from './LanguageSelector';
 import { MENU_BREADS, MENU_DRINKS, type BreadItem } from '@/lib/breadData';
 import NaverMap, { openNaverMapPlace } from './NaverMap';
@@ -98,10 +101,31 @@ function BreadPlaceholder() {
   );
 }
 
+function CupPlaceholder() {
+  return (
+    <svg className={styles.placeholderIcon} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path d="M18 20h28l-3.5 34a3 3 0 0 1-3 2.7H24.5a3 3 0 0 1-3-2.7L18 20z" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M15 20h34M36 20l4-12h6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M20.5 34h23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconCopy() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15V6a2 2 0 0 1 2-2h9" />
+    </svg>
+  );
+}
+
 /* ---------- menu card ---------- */
 
-function MenuCard({ item }: { item: BreadItem }) {
-  const { t } = useLanguage();
+function MenuCard({ item, kind }: { item: BreadItem; kind: 'bread' | 'drink' }) {
+  const { language, t } = useLanguage();
+  // Foreign visitors order by pointing: the Korean name is what staff read.
+  const koName = language === 'ko' ? null : translate(item.nameKey, 'ko');
   return (
     <article className={styles.menuCard}>
       <div className={styles.menuMedia}>
@@ -111,27 +135,72 @@ function MenuCard({ item }: { item: BreadItem }) {
             alt={t(item.nameKey)}
             width={480}
             height={480}
-            sizes="(max-width: 640px) 50vw, 240px"
+            sizes="(max-width: 640px) 50vw, (max-width: 960px) 33vw, 260px"
             className={styles.menuImage}
           />
         ) : (
           <div className={styles.menuPlaceholder}>
-            <BreadPlaceholder />
+            {kind === 'drink' ? <CupPlaceholder /> : <BreadPlaceholder />}
           </div>
         )}
         {item.signature && <span className={styles.signatureBadge}>{t('signatureBadge')}</span>}
       </div>
       <div className={styles.menuBody}>
-        <div className={styles.menuRow}>
-          <h3 className={styles.menuName}>{t(item.nameKey)}</h3>
-          <span className={styles.menuPrice}>
-            {item.price.toLocaleString()}
-            <span className={styles.menuUnit}>{t('currencyUnit')}</span>
+        <h3 className={styles.menuName}>{t(item.nameKey)}</h3>
+        {koName && (
+          <span className={styles.menuKo} lang="ko">
+            {koName}
           </span>
-        </div>
+        )}
         <p className={styles.menuDesc}>{t(item.descKey)}</p>
+        <span className={styles.menuPrice}>
+          {language === 'ko' ? (
+            <>
+              {item.price.toLocaleString('ko-KR')}
+              <span className={styles.menuUnit}>원</span>
+            </>
+          ) : (
+            <>
+              <span className={styles.menuUnit}>₩</span>
+              {item.price.toLocaleString('en-US')}
+            </>
+          )}
+        </span>
       </div>
     </article>
+  );
+}
+
+/* ---------- taxi card ---------- */
+
+function TaxiCard() {
+  const { t } = useLanguage();
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(STORE.addressFull);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* clipboard blocked — the address is on screen anyway */
+    }
+  };
+
+  return (
+    <div className={styles.taxiCard}>
+      <p className={styles.taxiLabel}>🚕 {t('taxiTitle')}</p>
+      <p className={styles.taxiAddress} lang="ko">
+        {STORE.addressFull}
+      </p>
+      <p className={styles.taxiName} lang="ko">
+        {STORE.fullName} · {STORE.telephoneDisplay}
+      </p>
+      <button type="button" className={styles.taxiCopy} onClick={copy} aria-live="polite">
+        <IconCopy />
+        {copied ? t('copied') : t('copyAddress')}
+      </button>
+    </div>
   );
 }
 
@@ -142,6 +211,13 @@ export default function LandingPage({ posts = [] }: Props) {
   const taglineLines = t('heroTagline').split('\n');
   const menuBoardHref = language === 'ja' ? '/menu/jp' : '/menu';
   const showMenuBoard = language === 'ko' || language === 'ja';
+  const isForeign = language !== 'ko';
+
+  // Keep <html lang> in step so screen readers pronounce the copy correctly
+  // and CJK text gets the right regional glyph forms.
+  useEffect(() => {
+    document.documentElement.lang = getLocale(language).htmlLang;
+  }, [language]);
 
   return (
     <div className={styles.container}>
@@ -230,10 +306,11 @@ export default function LandingPage({ posts = [] }: Props) {
         <header className={styles.sectionHead}>
           <h2 className={styles.sectionTitle}>{t('menu')}</h2>
           <p className={styles.sectionSub}>{t('menuSubtitle')}</p>
+          {isForeign && <p className={styles.orderTip}>💡 {t('orderTip')}</p>}
         </header>
         <div className={styles.menuGrid}>
           {MENU_BREADS.map((bread) => (
-            <MenuCard key={bread.id} item={bread} />
+            <MenuCard key={bread.id} item={bread} kind="bread" />
           ))}
         </div>
         {/* Menu board — published in Korean (/menu) and Japanese (/menu/jp) */}
@@ -253,7 +330,7 @@ export default function LandingPage({ posts = [] }: Props) {
         </header>
         <div className={styles.menuGrid}>
           {MENU_DRINKS.map((drink) => (
-            <MenuCard key={drink.id} item={drink} />
+            <MenuCard key={drink.id} item={drink} kind="drink" />
           ))}
         </div>
       </section>
@@ -280,7 +357,7 @@ export default function LandingPage({ posts = [] }: Props) {
               <dd className={styles.infoValue}>
                 {t('storeAddress')}
                 {/* Romanised address — foreign visitors show this to a taxi driver. */}
-                {language !== 'ko' && (
+                {language !== 'ko' && !t('storeAddress').includes('Donggyo-ro') && (
                   <span className={styles.infoMuted}>{t('storeAddressRoman')}</span>
                 )}
               </dd>
@@ -314,6 +391,7 @@ export default function LandingPage({ posts = [] }: Props) {
               </dd>
             </div>
           </dl>
+          {isForeign && <TaxiCard />}
           <div className={styles.mapButtons}>
             <button type="button" className={styles.btnPrimary} onClick={openNaverMapPlace}>
               <IconPin />
@@ -369,10 +447,11 @@ export default function LandingPage({ posts = [] }: Props) {
         {/* Crawlable links to the per-language info pages — hreflang alone is
             not enough; Google needs real links to discover and rank them. */}
         <nav className={styles.langLinks} aria-label="Language versions">
-          <Link href="/en" hrefLang="en">English</Link>
-          <Link href="/ja" hrefLang="ja">日本語</Link>
-          <Link href="/zh" hrefLang="zh-Hans">简体中文</Link>
-          <Link href="/zh-hant" hrefLang="zh-Hant">繁體中文</Link>
+          {LOCALES.filter((l) => l.code !== 'ko').map((l) => (
+            <Link key={l.code} href={l.path} hrefLang={l.hreflang} lang={l.htmlLang}>
+              {l.nativeName}
+            </Link>
+          ))}
         </nav>
         <p className={styles.footerText}>
           &copy; 2026 <a href="/admin" className={styles.adminLink}>{STORE.fullName}</a>{t('allRightsReserved')}

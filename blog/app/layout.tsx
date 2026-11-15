@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { ToastProvider } from '@/components/Toast';
 import { STORE } from '@/lib/storeInfo';
+import { LOCALES, hreflangAlternates } from '@/lib/locales';
 import './globals.css';
 
 // Foreign visitors cannot type "θ", so every English-facing string pairs the
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
       },
     ],
     locale: 'ko_KR',
-    alternateLocale: ['en_US', 'ja_JP', 'zh_CN', 'zh_TW'],
+    alternateLocale: LOCALES.filter((l) => l.code !== 'ko').map((l) => l.ogLocale),
     siteName: '솔트빵 Salt,θ',
   },
   twitter: {
@@ -53,14 +54,7 @@ export const metadata: Metadata = {
     canonical: STORE.websiteUrl,
     // Each language has its own indexable URL so hreflang is meaningful —
     // pointing every locale at "/" would make Google ignore the annotations.
-    languages: {
-      ko: `${STORE.websiteUrl}/`,
-      en: `${STORE.websiteUrl}/en`,
-      ja: `${STORE.websiteUrl}/ja`,
-      'zh-Hans': `${STORE.websiteUrl}/zh`,
-      'zh-Hant': `${STORE.websiteUrl}/zh-hant`,
-      'x-default': `${STORE.websiteUrl}/`,
-    },
+    languages: hreflangAlternates(),
   },
   other: {
     'geo.region': 'KR-11',
@@ -91,7 +85,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko">
+    // lang is updated client-side for the visitor's language (LandingPage,
+    // StoreInfoPage), so the server value is expected to differ.
+    <html lang="ko" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
@@ -100,6 +96,14 @@ export default function RootLayout({
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+        {/* Pretendard has no Thai glyphs. Google Fonts serves this with a
+            unicode-range, so browsers only fetch it when Thai text renders. */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400..800&display=swap"
         />
         <meta name="theme-color" content="#FAF7F2" />
       </head>
